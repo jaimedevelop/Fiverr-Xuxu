@@ -1,0 +1,8 @@
+# Netlify _redirects file
+# This tells Netlify to serve index.html for all routes (SPA fallback)
+
+# Handle all routes by serving index.html
+/*    /index.html   200
+
+# Optional: Handle specific API routes if you have them
+# /api/*  https://your-api-url.com/api/:splat  200
