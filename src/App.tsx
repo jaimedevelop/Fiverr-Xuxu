@@ -3,13 +3,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ResponsiveLayout from './components/layout/ResponsiveLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
-
+import AuthPage from './pages/auth/AuthPage';
+import AdminAuth from './pages/auth/AdminAuth';
+import UserAuth from './pages/auth/UserAuth';
+import UserRegistration from './components/user/registration/UserRegistration';
+import BusinessRegistration from './pages/business/BusinessRegistration';
+import EmailVerification from './pages/business/EmailVerification';
 // User pages
-import Menu from './pages/user/Menu';
+import UserMenu from './pages/user/UserMenu';
 import Orders from './pages/user/Orders';
 import Profile from './pages/user/Profile';
-
 // Admin pages
 import Dashboard from './pages/admin/Dashboard';
 import MenuManagement from './pages/admin/MenuManagement';
@@ -20,101 +23,7 @@ import BusinessProfile from './pages/admin/BusinessProfile';
 import Promotions from './pages/admin/Promotions';
 import Settings from './pages/admin/Settings';
 
-const AppRoutes: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
-
-  if (!isAuthenticated) {
-    return (
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    );
-  }
-
-  // Default route based on user role
-  const getDefaultRoute = () => {
-    if (user?.role === 'admin') {
-      return '/admin/dashboard';
-    }
-    return '/user/menu';
-  };
-
-  return (
-    <Routes>
-      <Route path="/login" element={<Navigate to={getDefaultRoute()} replace />} />
-      <Route path="/" element={<ResponsiveLayout />}>
-        {/* User routes */}
-        <Route path="user">
-          <Route path="menu" element={
-            <ProtectedRoute requiredRole="user">
-              <Menu />
-            </ProtectedRoute>
-          } />
-          <Route path="orders" element={
-            <ProtectedRoute requiredRole="user">
-              <Orders />
-            </ProtectedRoute>
-          } />
-          <Route path="profile" element={
-            <ProtectedRoute requiredRole="user">
-              <Profile />
-            </ProtectedRoute>
-          } />
-        </Route>
-        
-        {/* Admin routes */}
-        <Route path="admin">
-          <Route path="dashboard" element={
-            <ProtectedRoute requiredRole="admin">
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="menu-management" element={
-            <ProtectedRoute requiredRole="admin">
-              <MenuManagement />
-            </ProtectedRoute>
-          } />
-          <Route path="orders" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminOrders />
-            </ProtectedRoute>
-          } />
-          <Route path="analytics" element={
-            <ProtectedRoute requiredRole="admin">
-              <Analytics />
-            </ProtectedRoute>
-          } />
-          <Route path="inventory" element={
-            <ProtectedRoute requiredRole="admin">
-              <Inventory />
-            </ProtectedRoute>
-          } />
-          <Route path="business-profile" element={
-            <ProtectedRoute requiredRole="admin">
-              <BusinessProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="promotions" element={
-            <ProtectedRoute requiredRole="admin">
-              <Promotions />
-            </ProtectedRoute>
-          } />
-          <Route path="settings" element={
-            <ProtectedRoute requiredRole="admin">
-              <Settings />
-            </ProtectedRoute>
-          } />
-        </Route>
-        
-        {/* Default redirects based on role */}
-        <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
-      </Route>
-      <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
-    </Routes>
-  );
-};
-
+// Define AppRoutes inside the App component to have access to AuthProvider
 function App() {
   // Register service worker
   React.useEffect(() => {
@@ -130,13 +39,137 @@ function App() {
       });
     }
   }, []);
-
+  
+  // Define AppRoutes inside App so it has access to the AuthProvider context
+  const AppRoutes = () => {
+    const { authState } = useAuth();
+    const { user, loading } = authState;
+    
+    // Show loading spinner while checking authentication status
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      );
+    }
+    
+    // If user is not authenticated, show auth routes
+    if (!user) {
+      console.log("User not authenticated, showing auth routes");
+      return (
+        <Routes>
+          <Route path="/iniciar-sesion" element={<AuthPage />} />
+          <Route path="/acceso-admin" element={<AdminAuth />} />
+          <Route path="/acceso-usuario" element={<UserAuth />} />
+          <Route path="/registro-usuario" element={
+            <>
+              {console.log("Rendering UserRegistration component")}
+              <UserRegistration />
+            </>
+          } />
+          <Route path="/registro-negocio" element={<BusinessRegistration />} />
+          <Route path="/verificar-correo/:businessId" element={<EmailVerification />} />
+          <Route path="*" element={<Navigate to="/iniciar-sesion" replace />} />
+        </Routes>
+      );
+    }
+    
+    // Default route based on user role
+    const getDefaultRoute = () => {
+      if (user?.role === 'admin') {
+        return '/admin/dashboard';
+      }
+      return '/usuario/menu';
+    };
+    
+    // If user is authenticated, show protected routes
+    return (
+      <Routes>
+        {/* Redirect auth routes to default route when already authenticated */}
+        <Route path="/iniciar-sesion" element={<Navigate to={getDefaultRoute()} replace />} />
+        <Route path="/acceso-admin" element={<Navigate to={getDefaultRoute()} replace />} />
+        <Route path="/acceso-usuario" element={<Navigate to={getDefaultRoute()} replace />} />
+        <Route path="/registro-negocio" element={<Navigate to={getDefaultRoute()} replace />} />
+        
+        <Route path="/" element={<ResponsiveLayout />}>
+          {/* User routes */}
+          <Route path="usuario">
+            <Route path="menu" element={
+              <ProtectedRoute requiredRole="user">
+                <UserMenu />
+              </ProtectedRoute>
+            } />
+            <Route path="pedidos" element={
+              <ProtectedRoute requiredRole="user">
+                <Orders />
+              </ProtectedRoute>
+            } />
+            <Route path="perfil" element={
+              <ProtectedRoute requiredRole="user">
+                <Profile />
+              </ProtectedRoute>
+            } />
+          </Route>
+          
+          {/* Admin routes */}
+          <Route path="admin">
+            <Route path="dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="menu-management" element={
+              <ProtectedRoute requiredRole="admin">
+                <MenuManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="pedidos" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminOrders />
+              </ProtectedRoute>
+            } />
+            <Route path="analitica" element={
+              <ProtectedRoute requiredRole="admin">
+                <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="inventario" element={
+              <ProtectedRoute requiredRole="admin">
+                <Inventory />
+              </ProtectedRoute>
+            } />
+            <Route path="perfil-negocio" element={
+              <ProtectedRoute requiredRole="admin">
+                <BusinessProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="promociones" element={
+              <ProtectedRoute requiredRole="admin">
+                <Promotions />
+              </ProtectedRoute>
+            } />
+            <Route path="configuracion" element={
+              <ProtectedRoute requiredRole="admin">
+                <Settings />
+              </ProtectedRoute>
+            } />
+          </Route>
+          
+          {/* Default redirects based on role */}
+          <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+        </Route>
+        <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
+      </Routes>
+    );
+  };
+  
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppRoutes />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

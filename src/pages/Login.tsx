@@ -1,15 +1,17 @@
+// src/components/auth/Login.tsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { User, Shield } from 'lucide-react';
 
 const Login: React.FC = () => {
-  const { login } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogin = (role: 'user' | 'admin') => {
-    login(role);
-    navigate(role === 'admin' ? '/admin/dashboard' : '/user/menu');
+  
+  const handleLoginNavigation = (role: 'user' | 'admin') => {
+    if (role === 'admin') {
+      navigate('/acceso-admin');
+    } else {
+      navigate('/acceso-usuario');
+    }
   };
 
   return (
@@ -24,7 +26,7 @@ const Login: React.FC = () => {
         
         <div className="space-y-4">
           <button
-            onClick={() => handleLogin('user')}
+            onClick={() => handleLoginNavigation('user')}
             className="w-full flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <User className="mr-3" size={24} />
@@ -35,7 +37,7 @@ const Login: React.FC = () => {
           </button>
           
           <button
-            onClick={() => handleLogin('admin')}
+            onClick={() => handleLoginNavigation('admin')}
             className="w-full flex items-center justify-center px-6 py-4 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
           >
             <Shield className="mr-3" size={24} />

@@ -12,9 +12,9 @@ const UserMobileNavigation: React.FC = () => {
   const { logout } = useAuth();
 
   const userNavItems = [
-    { path: '/user/explore', label: 'Explore', icon: Compass },
-    { path: '/user/orders', label: 'Orders', icon: Package },
-    { path: '/user/profile', label: 'Profile', icon: User },
+    { path: '/user/explore', label: 'Explorar', icon: Compass },
+    { path: '/user/orders', label: 'Ordenes', icon: Package },
+    { path: '/user/profile', label: 'Perfil', icon: User },
   ];
 
   const handleLogout = () => {
@@ -46,7 +46,7 @@ const UserMobileNavigation: React.FC = () => {
           className="flex items-center justify-center w-full py-2 px-3 rounded-lg transition-colors text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100"
         >
           <LogOut size={16} className="mr-2" />
-          <span className="text-sm font-medium">Logout</span>
+          <span className="text-sm font-medium">Cerrar Sesión</span>
         </button>
       </div>
     </nav>

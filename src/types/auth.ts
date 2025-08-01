@@ -1,14 +1,12 @@
-export type UserRole = 'user' | 'admin';
-
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
+export interface AuthUser {
+  uid: string;
+  email: string;
+  role: 'user' | 'admin';
+  businessId?: string;
 }
 
-export interface AuthContextType {
-  user: User | null;
-  login: (role: UserRole) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
+export interface AuthState {
+  user: AuthUser | null;
+  loading: boolean;
+  error: string | null;
 }

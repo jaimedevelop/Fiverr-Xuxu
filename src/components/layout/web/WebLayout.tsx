@@ -1,11 +1,22 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import WebSidebar from './WebSidebar';
+import { useAuth } from '../../../contexts/AuthContext';
+import AdminWebSidebar from './AdminWebSidebar';
+import UserWebSidebar from './UserWebSidebar';
 
 const WebLayout: React.FC = () => {
+  const { authState } = useAuth();
+  const { user } = authState;
+
   return (
     <div className="flex h-screen bg-gray-50">
-      <WebSidebar />
+      {/* Render sidebar based on user role */}
+      {user?.role === 'admin' ? (
+        <AdminWebSidebar />
+      ) : (
+        <UserWebSidebar />
+      )}
+      
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>

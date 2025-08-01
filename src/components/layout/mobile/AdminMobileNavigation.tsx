@@ -26,15 +26,15 @@ const AdminMobileNavigation: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const adminNavItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { path: '/admin/menu-management', label: 'Menu Management', icon: Menu },
-    { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-    { path: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
-    { path: '/admin/inventory', label: 'Inventory', icon: Package },
-    { path: '/admin/business-profile', label: 'Business Profile', icon: Building2 },
-    { path: '/admin/commission-payments', label: 'Commission/Payments', icon: CreditCard },
-    { path: '/admin/promotions', label: 'Promotions', icon: Megaphone },
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
+    { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
+    { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu },
+    { path: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
+    { path: '/admin/analytics', label: 'Análisis', icon: TrendingUp },
+    { path: '/admin/inventory', label: 'Inventario', icon: Package },
+    { path: '/admin/business-profile', label: 'Perfil del Negocio', icon: Building2 },
+    { path: '/admin/commission-payments', label: 'Comisiones/Pagos', icon: CreditCard },
+    { path: '/admin/promotions', label: 'Promociones', icon: Megaphone },
+    { path: '/admin/settings', label: 'Configuración', icon: Settings },
   ];
 
   const toggleMenu = () => {
@@ -91,11 +91,11 @@ const AdminMobileNavigation: React.FC = () => {
       <button
         onClick={toggleMenu}
         className="fixed top-4 left-4 z-60 bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition-all duration-200 hover:shadow-xl"
-        aria-label="Open admin menu"
+        aria-label="Abrir menú de administrador"
       >
         <Menu size={24} className="text-gray-700" />
       </button>
-
+      
       {/* Overlay */}
       {isMenuOpen && (
         <div
@@ -103,7 +103,7 @@ const AdminMobileNavigation: React.FC = () => {
           onClick={closeMenu}
         />
       )}
-
+      
       {/* Slide-out Menu */}
       <div
         ref={menuRef}
@@ -126,18 +126,18 @@ const AdminMobileNavigation: React.FC = () => {
             </div>
             <div>
               <h2 className="text-lg font-bold text-gray-900">Xuxu Admin</h2>
-              <p className="text-sm text-gray-600">Pastry Management</p>
+              <p className="text-sm text-gray-600">Gestión de Pastelería</p>
             </div>
           </div>
           <button
             onClick={closeMenu}
             className="p-2 hover:bg-white hover:bg-opacity-50 rounded-lg transition-colors duration-200"
-            aria-label="Close menu"
+            aria-label="Cerrar menú"
           >
             <X size={22} className="text-gray-600" />
           </button>
         </div>
-
+        
         {/* Navigation Items */}
         <div className="flex-1 px-4 py-6">
           <div className="space-y-1">
@@ -163,11 +163,11 @@ const AdminMobileNavigation: React.FC = () => {
               <div className="flex-shrink-0">
                 <LogOut size={20} />
               </div>
-              <span className="font-medium text-sm">Logout</span>
+              <span className="font-medium text-sm">Cerrar Sesión</span>
             </button>
           </div>
         </div>
-
+        
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-white shadow-sm">
@@ -175,7 +175,7 @@ const AdminMobileNavigation: React.FC = () => {
               <User size={18} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">Admin User</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">Usuario Administrador</p>
               <p className="text-xs text-gray-500 truncate">admin@xuxu.com</p>
             </div>
           </div>

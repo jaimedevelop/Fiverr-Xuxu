@@ -17,33 +17,33 @@ import {
 
 const WebSidebar: React.FC = () => {
   const { user, logout } = useAuth();
-
+  
   const userNavItems = [
-    { path: '/user/menu', label: 'Menu', icon: Menu },
-    { path: '/user/orders', label: 'Orders', icon: ShoppingBag },
-    { path: '/user/profile', label: 'Profile', icon: User },
+    { path: '/user/menu', label: 'Menú', icon: Menu },
+    { path: '/user/orders', label: 'Pedidos', icon: ShoppingBag },
+    { path: '/user/profile', label: 'Perfil', icon: User },
   ];
-
+  
   const adminNavItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { path: '/admin/menu-management', label: 'Menu Management', icon: Menu },
-    { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-    { path: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
-    { path: '/admin/inventory', label: 'Inventory', icon: Package },
-    { path: '/admin/business-profile', label: 'Business Profile', icon: Building2 },
-    { path: '/admin/promotions', label: 'Promotions', icon: Megaphone },
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
+    { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
+    { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu },
+    { path: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
+    { path: '/admin/analytics', label: 'Análisis', icon: TrendingUp },
+    { path: '/admin/inventory', label: 'Inventario', icon: Package },
+    { path: '/admin/business-profile', label: 'Perfil del Negocio', icon: Building2 },
+    { path: '/admin/promotions', label: 'Promociones', icon: Megaphone },
+    { path: '/admin/settings', label: 'Configuración', icon: Settings },
   ];
-
+  
   const navItems = user?.role === 'admin' ? adminNavItems : userNavItems;
-
+  
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-gray-900">
-          {user?.role === 'admin' ? 'Admin Panel' : 'Restaurant App'}
+          {user?.role === 'admin' ? 'Panel de Administración' : 'App de Restaurante'}
         </h1>
-        <p className="text-sm text-gray-600 mt-1">Welcome, {user?.name}</p>
+        <p className="text-sm text-gray-600 mt-1">Bienvenido, {user?.name}</p>
       </div>
       
       <nav className="flex-1 p-4">
@@ -74,7 +74,7 @@ const WebSidebar: React.FC = () => {
           className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
         >
           <LogOut size={20} className="mr-3" />
-          Logout
+          Cerrar Sesión
         </button>
       </div>
     </aside>

@@ -1,25 +1,34 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '../types/auth';
+import LoadingSpinner from './common/LoadingSpinner'; // Changed from named to default import
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: UserRole;
+  requiredRole?: 'user' | 'admin';
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+const ProtectedRoute = ({ 
   children, 
   requiredRole 
-}) => {
-  const { isAuthenticated, user } = useAuth();
+}: ProtectedRouteProps) => {
+  const { authState } = useAuth();
+  const { user, loading } = authState;
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" />
+      </div>
+    );
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/iniciar-sesion" replace />;
+  }
+
+  if (requiredRole && user.role !== requiredRole) {
+    return <Navigate to="/no-autorizado" replace />;
   }
 
   return <>{children}</>;

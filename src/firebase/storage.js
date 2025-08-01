@@ -61,9 +61,9 @@ export const uploadMultipleImages = async (files, basePath, onProgress = null) =
     const urls = [];
     const errors = [];
     
-    results.forEach((result, index) => {
+    results.forEach((result) => {
       if (result.error) {
-        errors.push(`File ${index}: ${result.error}`);
+        errors.push(result.error);
       } else {
         urls.push(result.url);
       }

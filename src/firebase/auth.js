@@ -11,24 +11,24 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './config';
 
 // Register new user
-export const registerUser = async (email, password, userData) => {
+export const registerUser = async (name, email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
     // Update profile with display name
-    if (userData.name) {
+    if (name) {
       await updateProfile(user, {
-        displayName: userData.name
+        displayName: name
       });
     }
     
     // Create user document in Firestore
     await setDoc(doc(db, 'users', user.uid), {
-      name: userData.name || '',
+      name: name || '',
       email: user.email,
-      phone: userData.phone || '',
-      role: userData.role || 'customer', // 'customer' or 'admin'
+      phone: '',
+      role: 'user', // Default role for new users
       addresses: [],
       createdAt: new Date(),
       updatedAt: new Date()
