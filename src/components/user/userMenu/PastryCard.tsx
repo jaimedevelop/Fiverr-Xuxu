@@ -1,6 +1,7 @@
 import React from 'react';
-import { Heart, Eye } from 'lucide-react';
+import { Heart, Eye, ShoppingCart } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
+import { useCart } from '../../../contexts/CartContext';
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
 import ImageDisplay from './ImageDisplay';
@@ -12,6 +13,18 @@ interface PastryCardProps {
 }
 
 const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addItem({
+      pastryId: pastry.id,
+      name: pastry.name,
+      price: pastry.price,
+      quantity: 1
+    });
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="relative">
@@ -56,6 +69,21 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
             className="text-sm font-medium text-blue-600 hover:text-blue-800"
           >
             Ver detalles
+          </button>
+        </div>
+        
+        <div className="mt-3">
+          <button
+            onClick={handleAddToCart}
+            disabled={!pastry.available}
+            className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${
+              pastry.available
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            {pastry.available ? 'Añadir al Carrito' : 'No Disponible'}
           </button>
         </div>
       </div>

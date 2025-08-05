@@ -1,9 +1,10 @@
 import React from 'react';
+import UserProfileComponent from '../../components/user/profile/UserProfile';
 
 const Profile: React.FC = () => {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+      <UserProfileComponent />
     </div>
   );
 };

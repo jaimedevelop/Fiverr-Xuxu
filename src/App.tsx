@@ -1,6 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { OrderProvider } from './contexts/OrderContext';
+import { InventoryProvider } from './contexts/InventoryContext';
+import { AnalyticsProvider } from './contexts/AnalyticsContext';
+import { BusinessProvider } from './contexts/BusinessContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
+import { CartProvider } from './contexts/CartContext';
 import ResponsiveLayout from './components/layout/ResponsiveLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthPage from './pages/auth/AuthPage';
@@ -13,6 +19,8 @@ import EmailVerification from './pages/business/EmailVerification';
 import UserMenu from './pages/user/UserMenu';
 import Orders from './pages/user/Orders';
 import Profile from './pages/user/Profile';
+import Favorites from './pages/user/Favorites';
+import OrderHistory from './pages/user/OrderHistory';
 // Admin pages
 import Dashboard from './pages/admin/Dashboard';
 import MenuManagement from './pages/admin/MenuManagement';
@@ -105,6 +113,11 @@ function App() {
                 <Orders />
               </ProtectedRoute>
             } />
+            <Route path="favoritos" element={
+              <ProtectedRoute requiredRole="user">
+                <Favorites />
+              </ProtectedRoute>
+            } />
             <Route path="perfil" element={
               <ProtectedRoute requiredRole="user">
                 <Profile />
@@ -167,7 +180,19 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppRoutes />
+        <OrderProvider>
+          <InventoryProvider>
+            <AnalyticsProvider>
+              <BusinessProvider>
+                <FavoritesProvider>
+                  <CartProvider>
+                    <AppRoutes />
+                  </CartProvider>
+                </FavoritesProvider>
+              </BusinessProvider>
+            </AnalyticsProvider>
+          </InventoryProvider>
+        </OrderProvider>
       </AuthProvider>
     </Router>
   );

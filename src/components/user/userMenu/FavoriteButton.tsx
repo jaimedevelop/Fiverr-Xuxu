@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
+import { useFavorites } from '../../../contexts/FavoritesContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import AuthPromptModal from './AuthPromptModal';
 
 interface FavoriteButtonProps {
@@ -8,34 +10,42 @@ interface FavoriteButtonProps {
 
 const FavoriteButton = ({ pastryId }: FavoriteButtonProps) => {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { addFavorite, removeFavorite, isFavorite: checkIsFavorite, loading } = useFavorites();
+  const { authState } = useAuth();
+  const { user } = authState;
+  
+  const isFavorited = checkIsFavorite(pastryId);
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // In a real app, you would check if user is authenticated
-    const isAuthenticated = false; // Replace with actual auth check
-    
-    if (!isAuthenticated) {
+    if (!user) {
       setShowAuthPrompt(true);
       return;
     }
     
-    // Toggle favorite status
-    setIsFavorite(!isFavorite);
-    // In a real app, you would save this to Firebase
+    try {
+      if (isFavorited) {
+        await removeFavorite(pastryId);
+      } else {
+        await addFavorite(pastryId);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
   return (
     <>
       <button
         onClick={handleFavoriteClick}
-        className="text-gray-400 hover:text-red-500 transition-colors"
-        aria-label={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+        disabled={loading}
+        className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
+        aria-label={isFavorited ? "Quitar de favoritos" : "Añadir a favoritos"}
       >
         <Heart
-          className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}
-          fill={isFavorite ? 'currentColor' : 'none'}
+          className={`h-5 w-5 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`}
+          fill={isFavorited ? 'currentColor' : 'none'}
         />
       </button>
       
