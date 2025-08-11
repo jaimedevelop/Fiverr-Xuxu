@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { useFavorites } from '../../../contexts/FavoritesContext';
+// Temporarily disabled favorites functionality
+// import { useFavorites } from '../../../contexts/FavoritesContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AuthPromptModal from './AuthPromptModal';
 
@@ -10,11 +11,14 @@ interface FavoriteButtonProps {
 
 const FavoriteButton = ({ pastryId }: FavoriteButtonProps) => {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const { addFavorite, removeFavorite, isFavorite: checkIsFavorite, loading } = useFavorites();
+  // Temporarily disabled favorites functionality
+  // const { addFavorite, removeFavorite, isFavorite: checkIsFavorite, loading } = useFavorites();
   const { authState } = useAuth();
   const { user } = authState;
   
-  const isFavorited = checkIsFavorite(pastryId);
+  // Temporarily hardcoded - will be restored when FavoritesProvider is available
+  const isFavorited = false;
+  const loading = false;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -24,15 +28,19 @@ const FavoriteButton = ({ pastryId }: FavoriteButtonProps) => {
       return;
     }
     
-    try {
-      if (isFavorited) {
-        await removeFavorite(pastryId);
-      } else {
-        await addFavorite(pastryId);
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-    }
+    // Temporarily disabled - show alert instead
+    alert('Funcionalidad de favoritos temporalmente deshabilitada. ¡Próximamente disponible!');
+    
+    // Original code (will be uncommented later):
+    // try {
+    //   if (isFavorited) {
+    //     await removeFavorite(pastryId);
+    //   } else {
+    //     await addFavorite(pastryId);
+    //   }
+    // } catch (error) {
+    //   console.error('Error toggling favorite:', error);
+    // }
   };
 
   return (

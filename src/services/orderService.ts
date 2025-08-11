@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   QueryDocumentSnapshot
 } from 'firebase/firestore';
-import { db } from '../firebase/config.js';
+import { db } from '../firebase/config';
 import { Order, OrderItem, OrderFilters, OrderStats, OrderStatus } from '../types/order';
 
 class OrderService {

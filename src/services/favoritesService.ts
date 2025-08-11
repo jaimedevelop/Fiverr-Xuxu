@@ -11,16 +11,8 @@ import {
   serverTimestamp,
   QueryDocumentSnapshot
 } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { Pastry } from '../types/pastry';
-
-// Dynamic import to handle TypeScript module issue
-let db: any;
-try {
-  const firebaseConfig = require('../firebase/config.js');
-  db = firebaseConfig.db;
-} catch (error) {
-  console.error('Error loading firebase config:', error);
-}
 
 export interface Favorite {
   id: string;

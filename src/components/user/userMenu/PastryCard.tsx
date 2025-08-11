@@ -1,7 +1,8 @@
 import React from 'react';
 import { Heart, Eye, ShoppingCart } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
-import { useCart } from '../../../contexts/CartContext';
+// Temporarily disabled cart functionality
+// import { useCart } from '../../../contexts/CartContext';
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
 import ImageDisplay from './ImageDisplay';
@@ -13,16 +14,22 @@ interface PastryCardProps {
 }
 
 const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
-  const { addItem } = useCart();
+  // Temporarily disabled cart functionality
+  // const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addItem({
-      pastryId: pastry.id,
-      name: pastry.name,
-      price: pastry.price,
-      quantity: 1
-    });
+    
+    // Temporarily disabled - show alert instead
+    alert('Funcionalidad de carrito temporalmente deshabilitada. ¡Próximamente disponible!');
+    
+    // Original code (will be uncommented later):
+    // addItem({
+    //   pastryId: pastry.id,
+    //   name: pastry.name,
+    //   price: pastry.price,
+    //   quantity: 1
+    // });
   };
 
   return (

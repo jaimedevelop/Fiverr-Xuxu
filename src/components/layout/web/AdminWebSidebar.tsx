@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useUser } from '../../../contexts/UserContext';
 import { 
   Menu, 
   ShoppingBag, 
@@ -15,7 +16,7 @@ import {
 
 const AdminWebSidebar: React.FC = () => {
   const { authState, logout } = useAuth();
-  const { user } = authState;
+  const { user: firestoreUser } = useUser();
   
   const adminNavItems = [
     { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
@@ -34,7 +35,7 @@ const AdminWebSidebar: React.FC = () => {
         <h1 className="text-xl font-bold text-gray-900">
           Panel de Administración
         </h1>
-        <p className="text-sm text-gray-600 mt-1">Bienvenido, {user?.email}</p>
+        <p className="text-sm text-gray-600 mt-1">Bienvenido, {firestoreUser?.email}</p>
       </div>
       
       <nav className="flex-1 p-4">

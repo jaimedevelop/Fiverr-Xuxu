@@ -54,14 +54,20 @@ const UserAuthForm = () => {
     
     if (!validateForm()) return;
     
+    console.log("🔑 USER LOGIN ATTEMPT:");
+    console.log("  - Email:", formData.email);
+    
     setIsSubmitting(true);
     setErrors(prev => ({ ...prev, general: '' }));
     
     try {
+      console.log("  - Calling login function...");
       await login(formData.email, formData.password);
-      navigate('/usuario/menu');
+      console.log("  - Login successful! App routing will handle navigation based on user role");
+      // REMOVED: navigate('/usuario/menu');
+      // Let App.tsx routing logic handle the navigation once UserContext loads the user data
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('  - Login error:', error);
       setErrors({ 
         general: error.message === 'auth/user-not-found' 
           ? 'Usuario no encontrado' 

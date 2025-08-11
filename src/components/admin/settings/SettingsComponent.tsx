@@ -1,35 +1,61 @@
+// src/components/admin/settings/SettingsComponent.tsx
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Users, Shield, Database } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, User as UserIcon } from 'lucide-react';
 import GeneralSettings from './GeneralSettings';
 import UserSettings from './UserSettings';
+import AccountSettings from './AccountSettings';
 import BaseCard from '../../../components/common/BaseCard';
+import User from '../../../types/user';
 
 interface SettingsProps {
+  user: User | null;
   loading?: boolean;
   error?: string | null;
 }
 
 const SettingsComponent: React.FC<SettingsProps> = ({
+  user,
   loading = false,
   error = null
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'users' | 'security'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'users' | 'security' | 'account'>('account');
 
   return (
     <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
-        <p className="text-gray-600">Gestiona la configuración de tu negocio y usuarios</p>
+        <p className="text-gray-600">
+          Gestiona la configuración de tu negocio y usuarios
+        </p>
+        {user && (
+          <div className="mt-2 text-sm text-gray-500">
+            Sesión iniciada como: {user.name} ({user.email})
+          </div>
+        )}
       </div>
-
+      
       {error && (
         <div className="bg-red-50 p-4 rounded-md">
           <p className="text-red-700">{error}</p>
         </div>
       )}
-
+      
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('account')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'account'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <UserIcon className="h-4 w-4 mr-2" />
+              Mi Cuenta
+            </div>
+          </button>
+          
           <button
             onClick={() => setActiveTab('general')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -43,6 +69,7 @@ const SettingsComponent: React.FC<SettingsProps> = ({
               General
             </div>
           </button>
+          
           <button
             onClick={() => setActiveTab('users')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -56,6 +83,7 @@ const SettingsComponent: React.FC<SettingsProps> = ({
               Usuarios
             </div>
           </button>
+          
           <button
             onClick={() => setActiveTab('security')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -71,15 +99,19 @@ const SettingsComponent: React.FC<SettingsProps> = ({
           </button>
         </nav>
       </div>
-
+      
+      {activeTab === 'account' && user && (
+        <AccountSettings user={user} loading={loading} />
+      )}
+      
       {activeTab === 'general' && (
         <GeneralSettings loading={loading} error={error} />
       )}
-
+      
       {activeTab === 'users' && (
         <UserSettings loading={loading} error={error} />
       )}
-
+      
       {activeTab === 'security' && (
         <BaseCard title="Configuración de Seguridad">
           <div className="bg-blue-50 p-6 rounded-md">

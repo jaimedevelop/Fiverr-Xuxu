@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Users, Shield, UserPlus, UserMinus, Trash2 } from 'lucide-react';
+import AuthUser from '../../../types/auth';
+import { Business } from '../../../types/business';
 import Button from '../../../components/ui/Button';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
@@ -18,6 +20,8 @@ interface User {
 }
 
 interface UserSettingsProps {
+  user?: AuthUser | null;
+  business?: Business | null;
   loading?: boolean;
   error?: string | null;
 }
@@ -30,9 +34,11 @@ interface UserFormData {
   status: 'active' | 'inactive';
 }
 
-const UserSettings: React.FC<UserSettingsProps> = ({ 
-  loading = false, 
-  error = null 
+const UserSettings: React.FC<UserSettingsProps> = ({
+  user,
+  business,
+  loading = false,
+  error = null
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -46,47 +52,24 @@ const UserSettings: React.FC<UserSettingsProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Mock data for development
-    const mockUsers: User[] = [
-      {
-        id: '1',
-        name: 'Juan Pérez',
-        email: 'juan@pasteleriadelicias.com',
-        role: 'admin',
+    const usersList: User[] = [];
+    
+    // Add the current user to the list
+    if (user) {
+      usersList.push({
+        id: user.uid,
+        name: user.name,
+        email: user.email,
+        role: user.role as 'admin' | 'employee' | 'cashier',
         status: 'active',
-        lastLogin: new Date(2023, 5, 15),
-        createdAt: new Date(2023, 0, 10)
-      },
-      {
-        id: '2',
-        name: 'María García',
-        email: 'maria@pasteleriadelicias.com',
-        role: 'employee',
-        status: 'active',
-        lastLogin: new Date(2023, 5, 14),
-        createdAt: new Date(2023, 1, 15)
-      },
-      {
-        id: '3',
-        name: 'Carlos López',
-        email: 'carlos@pasteleriadelicias.com',
-        role: 'cashier',
-        status: 'active',
-        lastLogin: new Date(2023, 5, 10),
-        createdAt: new Date(2023, 2, 20)
-      },
-      {
-        id: '4',
-        name: 'Ana Martínez',
-        email: 'ana@pasteleriadelicias.com',
-        role: 'employee',
-        status: 'inactive',
-        lastLogin: new Date(2023, 4, 5),
-        createdAt: new Date(2023, 3, 5)
-      }
-    ];
-    setUsers(mockUsers);
-  }, []);
+        lastLogin: new Date(),
+        createdAt: new Date()
+      });
+    }
+
+    
+    setUsers([...usersList]);
+  }, [user]);
 
   const roleOptions = [
     { value: 'admin', label: 'Administrador' },

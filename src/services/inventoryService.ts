@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   QueryDocumentSnapshot
 } from 'firebase/firestore';
-import { db } from '../firebase/config.js';
+import { db } from '../firebase/config';
 import { 
   InventoryItem, 
   StockChange, 

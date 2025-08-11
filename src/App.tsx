@@ -1,3 +1,4 @@
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -7,6 +8,7 @@ import { AnalyticsProvider } from './contexts/AnalyticsContext';
 import { BusinessProvider } from './contexts/BusinessContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { CartProvider } from './contexts/CartContext';
+import { UserProvider } from './contexts/UserContext';
 import ResponsiveLayout from './components/layout/ResponsiveLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthPage from './pages/auth/AuthPage';
@@ -15,8 +17,10 @@ import UserAuth from './pages/auth/UserAuth';
 import UserRegistration from './components/user/registration/UserRegistration';
 import BusinessRegistration from './pages/business/BusinessRegistration';
 import EmailVerification from './pages/business/EmailVerification';
+import { useUser } from './contexts/UserContext';
 // User pages
-import UserMenu from './pages/user/UserMenu';
+import UserExplore from './pages/user/UserExplore'; // NEW: Import UserExplore
+import UserMenu from './pages/user/UserMenu'; // UPDATED: Now business-specific
 import Orders from './pages/user/Orders';
 import Profile from './pages/user/Profile';
 import Favorites from './pages/user/Favorites';
@@ -50,21 +54,26 @@ function App() {
   
   // Define AppRoutes inside App so it has access to the AuthProvider context
   const AppRoutes = () => {
-    const { authState } = useAuth();
-    const { user, loading } = authState;
+  const { user: firestoreUser, loading: userLoading } = useUser();
+  
+  console.log("🔍 APP ROUTING DEBUG:");
+  console.log("  - User loading:", userLoading);
+  console.log("  - Firestore user:", firestoreUser);
+  console.log("  - Firestore user role:", firestoreUser?.role);
     
-    // Show loading spinner while checking authentication status
-    if (loading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      );
-    }
+  // Show loading spinner while checking authentication status
+  if (userLoading || userLoading) {
+    console.log("⏳ Showing loading spinner - authLoading:", userLoading, "userLoading:", userLoading);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
     
     // If user is not authenticated, show auth routes
-    if (!user) {
-      console.log("User not authenticated, showing auth routes");
+    if (!firestoreUser) {
+      console.log("❌ User not authenticated, showing auth routes");
       return (
         <Routes>
           <Route path="/iniciar-sesion" element={<AuthPage />} />
@@ -83,13 +92,16 @@ function App() {
       );
     }
     
-    // Default route based on user role
-    const getDefaultRoute = () => {
-      if (user?.role === 'admin') {
-        return '/admin/dashboard';
-      }
-      return '/usuario/menu';
-    };
+ // Default route based on user role - USE FIRESTORE USER ROLE
+  const getDefaultRoute = () => {
+    console.log("🎯 Getting default route for role:", firestoreUser?.role);
+    if (firestoreUser?.role === 'admin') {
+      console.log("  → Directing to admin dashboard");
+      return '/admin/dashboard';
+    }
+    console.log("  → Directing to user explore"); // UPDATED: Changed from menu to explore
+    return '/usuario/explorar'; // UPDATED: Changed from /usuario/menu to /usuario/explorar
+  };
     
     // If user is authenticated, show protected routes
     return (
@@ -103,11 +115,20 @@ function App() {
         <Route path="/" element={<ResponsiveLayout />}>
           {/* User routes */}
           <Route path="usuario">
-            <Route path="menu" element={
+            {/* NEW: Explore page (marketplace view) */}
+            <Route path="explorar" element={
+              <ProtectedRoute requiredRole="user">
+                <UserExplore />
+              </ProtectedRoute>
+            } />
+            {/* UPDATED: Menu is now business-specific with businessId parameter */}
+            <Route path="menu/:businessId" element={
               <ProtectedRoute requiredRole="user">
                 <UserMenu />
               </ProtectedRoute>
             } />
+            {/* REDIRECT: Old menu route to new explore route */}
+            <Route path="menu" element={<Navigate to="/usuario/explorar" replace />} />
             <Route path="pedidos" element={
               <ProtectedRoute requiredRole="user">
                 <Orders />
@@ -180,19 +201,21 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <OrderProvider>
-          <InventoryProvider>
-            <AnalyticsProvider>
-              <BusinessProvider>
-                <FavoritesProvider>
-                  <CartProvider>
-                    <AppRoutes />
-                  </CartProvider>
-                </FavoritesProvider>
-              </BusinessProvider>
-            </AnalyticsProvider>
-          </InventoryProvider>
-        </OrderProvider>
+        <UserProvider>
+          <BusinessProvider>
+            <OrderProvider>
+            <InventoryProvider>
+              <AnalyticsProvider>
+                  <FavoritesProvider>
+                    <CartProvider>
+                      <AppRoutes />
+                    </CartProvider>
+                  </FavoritesProvider>
+              </AnalyticsProvider>
+            </InventoryProvider>
+          </OrderProvider>
+          </BusinessProvider>
+        </UserProvider>
       </AuthProvider>
     </Router>
   );

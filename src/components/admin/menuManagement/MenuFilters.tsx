@@ -1,64 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 
-const MenuFilters = ({ pastries, categories, onFilter }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [availabilityFilter, setAvailabilityFilter] = useState('all');
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange }) => {
+  const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+  const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Apply filters whenever any filter changes
+  // Update filters when local state changes
   useEffect(() => {
-    let filtered = [...pastries];
+    const newFilters = {
+      search: searchTerm,
+      category: selectedCategory || null,
+    };
     
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(pastry =>
-        pastry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pastry.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    // Only call onFiltersChange if filters actually changed
+    const filtersChanged = 
+      newFilters.search !== filters.search || 
+      newFilters.category !== filters.category;
+      
+    if (filtersChanged) {
+      console.log('🔍 MenuFilters: Filters changed', newFilters);
+      onFiltersChange(newFilters);
     }
-    
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(pastry => pastry.categoryId === selectedCategory);
-    }
-    
-    // Availability filter
-    if (availabilityFilter !== 'all') {
-      filtered = filtered.filter(pastry => {
-        if (availabilityFilter === 'available') return pastry.available;
-        if (availabilityFilter === 'unavailable') return !pastry.available;
-        if (availabilityFilter === 'low-stock') return pastry.inventory <= 5 && pastry.inventory > 0;
-        if (availabilityFilter === 'out-of-stock') return pastry.inventory === 0;
-        return true;
-      });
-    }
-    
-    // Price range filter
-    if (priceRange.min || priceRange.max) {
-      filtered = filtered.filter(pastry => {
-        const price = parseFloat(pastry.price);
-        const min = priceRange.min ? parseFloat(priceRange.min) : 0;
-        const max = priceRange.max ? parseFloat(priceRange.max) : Infinity;
-        return price >= min && price <= max;
-      });
-    }
-    
-    onFilter(filtered);
-  }, [pastries, searchTerm, selectedCategory, availabilityFilter, priceRange.min, priceRange.max]);
+  }, [searchTerm, selectedCategory, filters.search, filters.category, onFiltersChange]);
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedCategory('all');
-    setAvailabilityFilter('all');
-    setPriceRange({ min: '', max: '' });
+    setSelectedCategory('');
     setShowAdvanced(false);
   };
 
-  const hasActiveFilters = searchTerm || selectedCategory !== 'all' || 
-                          availabilityFilter !== 'all' || priceRange.min || priceRange.max;
+  const hasActiveFilters = searchTerm || selectedCategory;
 
   return (
     <div className="bg-white rounded-lg border p-4 mb-6">
@@ -68,7 +40,7 @@ const MenuFilters = ({ pastries, categories, onFilter }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
-            placeholder="Buscar postres por nombre o descripción..."
+            placeholder="Buscar postres por nombre, etiquetas o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -81,25 +53,12 @@ const MenuFilters = ({ pastries, categories, onFilter }) => {
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          <option value="all">Todas las Categorías</option>
+          <option value="">Todas las Categorías</option>
           {categories.map(category => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
-        </select>
-        
-        {/* Availability Filter */}
-        <select
-          value={availabilityFilter}
-          onChange={(e) => setAvailabilityFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="all">Todos los Artículos</option>
-          <option value="available">Disponible</option>
-          <option value="unavailable">No Disponible</option>
-          <option value="low-stock">Stock Bajo (≤5)</option>
-          <option value="out-of-stock">Sin Stock</option>
         </select>
         
         {/* Advanced Filters Toggle */}
@@ -108,7 +67,7 @@ const MenuFilters = ({ pastries, categories, onFilter }) => {
           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
         >
           <Filter size={18} />
-          Avanzado
+          Ordenar
         </button>
         
         {/* Clear Filters */}
@@ -123,48 +82,43 @@ const MenuFilters = ({ pastries, categories, onFilter }) => {
         )}
       </div>
       
-      {/* Advanced Filters */}
+      {/* Advanced Filters - Sort Options */}
       {showAdvanced && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Price Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rango de Precio (MXN)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Mín"
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <span className="flex items-center text-gray-500">a</span>
-                <input
-                  type="number"
-                  placeholder="Máx"
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
             {/* Sort Options */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Ordenar Por
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select 
+                value={sort}
+                onChange={(e) => onSortChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
                 <option value="newest">Más Recientes Primero</option>
                 <option value="oldest">Más Antiguos Primero</option>
                 <option value="name-asc">Nombre (A-Z)</option>
                 <option value="name-desc">Nombre (Z-A)</option>
                 <option value="price-low">Precio (Menor a Mayor)</option>
                 <option value="price-high">Precio (Mayor a Menor)</option>
-                <option value="inventory">Nivel de Inventario</option>
               </select>
+            </div>
+            
+            {/* Placeholder for future filters */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Disponibilidad
+              </label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled
+              >
+                <option>Todos los Artículos</option>
+                <option>Disponible</option>
+                <option>No Disponible</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Próximamente</p>
             </div>
           </div>
         </div>
@@ -180,21 +134,9 @@ const MenuFilters = ({ pastries, categories, onFilter }) => {
                 Búsqueda: "{searchTerm}"
               </span>
             )}
-            {selectedCategory !== 'all' && (
+            {selectedCategory && (
               <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
                 Categoría: {categories.find(c => c.id === selectedCategory)?.name}
-              </span>
-            )}
-            {availabilityFilter !== 'all' && (
-              <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
-                Estado: {availabilityFilter === 'low-stock' ? 'Stock Bajo' : 
-                         availabilityFilter === 'out-of-stock' ? 'Sin Stock' : 
-                         availabilityFilter === 'available' ? 'Disponible' : 'No Disponible'}
-              </span>
-            )}
-            {(priceRange.min || priceRange.max) && (
-              <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                Precio: {priceRange.min || '0'} - {priceRange.max || '∞'}
               </span>
             )}
           </div>

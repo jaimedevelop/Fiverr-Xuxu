@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useUser } from '../../../contexts/UserContext';
 import { 
   Menu, 
   ShoppingBag, 
@@ -16,7 +17,8 @@ import {
 } from 'lucide-react';
 
 const WebSidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { user: firestoreUser } = useUser();
   
   const userNavItems = [
     { path: '/user/menu', label: 'Menú', icon: Menu },
@@ -35,15 +37,15 @@ const WebSidebar: React.FC = () => {
     { path: '/admin/settings', label: 'Configuración', icon: Settings },
   ];
   
-  const navItems = user?.role === 'admin' ? adminNavItems : userNavItems;
+  const navItems = firestoreUser?.role === 'admin' ? adminNavItems : userNavItems;
   
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-gray-900">
-          {user?.role === 'admin' ? 'Panel de Administración' : 'App de Restaurante'}
+          {firestoreUser?.role === 'admin' ? 'Panel de Administración' : 'App de Restaurante'}
         </h1>
-        <p className="text-sm text-gray-600 mt-1">Bienvenido, {user?.name}</p>
+        <p className="text-sm text-gray-600 mt-1">Bienvenido, {firestoreUser?.name || firestoreUser?.email}</p>
       </div>
       
       <nav className="flex-1 p-4">

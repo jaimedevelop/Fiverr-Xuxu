@@ -1,4 +1,4 @@
-// src/firebase/database.js
+// src/firebase/database.ts
 import {
   collection,
   doc,
@@ -15,12 +15,37 @@ import {
   serverTimestamp,
   increment,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  DocumentData,
+  Query,
+  QueryDocumentSnapshot,
+  Unsubscribe,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from './config';
 
+// Define result types
+interface DocumentResult {
+  id: string | null;
+  error: string | null;
+}
+
+interface DataResult<T> {
+  data: T[];
+  error: string | null;
+}
+
+interface SingleDataResult<T> {
+  data: T | null;
+  error: string | null;
+}
+
+interface SimpleResult {
+  error: string | null;
+}
+
 // PASTRIES COLLECTION
-export const addPastry = async (pastryData) => {
+export const addPastry = async (pastryData: DocumentData): Promise<DocumentResult> => {
   try {
     const docRef = await addDoc(collection(db, 'pastries'), {
       ...pastryData,
@@ -28,14 +53,14 @@ export const addPastry = async (pastryData) => {
       updatedAt: serverTimestamp()
     });
     return { id: docRef.id, error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { id: null, error: error.message };
   }
 };
 
-export const getPastries = async (vendorId = null) => {
+export const getPastries = async (vendorId: string | null = null): Promise<DataResult<DocumentData>> => {
   try {
-    let q = collection(db, 'pastries');
+    let q: Query = collection(db, 'pastries');
     
     if (vendorId) {
       q = query(q, where('vendorId', '==', vendorId));
@@ -44,18 +69,18 @@ export const getPastries = async (vendorId = null) => {
     q = query(q, where('available', '==', true), orderBy('createdAt', 'desc'));
     
     const querySnapshot = await getDocs(q);
-    const pastries = [];
-    querySnapshot.forEach((doc) => {
+    const pastries: DocumentData[] = [];
+    querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
       pastries.push({ id: doc.id, ...doc.data() });
     });
     
     return { data: pastries, error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { data: [], error: error.message };
   }
 };
 
-export const updatePastry = async (pastryId, updateData) => {
+export const updatePastry = async (pastryId: string, updateData: DocumentData): Promise<SimpleResult> => {
   try {
     const pastryRef = doc(db, 'pastries', pastryId);
     await updateDoc(pastryRef, {
@@ -63,22 +88,22 @@ export const updatePastry = async (pastryId, updateData) => {
       updatedAt: serverTimestamp()
     });
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };
 
-export const deletePastry = async (pastryId) => {
+export const deletePastry = async (pastryId: string): Promise<SimpleResult> => {
   try {
     await deleteDoc(doc(db, 'pastries', pastryId));
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };
 
 // ORDERS COLLECTION
-export const createOrder = async (orderData) => {
+export const createOrder = async (orderData: DocumentData): Promise<DocumentResult> => {
   try {
     const docRef = await addDoc(collection(db, 'orders'), {
       ...orderData,
@@ -87,14 +112,14 @@ export const createOrder = async (orderData) => {
       updatedAt: serverTimestamp()
     });
     return { id: docRef.id, error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { id: null, error: error.message };
   }
 };
 
-export const getOrders = async (userId, role = 'customer') => {
+export const getOrders = async (userId: string, role: string = 'customer'): Promise<DataResult<DocumentData>> => {
   try {
-    let q = collection(db, 'orders');
+    let q: Query = collection(db, 'orders');
     
     if (role === 'customer') {
       q = query(q, where('customerId', '==', userId));
@@ -105,18 +130,18 @@ export const getOrders = async (userId, role = 'customer') => {
     q = query(q, orderBy('createdAt', 'desc'));
     
     const querySnapshot = await getDocs(q);
-    const orders = [];
-    querySnapshot.forEach((doc) => {
+    const orders: DocumentData[] = [];
+    querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
       orders.push({ id: doc.id, ...doc.data() });
     });
     
     return { data: orders, error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { data: [], error: error.message };
   }
 };
 
-export const updateOrderStatus = async (orderId, status, notes = '') => {
+export const updateOrderStatus = async (orderId: string, status: string, notes: string = ''): Promise<SimpleResult> => {
   try {
     const orderRef = doc(db, 'orders', orderId);
     await updateDoc(orderRef, {
@@ -130,14 +155,14 @@ export const updateOrderStatus = async (orderId, status, notes = '') => {
       updatedAt: serverTimestamp()
     });
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };
 
 // REAL-TIME LISTENERS
-export const listenToOrders = (userId, role, callback) => {
-  let q = collection(db, 'orders');
+export const listenToOrders = (userId: string, role: string, callback: (orders: DocumentData[]) => void): Unsubscribe => {
+  let q: Query = collection(db, 'orders');
   
   if (role === 'customer') {
     q = query(q, where('customerId', '==', userId));
@@ -148,16 +173,16 @@ export const listenToOrders = (userId, role, callback) => {
   q = query(q, orderBy('createdAt', 'desc'));
   
   return onSnapshot(q, (querySnapshot) => {
-    const orders = [];
-    querySnapshot.forEach((doc) => {
+    const orders: DocumentData[] = [];
+    querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
       orders.push({ id: doc.id, ...doc.data() });
     });
     callback(orders);
   });
 };
 
-export const listenToPastries = (vendorId, callback) => {
-  let q = collection(db, 'pastries');
+export const listenToPastries = (vendorId: string | null, callback: (pastries: DocumentData[]) => void): Unsubscribe => {
+  let q: Query = collection(db, 'pastries');
   
   if (vendorId) {
     q = query(q, where('vendorId', '==', vendorId));
@@ -166,8 +191,8 @@ export const listenToPastries = (vendorId, callback) => {
   q = query(q, orderBy('createdAt', 'desc'));
   
   return onSnapshot(q, (querySnapshot) => {
-    const pastries = [];
-    querySnapshot.forEach((doc) => {
+    const pastries: DocumentData[] = [];
+    querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
       pastries.push({ id: doc.id, ...doc.data() });
     });
     callback(pastries);
@@ -175,7 +200,7 @@ export const listenToPastries = (vendorId, callback) => {
 };
 
 // INVENTORY MANAGEMENT
-export const updateInventory = async (pastryId, quantity) => {
+export const updateInventory = async (pastryId: string, quantity: number): Promise<SimpleResult> => {
   try {
     const pastryRef = doc(db, 'pastries', pastryId);
     await updateDoc(pastryRef, {
@@ -183,13 +208,13 @@ export const updateInventory = async (pastryId, quantity) => {
       updatedAt: serverTimestamp()
     });
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };
 
 // FAVORITES
-export const addToFavorites = async (userId, pastryId) => {
+export const addToFavorites = async (userId: string, pastryId: string): Promise<SimpleResult> => {
   try {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
@@ -197,12 +222,12 @@ export const addToFavorites = async (userId, pastryId) => {
       updatedAt: serverTimestamp()
     });
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };
 
-export const removeFromFavorites = async (userId, pastryId) => {
+export const removeFromFavorites = async (userId: string, pastryId: string): Promise<SimpleResult> => {
   try {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
@@ -210,7 +235,7 @@ export const removeFromFavorites = async (userId, pastryId) => {
       updatedAt: serverTimestamp()
     });
     return { error: null };
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message };
   }
 };

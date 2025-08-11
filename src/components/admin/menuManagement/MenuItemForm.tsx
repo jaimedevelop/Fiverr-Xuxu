@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
+import { useUser } from '../../../contexts/UserContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import PhotoUpload from './PhotoUpload';
 import AvailabilityToggle from './AvailabilityToggle';
 import { X, Save, AlertCircle } from 'lucide-react';
 
 const MenuItemForm = ({ item, categories, onClose }) => {
+  const { user } = useUser();
+  const { logout } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -20,6 +24,24 @@ const MenuItemForm = ({ item, categories, onClose }) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [activeTab, setActiveTab] = useState('basic');
+
+  // Check for admin user with businessId on component mount
+  useEffect(() => {
+    console.log('🥐 MenuItemForm: Checking user permissions', {
+      hasUser: !!user,
+      userRole: user?.role,
+      userBusinessId: user?.businessId
+    });
+
+    if (user?.role === 'admin' && !user.businessId) {
+      console.error('❌ MenuItemForm: Admin user without businessId detected');
+      alert('Error: Cuenta de administrador sin negocio asignado. Cerrando sesión...');
+      setTimeout(() => {
+        logout();
+      }, 2000);
+      return;
+    }
+  }, [user, logout]);
 
   // Initialize form data when item prop changes
   useEffect(() => {
@@ -53,6 +75,14 @@ const MenuItemForm = ({ item, categories, onClose }) => {
 
   const validateForm = () => {
     const newErrors = {};
+    
+    // Check if user has businessId (additional safety check)
+    if (!user?.businessId) {
+      newErrors.general = 'Error: No se encontró el ID del negocio';
+      setErrors(newErrors);
+      return false;
+    }
+    
     // Required fields
     if (!formData.name.trim()) {
       newErrors.name = 'El nombre del postre es obligatorio';
@@ -80,6 +110,14 @@ const MenuItemForm = ({ item, categories, onClose }) => {
       setActiveTab('basic'); // Switch to basic tab to show errors
       return;
     }
+
+    // Final check for businessId
+    if (!user?.businessId) {
+      alert('Error: No se encontró el ID del negocio. Cerrando sesión...');
+      logout();
+      return;
+    }
+
     setSaving(true);
     try {
       const pastryData = {
@@ -92,21 +130,27 @@ const MenuItemForm = ({ item, categories, onClose }) => {
         availabilityMode: formData.availabilityMode,
         inventory: parseInt(formData.inventory) || 0,
         tags: formData.tags,
+        businessId: user.businessId, // Add businessId to pastry data
         updatedAt: new Date()
       };
+
+      console.log('🥐 MenuItemForm: Saving pastry with businessId:', user.businessId);
+
       if (item) {
         // Update existing pastry
         await updateDoc(doc(db, 'pastries', item.id), pastryData);
+        console.log('✅ MenuItemForm: Pastry updated successfully');
       } else {
         // Create new pastry
         await addDoc(collection(db, 'pastries'), {
           ...pastryData,
           createdAt: new Date()
         });
+        console.log('✅ MenuItemForm: New pastry created successfully');
       }
       onClose();
     } catch (error) {
-      console.error('Error saving pastry:', error);
+      console.error('❌ MenuItemForm: Error saving pastry:', error);
       alert('Error al guardar el postre. Por favor, inténtelo de nuevo.');
     } finally {
       setSaving(false);
@@ -120,8 +164,28 @@ const MenuItemForm = ({ item, categories, onClose }) => {
     }
   };
 
+  // Don't render form if user doesn't have businessId
+  if (user?.role === 'admin' && !user.businessId) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="flex items-center gap-3 text-red-600 mb-4">
+            <AlertCircle size={24} />
+            <h2 className="text-lg font-semibold">Error de Configuración</h2>
+          </div>
+          <p className="text-gray-700 mb-4">
+            Su cuenta de administrador no tiene un negocio asignado. Cerrando sesión...
+          </p>
+          <div className="flex justify-center">
+            <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const tabs = [
-    { id: 'basic', label: 'Información Básica', hasError: !!(errors.name || errors.description || errors.price || errors.categoryId) },
+    { id: 'basic', label: 'Información Básica', hasError: !!(errors.name || errors.description || errors.price || errors.categoryId || errors.general) },
     { id: 'images', label: 'Fotos', hasError: !!errors.images },
     { id: 'availability', label: 'Disponibilidad', hasError: false },
     { id: 'advanced', label: 'Avanzado', hasError: false }
@@ -149,6 +213,16 @@ const MenuItemForm = ({ item, categories, onClose }) => {
             <X size={24} />
           </button>
         </div>
+        
+        {/* Error Alert */}
+        {errors.general && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} className="text-red-600" />
+              <p className="text-sm text-red-600">{errors.general}</p>
+            </div>
+          </div>
+        )}
         
         {/* Tabs */}
         <div className="border-b">

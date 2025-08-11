@@ -1,8 +1,8 @@
 // src/services/businessService.ts
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { collection, doc, setDoc, Timestamp } from 'firebase/firestore';
-import { auth, db } from '../firebase';
-import { uploadImage } from '../firebase/storage';
+import { auth, db } from '../firebase/config';
+import { uploadImage } from '../firebase';
 import { BusinessRegistrationData } from '../types/business';
 
 export const registerBusiness = async (formData: BusinessRegistrationData) => {
@@ -13,9 +13,9 @@ export const registerBusiness = async (formData: BusinessRegistrationData) => {
       formData.email,
       formData.password
     );
-    
+
     const user = userCredential.user;
-    
+
     // Upload logo if provided
     let logoUrl = '';
     if (formData.logo) {
@@ -25,11 +25,11 @@ export const registerBusiness = async (formData: BusinessRegistrationData) => {
       }
       logoUrl = result.url || '';
     }
-    
+
     // Create business document in Firestore (v9+ syntax)
     const businessRef = doc(collection(db, 'businesses'));
     const businessId = businessRef.id;
-    
+
     const businessData = {
       id: businessId,
       storeName: formData.storeName,
@@ -50,9 +50,9 @@ export const registerBusiness = async (formData: BusinessRegistrationData) => {
       isActive: true,
       userId: user.uid
     };
-    
+
     await setDoc(businessRef, businessData);
-    
+
     // Update user profile with business ID and role
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, {
@@ -62,10 +62,10 @@ export const registerBusiness = async (formData: BusinessRegistrationData) => {
       businessId: businessId,
       createdAt: Timestamp.now()
     });
-    
+
     // Send email verification (v9+ syntax)
     await sendEmailVerification(user);
-    
+
     return {
       user: {
         uid: user.uid,

@@ -1,15 +1,14 @@
 // src/contexts/AuthContext.tsx
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore'; // Added setDoc import
-import { auth, db } from '../firebase/config';
-import { signInUser, signOutUser, onAuthStateChange, registerUser } from '../firebase/auth'; // Added registerUser import
-import { AuthUser, AuthState } from '../types/auth';
+import { User as FirebaseUser } from 'firebase/auth';
+import { signInUser, signOutUser, onAuthStateChange, registerUser } from '../firebase/auth';
+import { AuthState } from '../types/auth';
 
 interface AuthContextType {
   authState: AuthState;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>; // Added register function
+  register: (name: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,99 +32,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error: null
   });
 
-  // Helper function to fetch user data from Firestore
-  const fetchUserData = async (uid: string): Promise<AuthUser | null> => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        return {
-          uid: uid,
-          email: userData.email || '',
-          name: userData.name || '', // Added name field
-          role: userData.role || 'user',
-          businessId: userData.businessId || ''
-        };
-      } else {
-        // If no user document exists, create a default user profile
-        return {
-          uid: uid,
-          email: '',
-          name: '', // Added name field
-          role: 'user',
-          businessId: ''
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching user data from Firestore:', error);
-      return null;
+useEffect(() => {
+  console.log("🔐 AUTH CONTEXT: Setting up auth listener");
+  
+  const unsubscribe = onAuthStateChange(async (firebaseUser: FirebaseUser | null) => {
+    console.log("🔐 AUTH STATE CHANGED:");
+    console.log("  - Firebase user:", firebaseUser);
+    console.log("  - User UID:", firebaseUser?.uid);
+    console.log("  - User email:", firebaseUser?.email);
+    
+    if (firebaseUser) {
+      const authUserData = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        name: firebaseUser.displayName || '',
+        role: 'user', // Default role, will be updated by UserContext
+        businessId: '', // Will be populated by UserContext
+        createdAt: new Date()
+      };
+      
+      console.log("  - Setting auth state with default user role:", authUserData);
+      
+      setAuthState({
+        user: authUserData,
+        loading: false,
+        error: null
+      });
+    } else {
+      console.log("  - No firebase user, clearing auth state");
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null
+      });
     }
+  });
+  
+  return () => {
+    console.log("🔐 AUTH CONTEXT: Cleaning up auth listener");
+    unsubscribe();
   };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          setAuthState(prev => ({ ...prev, loading: true }));
-          
-          // Fetch user data from Firestore
-          const userData = await fetchUserData(firebaseUser.uid);
-          
-          if (userData) {
-            setAuthState({
-              user: {
-                ...userData,
-                email: userData.email || firebaseUser.email || '' // Use Firebase email as fallback
-              },
-              loading: false,
-              error: null
-            });
-          } else {
-            throw new Error('Failed to fetch user data');
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setAuthState({
-            user: null,
-            loading: false,
-            error: (error as Error).message
-          });
-        }
-      } else {
-        setAuthState({
-          user: null,
-          loading: false,
-          error: null
-        });
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+}, []);
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log("🔐 AUTH CONTEXT: Login attempt for email:", email);
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const result = await signInUser(email, password);
       
       if (result.error) {
+        console.log("🔐 AUTH CONTEXT: Login failed:", result.error);
         throw new Error(result.error);
       }
-      // Fetch user role and data from Firestore
-      const userData = await fetchUserData(result.user.uid);
       
-      if (userData) {
-        setAuthState({
-          user: {
-            ...userData,
-            email: userData.email || result.user.email || ''
-          },
-          loading: false,
-          error: null
-        });
-      } else {
-        throw new Error('Failed to fetch user data');
-      }
+      console.log("🔐 AUTH CONTEXT: Login successful, Firebase user:", result.user);
+      // AuthContext only handles Firebase Auth success
+      // UserContext will handle Firestore user data
+      
     } catch (error: any) {
+      console.log("🔐 AUTH CONTEXT: Login error:", error.message);
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 
@@ -135,33 +100,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Added handleRegister function
   const handleRegister = async (name: string, email: string, password: string) => {
     try {
+      console.log("🔐 AUTH CONTEXT: Register attempt for:", email);
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const result = await registerUser(name, email, password);
       
       if (result.error) {
+        console.log("🔐 AUTH CONTEXT: Register failed:", result.error);
         throw new Error(result.error);
       }
       
-      // The user document is already created in the registerUser function
-      // Fetch user data from Firestore
-      const userData = await fetchUserData(result.user.uid);
+      console.log("🔐 AUTH CONTEXT: Register successful");
+      // AuthContext only handles Firebase Auth success
+      // UserContext will handle Firestore user data
       
-      if (userData) {
-        setAuthState({
-          user: {
-            ...userData,
-            email: userData.email || result.user.email || ''
-          },
-          loading: false,
-          error: null
-        });
-      } else {
-        throw new Error('Failed to fetch user data');
-      }
     } catch (error: any) {
+      console.log("🔐 AUTH CONTEXT: Register error:", error.message);
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 
@@ -173,19 +128,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleLogout = async () => {
     try {
+      console.log("🔐 AUTH CONTEXT: Logout attempt");
       setAuthState(prev => ({ ...prev, loading: true }));
       const result = await signOutUser();
       
       if (result.error) {
+        console.log("🔐 AUTH CONTEXT: Logout failed:", result.error);
         throw new Error(result.error);
       }
       
+      console.log("🔐 AUTH CONTEXT: Logout successful");
       setAuthState({
         user: null,
         loading: false,
         error: null
       });
     } catch (error: any) {
+      console.log("🔐 AUTH CONTEXT: Logout error:", error.message);
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 
@@ -199,7 +158,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     authState,
     login: handleLogin,
     logout: handleLogout,
-    register: handleRegister // Added register function to context value
+    register: handleRegister
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

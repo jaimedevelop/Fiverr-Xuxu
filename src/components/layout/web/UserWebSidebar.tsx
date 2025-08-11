@@ -1,21 +1,23 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useUser } from '../../../contexts/UserContext';
 import {
-  Menu,
+  Search,
   ShoppingBag,
   User,
   LogOut
 } from 'lucide-react';
-import CartIcon from '../../../components/user/cart/CartIcon';
-import CartSidebar from '../../../components/user/cart/CartSidebar';
+// Temporarily disabled cart functionality
+// import CartIcon from '../../../components/user/cart/CartIcon';
+// import CartSidebar from '../../../components/user/cart/CartSidebar';
 
 const UserWebSidebar: React.FC = () => {
-  const { authState, logout } = useAuth();
-  const { user } = authState;
+  const { logout } = useAuth();
+  const { user: firestoreUser } = useUser();
   
   const userNavItems = [
-    { path: '/usuario/menu', label: 'Menú', icon: Menu },
+    { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: ShoppingBag },
     { path: '/usuario/favoritos', label: 'Favoritos', icon: User },
   ];
@@ -27,7 +29,7 @@ const UserWebSidebar: React.FC = () => {
           <h1 className="text-xl font-bold text-gray-900">
             Xuxu - Postres
           </h1>
-          <p className="text-sm text-gray-600 mt-1">Bienvenido, {user?.email}</p>
+          <p className="text-sm text-gray-600 mt-1">Bienvenido, {firestoreUser?.email}</p>
         </div>
         
         <nav className="flex-1 p-4">
@@ -50,13 +52,15 @@ const UserWebSidebar: React.FC = () => {
               </li>
             ))}
             
-            {/* Cart Icon */}
+            {/* Temporarily disabled cart functionality */}
+            {/* 
             <li>
               <div className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
                 <CartIcon />
                 <span className="ml-3">Carrito</span>
               </div>
             </li>
+            */}
           </ul>
         </nav>
         
@@ -71,8 +75,8 @@ const UserWebSidebar: React.FC = () => {
         </div>
       </aside>
       
-      {/* Cart Sidebar */}
-      <CartSidebar />
+      {/* Temporarily disabled cart sidebar */}
+      {/* <CartSidebar /> */}
     </>
   );
 };

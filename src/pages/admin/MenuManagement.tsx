@@ -1,49 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import React, { useState } from 'react';
+import { usePastries } from '../../hooks/usePastries';
 import MenuList from '../../components/admin/menuManagement/MenuList';
 import MenuItemForm from '../../components/admin/menuManagement/MenuItemForm';
 import CategoryManager from '../../components/admin/menuManagement/CategoryManager';
 import MenuFilters from '../../components/admin/menuManagement/MenuFilters';
-import { Plus, Settings, Grid, List } from 'lucide-react';
+import { Plus, Settings, Grid, List, AlertCircle } from 'lucide-react';
 
 const MenuManagement = () => {
-  const [pastries, setPastries] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [filteredPastries, setFilteredPastries] = useState([]);
+  const { 
+    pastries,           // Filtered and sorted pastries
+    allPastries,        // Raw pastries for statistics
+    categories, 
+    loading, 
+    error,
+    filters,
+    setFilters,
+    sort,
+    setSort
+  } = usePastries();
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [loading, setLoading] = useState(true);
-
-  // Load pastries from Firebase
-  useEffect(() => {
-    const q = query(collection(db, 'pastries'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const pastriesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setPastries(pastriesData);
-      setFilteredPastries(pastriesData);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Load categories from Firebase
-  useEffect(() => {
-    const q = query(collection(db, 'categories'), orderBy('name'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const categoriesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setCategories(categoriesData);
-    });
-    return () => unsubscribe();
-  }, []);
+  const [viewMode, setViewMode] = useState('grid');
 
   const handleAddNew = () => {
     setEditingItem(null);
@@ -60,9 +39,22 @@ const MenuManagement = () => {
     setEditingItem(null);
   };
 
-  const handleFilter = (filtered) => {
-    setFilteredPastries(filtered);
-  };
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle size={24} className="text-red-600" />
+            <div>
+              <h2 className="text-lg font-semibold text-red-800">Error</h2>
+              <p className="text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -127,26 +119,28 @@ const MenuManagement = () => {
       
       {/* Filters */}
       <MenuFilters
-        pastries={pastries}
         categories={categories}
-        onFilter={handleFilter}
+        filters={filters}
+        sort={sort}
+        onFiltersChange={setFilters}
+        onSortChange={setSort}
       />
       
-      {/* Statistics */}
+      {/* Statistics - Use allPastries for accurate stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg border p-4">
-          <div className="text-2xl font-bold text-blue-600">{pastries.length}</div>
+          <div className="text-2xl font-bold text-blue-600">{allPastries.length}</div>
           <div className="text-sm text-gray-600">Total de Postres</div>
         </div>
         <div className="bg-white rounded-lg border p-4">
           <div className="text-2xl font-bold text-green-600">
-            {pastries.filter(p => p.available).length}
+            {allPastries.filter(p => p.available).length}
           </div>
           <div className="text-sm text-gray-600">Disponibles</div>
         </div>
         <div className="bg-white rounded-lg border p-4">
           <div className="text-2xl font-bold text-red-600">
-            {pastries.filter(p => !p.available).length}
+            {allPastries.filter(p => !p.available).length}
           </div>
           <div className="text-sm text-gray-600">No Disponibles</div>
         </div>
@@ -156,9 +150,22 @@ const MenuManagement = () => {
         </div>
       </div>
       
-      {/* Menu List */}
+      {/* Results Info */}
+      {allPastries.length !== pastries.length && (
+        <div className="mb-4 text-sm text-gray-600">
+          Mostrando {pastries.length} de {allPastries.length} postres
+          {(filters.search || filters.category) && (
+            <span className="ml-2 text-blue-600">
+              (filtrado{filters.search && ` por "${filters.search}"`}
+              {filters.category && ` en categoría seleccionada`})
+            </span>
+          )}
+        </div>
+      )}
+      
+      {/* Menu List - Use filtered pastries */}
       <MenuList
-        pastries={filteredPastries}
+        pastries={pastries}
         categories={categories}
         viewMode={viewMode}
         onEdit={handleEdit}

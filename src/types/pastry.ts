@@ -1,3 +1,4 @@
+// src/types/pastry.ts
 export interface Pastry {
   id: string;
   name: string;
@@ -9,6 +10,7 @@ export interface Pastry {
   availabilityMode: 'manual' | 'inventory';
   inventory: number;
   tags: string[];
+  businessId: string; 
   createdAt: Date;
   updatedAt: Date;
 }

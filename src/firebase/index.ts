@@ -1,7 +1,6 @@
-// src/firebase/index.js
+// src/firebase/index.ts
 // Main Firebase exports for easy importing
 export { auth, db, storage, functions } from './config';
-
 // Auth functions
 export {
   registerUser,
@@ -11,7 +10,6 @@ export {
   getUserProfile,
   onAuthStateChange
 } from './auth';
-
 // Database functions
 export {
   addPastry,
@@ -27,7 +25,6 @@ export {
   addToFavorites,
   removeFromFavorites
 } from './database';
-
 // Storage functions
 export {
   uploadImage,

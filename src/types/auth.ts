@@ -1,12 +1,16 @@
-export interface AuthUser {
-  uid: string;
-  email: string;
-  role: 'user' | 'admin';
-  businessId?: string;
-}
+// src/types/auth.ts
+import User from './user';
 
-export interface AuthState {
-  user: AuthUser | null;
+export default interface AuthState {
+  user: User | null;
   loading: boolean;
   error: string | null;
+}
+
+export interface AuthResult {
+  user: {
+    uid: string;
+    email: string | null;
+  };
+  error?: string;
 }

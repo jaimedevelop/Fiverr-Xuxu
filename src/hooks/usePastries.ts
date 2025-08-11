@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+// src/hooks/usePastries.ts - Modified to support optional businessId
+import { useState, useEffect, useMemo } from 'react';
+import { collection, query, orderBy, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { Pastry, FilterOptions, SortOption } from '../types/pastry';
 import { Category } from '../types/category';
+import { useUser } from '../contexts/UserContext';
+import { useAuth } from '../contexts/AuthContext';
 
-export const usePastries = () => {
-  const [pastries, setPastries] = useState<Pastry[]>([]);
+interface UsePastriesOptions {
+  businessId?: string; // NEW: Optional businessId to filter by specific business
+}
+
+export const usePastries = (options: UsePastriesOptions = {}) => {
+  const { user } = useUser();
+  const { logout } = useAuth();
+  const [allPastries, setAllPastries] = useState<Pastry[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,73 +24,149 @@ export const usePastries = () => {
   });
   const [sort, setSort] = useState<SortOption>('newest');
 
-  // Fetch data from Firebase
+  // Fetch data from Firebase with business filtering
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch categories
-        const categoriesQuery = query(collection(db, 'categories'), orderBy('sortOrder'));
-        const categoriesSnapshot = await getDocs(categoriesQuery);
-        const categoriesData = categoriesSnapshot.docs.map(doc => ({
+    console.log('🥐 usePastries: Setting up data fetch', {
+      hasUser: !!user,
+      userRole: user?.role,
+      userBusinessId: user?.businessId,
+      optionsBusinessId: options.businessId
+    });
+
+    // Don't fetch if we don't have user data yet (unless we have a specific businessId)
+    if (!user && !options.businessId) {
+      console.log('🥐 usePastries: No user data and no businessId, waiting...');
+      return;
+    }
+
+    // Check if admin user has businessId (only if not using specific businessId)
+    if (!options.businessId && user?.role === 'admin' && !user.businessId) {
+      console.error('❌ usePastries: Admin user without businessId detected');
+      setError('Error: Cuenta de administrador sin negocio asignado. Cerrando sesión...');
+      setTimeout(() => {
+        logout();
+      }, 2000);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Set up categories listener (same for all users)
+    const categoriesQuery = query(collection(db, 'categories'), orderBy('name'));
+    const unsubscribeCategories = onSnapshot(
+      categoriesQuery,
+      (snapshot) => {
+        const categoriesData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         })) as Category[];
+        console.log('📂 usePastries: Categories loaded:', categoriesData.length);
         setCategories(categoriesData);
+      },
+      (error) => {
+        console.error('❌ usePastries: Categories error:', error);
+        setError('Error al cargar las categorías');
+      }
+    );
 
-        // Fetch pastries
-        const pastriesSnapshot = await getDocs(collection(db, 'pastries'));
-        const pastriesData = pastriesSnapshot.docs.map(doc => ({
+    // Set up pastries listener based on options and user role
+    let pastriesQuery;
+    
+    if (options.businessId) {
+      // Specific business pastries (for business menu page)
+      console.log('🏪 usePastries: Setting up query for specific businessId:', options.businessId);
+      pastriesQuery = query(
+        collection(db, 'pastries'),
+        where('businessId', '==', options.businessId),
+        orderBy('createdAt', 'desc')
+      );
+    } else if (user?.role === 'admin') {
+      // Admin users: only their business pastries
+      console.log('👨‍💼 usePastries: Setting up admin query for businessId:', user.businessId);
+      pastriesQuery = query(
+        collection(db, 'pastries'),
+        where('businessId', '==', user.businessId),
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      // Regular users: all pastries (marketplace view)
+      console.log('👤 usePastries: Setting up user query for all pastries');
+      pastriesQuery = query(
+        collection(db, 'pastries'),
+        orderBy('createdAt', 'desc')
+      );
+    }
+
+    const unsubscribePastries = onSnapshot(
+      pastriesQuery,
+      (snapshot) => {
+        const pastriesData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date(),
           updatedAt: doc.data().updatedAt?.toDate() || new Date(),
         })) as Pastry[];
-        setPastries(pastriesData);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Error al cargar los datos. Por favor, inténtelo de nuevo.');
-      } finally {
+        
+        console.log(`🥐 usePastries: Pastries loaded:`, {
+          count: pastriesData.length,
+          businessId: options.businessId || (user?.role === 'admin' ? user.businessId : 'all')
+        });
+        
+        setAllPastries(pastriesData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('❌ usePastries: Pastries error:', error);
+        setError('Error al cargar los postres');
         setLoading(false);
       }
+    );
+
+    // Cleanup function
+    return () => {
+      console.log('🧹 usePastries: Cleaning up listeners');
+      unsubscribeCategories();
+      unsubscribePastries();
     };
+  }, [user, logout, options.businessId]);
 
-    fetchData();
-  }, []);
-
-  // Apply filters and sorting
-  const filteredPastries = pastries
-    .filter(pastry => {
-      // Category filter
-      if (filters.category && pastry.categoryId !== filters.category) {
-        return false;
-      }
-
-      // Search filter (priority: name > tag > description)
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        
-        // Check name
+  // Apply filters and sorting using useMemo for performance
+  const filteredAndSortedPastries = useMemo(() => {
+    console.log('🔍 usePastries: Applying filters and sorting', { filters, sort });
+    
+    let filtered = [...allPastries];
+    
+    // Apply search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(pastry => {
+        // Check name (highest priority)
         if (pastry.name.toLowerCase().includes(searchLower)) {
           return true;
         }
         
         // Check tags
-        if (pastry.tags.some(tag => tag.toLowerCase().includes(searchLower))) {
+        if (pastry.tags?.some(tag => tag.toLowerCase().includes(searchLower))) {
           return true;
         }
         
-        // Check description
+        // Check description (lowest priority)
         if (pastry.description.toLowerCase().includes(searchLower)) {
           return true;
         }
         
         return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
+      });
+    }
+    
+    // Apply category filter
+    if (filters.category) {
+      filtered = filtered.filter(pastry => pastry.categoryId === filters.category);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
       switch (sort) {
         case 'oldest':
           return a.createdAt.getTime() - b.createdAt.getTime();
@@ -99,9 +184,14 @@ export const usePastries = () => {
           return 0;
       }
     });
+    
+    console.log(`✅ usePastries: Filtered ${allPastries.length} → ${filtered.length} pastries`);
+    return filtered;
+  }, [allPastries, filters, sort]);
 
   return {
-    pastries: filteredPastries,
+    pastries: filteredAndSortedPastries,
+    allPastries, // Expose raw data for statistics
     categories,
     loading,
     error,

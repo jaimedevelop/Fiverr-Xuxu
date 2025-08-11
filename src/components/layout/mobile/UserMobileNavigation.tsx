@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
-  Compass,
+  Search,
   Package,
   User,
   LogOut
@@ -14,7 +14,7 @@ const UserMobileNavigation: React.FC = () => {
   const { logout } = useAuth();
 
   const userNavItems = [
-    { path: '/usuario/menu', label: 'Menú', icon: Compass },
+    { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: Package },
     { path: '/usuario/favoritos', label: 'Favoritos', icon: User },
   ];
