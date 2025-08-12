@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { X, Heart, ShoppingCart, Clock } from 'lucide-react';
+import { X, Heart, ShoppingCart, Clock, Plus, Minus } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
-// Temporarily disabled cart functionality
-// import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '../../../contexts/CartContext';
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
 import FavoriteButton from './FavoriteButton';
@@ -15,23 +14,54 @@ interface PastryDetailModalProps {
 }
 
 const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
-  // Temporarily disabled cart functionality
-  // const { addItem } = useCart();
+  const { addItem, items, updateQuantity, removeItem } = useCart();
   const [showPreOrderModal, setShowPreOrderModal] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState('');
 
   if (!pastry) return null;
 
+  // Check if this pastry is already in cart and get its quantity
+  const cartItem = items.find(item => 
+    item.pastryId === pastry.id && item.businessId === pastry.businessId
+  );
+  const currentCartQuantity = cartItem?.quantity || 0;
+
   const handleAddToCart = () => {
-    // Temporarily disabled - show alert instead
-    alert('Funcionalidad de carrito temporalmente deshabilitada. ¡Próximamente disponible!');
+    if (!pastry.available) return;
     
-    // Original code (will be uncommented later):
-    // addItem({
-    //   pastryId: pastry.id,
-    //   name: pastry.name,
-    //   price: pastry.price,
-    //   quantity: 1
-    // });
+    addItem({
+      pastryId: pastry.id,
+      businessId: pastry.businessId,
+      name: pastry.name,
+      price: pastry.price,
+      quantity: quantity,
+      notes: notes.trim() || undefined
+    });
+
+    // Reset form after adding
+    setQuantity(1);
+    setNotes('');
+    
+    // Show success feedback
+    alert(`${quantity} ${pastry.name} añadido${quantity > 1 ? 's' : ''} al carrito!`);
+
+  };
+
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1 && newQuantity <= 99) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const handleUpdateCartQuantity = (newQuantity: number) => {
+    if (!cartItem) return;
+    
+    if (newQuantity <= 0) {
+      removeItem(cartItem.id);
+    } else {
+      updateQuantity(cartItem.id, newQuantity);
+    }
   };
 
   const handlePreOrder = () => {
@@ -39,8 +69,14 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
   };
 
   const handlePreOrderComplete = () => {
-    // This would typically show a success message
     console.log('Pre-order completed successfully');
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+    }).format(amount);
   };
 
   return (
@@ -120,6 +156,84 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
                     </div>
                   </div>
                 )}
+
+                {/* Cart Section */}
+                {pastry.available && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Añadir al Carrito</h3>
+                    
+                    {/* Quantity Selector */}
+                    <div className="flex items-center gap-4 mb-4">
+                      <label className="text-sm font-medium text-gray-700">Cantidad:</label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleQuantityChange(quantity - 1)}
+                          className="p-1 text-gray-500 hover:text-gray-700 border rounded"
+                          disabled={quantity <= 1}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="w-12 text-center font-medium">{quantity}</span>
+                        <button
+                          onClick={() => handleQuantityChange(quantity + 1)}
+                          className="p-1 text-gray-500 hover:text-gray-700 border rounded"
+                          disabled={quantity >= 99}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Total: {formatCurrency(pastry.price * quantity)}
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Notas especiales (opcional):
+                      </label>
+                      <textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ej: Sin azúcar, decoración especial..."
+                        rows={2}
+                        maxLength={200}
+                      />
+                      <div className="text-xs text-gray-400 mt-1">
+                        {notes.length}/200 caracteres
+                      </div>
+                    </div>
+
+                    {/* Current Cart Status */}
+                    {currentCartQuantity > 0 && (
+                      <div className="mb-4 p-3 bg-blue-50 rounded-md">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-blue-700">
+                            Ya tienes {currentCartQuantity} en el carrito
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleUpdateCartQuantity(currentCartQuantity - 1)}
+                              className="p-1 text-blue-600 hover:text-blue-800"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="text-sm font-medium text-blue-700">
+                              {currentCartQuantity}
+                            </span>
+                            <button
+                              onClick={() => handleUpdateCartQuantity(currentCartQuantity + 1)}
+                              className="p-1 text-blue-600 hover:text-blue-800"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
                   <button
@@ -132,7 +246,10 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
                     }`}
                   >
                     <ShoppingCart size={18} />
-                    {pastry.available ? 'Añadir al Carrito' : 'No Disponible'}
+                    {pastry.available ? 
+                      `Añadir ${quantity > 1 ? `${quantity} ` : ''}al Carrito` : 
+                      'No Disponible'
+                    }
                   </button>
                   
                   {pastry.available && (
@@ -141,7 +258,7 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
                       className="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <Clock size={18} />
-                      Pre-order
+                      Pre-ordenar
                     </button>
                   )}
                 </div>

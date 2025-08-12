@@ -1,4 +1,4 @@
-// src/firebase/database.ts
+// src/firebase/database.ts - FIXED VERSION
 import {
   collection,
   doc,
@@ -63,7 +63,7 @@ export const getPastries = async (vendorId: string | null = null): Promise<DataR
     let q: Query = collection(db, 'pastries');
     
     if (vendorId) {
-      q = query(q, where('vendorId', '==', vendorId));
+      q = query(q, where('businessId', '==', vendorId)); // FIXED: Use businessId instead of vendorId
     }
     
     q = query(q, where('available', '==', true), orderBy('createdAt', 'desc'));
@@ -102,29 +102,48 @@ export const deletePastry = async (pastryId: string): Promise<SimpleResult> => {
   }
 };
 
-// ORDERS COLLECTION
+// ORDERS COLLECTION - FIXED VERSION WITH PICKUP SUPPORT
 export const createOrder = async (orderData: DocumentData): Promise<DocumentResult> => {
   try {
-    const docRef = await addDoc(collection(db, 'orders'), {
+    // Ensure we have all required fields for the new order structure
+    const completeOrderData = {
       ...orderData,
-      status: 'received',
+      status: orderData.status || 'pending',
+      fulfillmentType: orderData.fulfillmentType || 'delivery', // Default to delivery if not specified
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
-    });
+    };
+
+    // Validate required fields based on fulfillment type
+    if (completeOrderData.fulfillmentType === 'delivery' && !completeOrderData.deliveryAddress) {
+      throw new Error('Delivery address is required for delivery orders');
+    }
+
+    if (completeOrderData.fulfillmentType === 'pickup' && !completeOrderData.pickupTime) {
+      throw new Error('Pickup time is required for pickup orders');
+    }
+
+    const docRef = await addDoc(collection(db, 'orders'), completeOrderData);
     return { id: docRef.id, error: null };
   } catch (error: any) {
     return { id: null, error: error.message };
   }
 };
 
-export const getOrders = async (userId: string, role: string = 'customer'): Promise<DataResult<DocumentData>> => {
+// FIXED: Updated getOrders function to handle new order structure and use correct field names
+export const getOrders = async (userId: string, role: string = 'customer', filters?: any): Promise<DataResult<DocumentData>> => {
   try {
     let q: Query = collection(db, 'orders');
     
     if (role === 'customer') {
-      q = query(q, where('customerId', '==', userId));
+      q = query(q, where('userId', '==', userId)); // FIXED: Use userId consistently
     } else if (role === 'admin') {
-      q = query(q, where('vendorId', '==', userId));
+      q = query(q, where('businessId', '==', userId)); // FIXED: Use businessId consistently
+    }
+
+    // Add fulfillment type filter if specified
+    if (filters?.fulfillmentType) {
+      q = query(q, where('fulfillmentType', '==', filters.fulfillmentType));
     }
     
     q = query(q, orderBy('createdAt', 'desc'));
@@ -132,7 +151,23 @@ export const getOrders = async (userId: string, role: string = 'customer'): Prom
     const querySnapshot = await getDocs(q);
     const orders: DocumentData[] = [];
     querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
-      orders.push({ id: doc.id, ...doc.data() });
+      const orderData = doc.data();
+      
+      // Convert Firestore timestamps to Date objects
+      if (orderData.pickupTime?.datetime && orderData.pickupTime.datetime.toDate) {
+        orderData.pickupTime.datetime = orderData.pickupTime.datetime.toDate();
+      }
+      if (orderData.estimatedDeliveryTime && orderData.estimatedDeliveryTime.toDate) {
+        orderData.estimatedDeliveryTime = orderData.estimatedDeliveryTime.toDate();
+      }
+      if (orderData.createdAt && orderData.createdAt.toDate) {
+        orderData.createdAt = orderData.createdAt.toDate();
+      }
+      if (orderData.updatedAt && orderData.updatedAt.toDate) {
+        orderData.updatedAt = orderData.updatedAt.toDate();
+      }
+      
+      orders.push({ id: doc.id, ...orderData });
     });
     
     return { data: orders, error: null };
@@ -160,14 +195,19 @@ export const updateOrderStatus = async (orderId: string, status: string, notes: 
   }
 };
 
-// REAL-TIME LISTENERS
-export const listenToOrders = (userId: string, role: string, callback: (orders: DocumentData[]) => void): Unsubscribe => {
+// FIXED: Single listenToOrders function with proper field names and pickup support
+export const listenToOrders = (userId: string, role: string, callback: (orders: DocumentData[]) => void, filters?: any): Unsubscribe => {
   let q: Query = collection(db, 'orders');
   
   if (role === 'customer') {
-    q = query(q, where('customerId', '==', userId));
+    q = query(q, where('userId', '==', userId)); // FIXED: Use userId consistently
   } else if (role === 'admin') {
-    q = query(q, where('vendorId', '==', userId));
+    q = query(q, where('businessId', '==', userId)); // FIXED: Use businessId consistently
+  }
+
+  // Add fulfillment type filter if specified
+  if (filters?.fulfillmentType) {
+    q = query(q, where('fulfillmentType', '==', filters.fulfillmentType));
   }
   
   q = query(q, orderBy('createdAt', 'desc'));
@@ -175,7 +215,23 @@ export const listenToOrders = (userId: string, role: string, callback: (orders: 
   return onSnapshot(q, (querySnapshot) => {
     const orders: DocumentData[] = [];
     querySnapshot.forEach((doc: QueryDocumentSnapshot) => {
-      orders.push({ id: doc.id, ...doc.data() });
+      const orderData = doc.data();
+      
+      // Convert Firestore timestamps to Date objects
+      if (orderData.pickupTime?.datetime && orderData.pickupTime.datetime.toDate) {
+        orderData.pickupTime.datetime = orderData.pickupTime.datetime.toDate();
+      }
+      if (orderData.estimatedDeliveryTime && orderData.estimatedDeliveryTime.toDate) {
+        orderData.estimatedDeliveryTime = orderData.estimatedDeliveryTime.toDate();
+      }
+      if (orderData.createdAt && orderData.createdAt.toDate) {
+        orderData.createdAt = orderData.createdAt.toDate();
+      }
+      if (orderData.updatedAt && orderData.updatedAt.toDate) {
+        orderData.updatedAt = orderData.updatedAt.toDate();
+      }
+      
+      orders.push({ id: doc.id, ...orderData });
     });
     callback(orders);
   });
@@ -185,7 +241,7 @@ export const listenToPastries = (vendorId: string | null, callback: (pastries: D
   let q: Query = collection(db, 'pastries');
   
   if (vendorId) {
-    q = query(q, where('vendorId', '==', vendorId));
+    q = query(q, where('businessId', '==', vendorId)); // FIXED: Use businessId instead of vendorId
   }
   
   q = query(q, orderBy('createdAt', 'desc'));

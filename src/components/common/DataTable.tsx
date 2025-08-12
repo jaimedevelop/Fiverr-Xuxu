@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Search, Download } from 'lucide-react';
 
 interface TableColumn<T> {
-  key: keyof T;
+  key: keyof T | string; // Allow string keys for custom columns like 'actions'
   title: string;
   sortable?: boolean;
   render?: (value: any, item: T) => React.ReactNode;
@@ -37,14 +37,25 @@ function DataTable<T>({
   className = '',
 }: DataTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [sortConfig, setSortConfig] = useState<{ key: keyof T | null; direction: 'asc' | 'desc' }>({
+  const [sortConfig, setSortConfig] = useState<{ key: keyof T | string | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc',
   });
   const [filterValue, setFilterValue] = useState('');
 
+  // Safe data access with fallback
+  const safeData = data || [];
+
+  console.log('📊 DataTable Debug:', {
+    dataLength: safeData.length,
+    columns: columns.map(col => col.key),
+    filterValue,
+    currentPage,
+    sortConfig
+  });
+
   // Handle sorting
-  const handleSort = (key: keyof T) => {
+  const handleSort = (key: keyof T | string) => {
     if (!sorting) return;
     
     let direction: 'asc' | 'desc' = 'asc';
@@ -54,13 +65,23 @@ function DataTable<T>({
     setSortConfig({ key, direction });
   };
 
-  // Sort data
+  // Sort data with null safety
   const sortedData = React.useMemo(() => {
-    if (!sortConfig.key) return data;
+    if (!sortConfig.key) return safeData;
 
-    return [...data].sort((a, b) => {
+    return [...safeData].sort((a, b) => {
+      // Skip sorting for custom columns like 'actions'
+      if (typeof sortConfig.key === 'string' && !(sortConfig.key in a)) {
+        return 0;
+      }
+
       const aValue = a[sortConfig.key as keyof T];
       const bValue = b[sortConfig.key as keyof T];
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortConfig.direction === 'asc' ? 1 : -1;
+      if (bValue == null) return sortConfig.direction === 'asc' ? -1 : 1;
 
       if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
@@ -70,17 +91,28 @@ function DataTable<T>({
       }
       return 0;
     });
-  }, [data, sortConfig]);
+  }, [safeData, sortConfig]);
 
-  // Filter data
+  // Filter data with null safety
   const filteredData = React.useMemo(() => {
     if (!filterValue) return sortedData;
 
     return sortedData.filter((item) => {
       return columns.some((column) => {
-        const value = item[column.key];
+        // Skip custom columns like 'actions' for filtering
+        if (typeof column.key === 'string' && !(column.key in item)) {
+          return false;
+        }
+        
+        const value = item[column.key as keyof T];
         if (value === null || value === undefined) return false;
-        return value.toString().toLowerCase().includes(filterValue.toLowerCase());
+        
+        try {
+          return value.toString().toLowerCase().includes(filterValue.toLowerCase());
+        } catch (error) {
+          console.warn('DataTable: Error converting value to string:', value, error);
+          return false;
+        }
       });
     });
   }, [sortedData, filterValue, columns]);
@@ -96,28 +128,50 @@ function DataTable<T>({
   const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const handleExport = () => {
-    // Create CSV content
-    const headers = columns.map((col) => col.title).join(',');
-    const rows = filteredData.map((item) =>
-      columns
-        .map((col) => {
-          const value = col.render ? col.render(item[col.key], item) : item[col.key];
-          return `"${value}"`;
-        })
-        .join(',')
-    );
-    const csvContent = [headers, ...rows].join('\n');
+    try {
+      // Create CSV content with null safety
+      const headers = columns
+        .filter(col => typeof col.key === 'string' ? col.key in (filteredData[0] || {}) : true)
+        .map((col) => col.title)
+        .join(',');
+      
+      const rows = filteredData.map((item) =>
+        columns
+          .filter(col => typeof col.key === 'string' ? col.key in item : true)
+          .map((col) => {
+            try {
+              // Skip custom render functions for export
+              if (col.render && typeof col.key === 'string' && !(col.key in item)) {
+                return '""';
+              }
+              
+              const value = item[col.key as keyof T] ?? '';
+              const cleanValue = String(value).replace(/"/g, '""').replace(/\n/g, ' ');
+              return `"${cleanValue}"`;
+            } catch (error) {
+              console.warn('DataTable: Error processing value for export:', error);
+              return '""';
+            }
+          })
+          .join(',')
+      );
+      const csvContent = [headers, ...rows].join('\n');
 
-    // Create download link
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'data_export.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `data_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('DataTable: Error exporting data:', error);
+      alert('Error al exportar los datos. Por favor, inténtalo de nuevo.');
+    }
   };
 
   // Render sort indicator
@@ -132,10 +186,40 @@ function DataTable<T>({
     );
   };
 
+  // Safe value renderer - FIXED to handle custom columns properly
+  const renderCellValue = (column: TableColumn<T>, row: T, rowIndex: number) => {
+    try {
+      // If column has a render function, use it
+      if (column.render) {
+        // Pass the value (or row for custom columns) and the full row
+        const isCustomColumn = typeof column.key === 'string' && !(column.key in row);
+        const value = isCustomColumn ? row : row[column.key as keyof T];
+        return column.render(value, row);
+      }
+      
+      // For columns without render functions
+      // Check if this is a custom column (not in the data object)
+      if (typeof column.key === 'string' && !(column.key in row)) {
+        return <span className="text-gray-400">N/A</span>;
+      }
+      
+      const value = row[column.key as keyof T];
+      if (value === null || value === undefined) {
+        return <span className="text-gray-400">N/A</span>;
+      }
+      
+      return String(value);
+    } catch (error) {
+      console.error(`DataTable: Error rendering cell for column ${String(column.key)}, row ${rowIndex}:`, error);
+      return <span className="text-red-400">Error</span>;
+    }
+  };
+
   if (loading) {
     return (
       <div className={`flex justify-center items-center py-12 ${className}`}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <span className="ml-2 text-gray-600">Cargando...</span>
       </div>
     );
   }
@@ -153,7 +237,7 @@ function DataTable<T>({
               <input
                 type="text"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Search..."
+                placeholder="Buscar..."
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
               />
@@ -162,10 +246,11 @@ function DataTable<T>({
           {exportable && (
             <button
               onClick={handleExport}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={filteredData.length === 0}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="mr-2 h-4 w-4" />
-              Export
+              Exportar
             </button>
           )}
         </div>
@@ -176,9 +261,9 @@ function DataTable<T>({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <th
-                  key={String(column.key)}
+                  key={`${String(column.key)}-${index}`}
                   scope="col"
                   className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
                     column.sortable && sorting ? 'cursor-pointer hover:bg-gray-100' : ''
@@ -207,9 +292,12 @@ function DataTable<T>({
                   className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}`}
                   onClick={() => onRowClick && onRowClick(row)}
                 >
-                  {columns.map((column) => (
-                    <td key={String(column.key)} className={`px-6 py-4 whitespace-nowrap text-sm ${column.className || ''}`}>
-                      {column.render ? column.render(row[column.key], row) : String(row[column.key] || '')}
+                  {columns.map((column, columnIndex) => (
+                    <td 
+                      key={`${String(column.key)}-${columnIndex}`}
+                      className={`px-6 py-4 whitespace-nowrap text-sm ${column.className || ''}`}
+                    >
+                      {renderCellValue(column, row, rowIndex)}
                     </td>
                   ))}
                 </tr>
@@ -226,26 +314,26 @@ function DataTable<T>({
             <button
               onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
               disabled={currentPage === 0}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              Anterior
             </button>
             <button
               onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
               disabled={currentPage === totalPages - 1}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              Siguiente
             </button>
-          </div>
+            </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{currentPage * pageSize + 1}</span> to{' '}
+                Mostrando <span className="font-medium">{currentPage * pageSize + 1}</span> a{' '}
                 <span className="font-medium">
                   {Math.min((currentPage + 1) * pageSize, filteredData.length)}
                 </span>{' '}
-                of <span className="font-medium">{filteredData.length}</span> results
+                de <span className="font-medium">{filteredData.length}</span> resultados
               </p>
             </div>
             <div>
@@ -253,9 +341,9 @@ function DataTable<T>({
                 <button
                   onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                   disabled={currentPage === 0}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="sr-only">Previous</span>
+                  <span className="sr-only">Anterior</span>
                   <ChevronDown className="h-5 w-5 transform rotate-90" />
                 </button>
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -287,9 +375,9 @@ function DataTable<T>({
                 <button
                   onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
                   disabled={currentPage === totalPages - 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="sr-only">Next</span>
+                  <span className="sr-only">Siguiente</span>
                   <ChevronDown className="h-5 w-5 transform -rotate-90" />
                 </button>
               </nav>

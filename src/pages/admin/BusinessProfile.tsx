@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import FormError from '../../components/common/FormError';
 import BusinessProfileComponent from '../../components/admin/business/BusinessProfile';
 import { Business, OperatingHours } from '../../types/business';
+import { Building2, RefreshCw, AlertTriangle, Users, Settings, Shield } from 'lucide-react';
 
 const BusinessProfile: React.FC = () => {
   console.log('🚀 BusinessProfile: Component rendering');
@@ -30,11 +31,27 @@ const BusinessProfile: React.FC = () => {
   } catch (error) {
     console.error('❌ BusinessProfile: useBusiness hook failed:', error);
     return (
-      <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>Context Error:</strong> BusinessProvider is not wrapping this component.
-          <p className="mt-2">Make sure App.tsx includes &lt;BusinessProvider&gt; around your routes.</p>
-          <pre className="mt-2 text-sm">{error.toString()}</pre>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-red-800">Error de Contexto</h2>
+                <p className="text-red-600">BusinessProvider no está envolviendo este componente.</p>
+              </div>
+            </div>
+            <div className="bg-red-100 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-700 mb-2">
+                Asegúrate de que App.tsx incluya &lt;BusinessProvider&gt; alrededor de tus rutas.
+              </p>
+              <pre className="text-xs text-red-600 bg-red-200 p-2 rounded overflow-auto">
+                {error.toString()}
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -93,10 +110,10 @@ const BusinessProfile: React.FC = () => {
   if (userLoading) {
     console.log('⏳ BusinessProfile: Waiting for user data...');
     return (
-      <div className="flex justify-center items-center py-12">
-        <LoadingSpinner />
-        <div className="ml-4 text-sm text-gray-500">
-          Loading user data...
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600 font-medium">Cargando datos de usuario...</p>
         </div>
       </div>
     );
@@ -106,10 +123,16 @@ const BusinessProfile: React.FC = () => {
   if (!user) {
     console.error('❌ BusinessProfile: No user found');
     return (
-      <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>Authentication Error:</strong> No user session found.
-          <p className="mt-2">Please log in to access the business profile.</p>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 shadow-sm">
+            <div className="text-center">
+              <Shield className="mx-auto h-16 w-16 text-red-500 mb-6" />
+              <h2 className="text-xl font-semibold text-red-800 mb-3">Error de Autenticación</h2>
+              <p className="text-red-600 mb-6">No se encontró una sesión de usuario activa.</p>
+              <p className="text-red-500 text-sm">Por favor, inicia sesión para acceder al perfil del negocio.</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -119,17 +142,26 @@ const BusinessProfile: React.FC = () => {
   if (!user.businessId) {
     console.error('❌ BusinessProfile: User has no businessId');
     return (
-      <div className="p-6">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-          <strong>Configuration Error:</strong> User account is not associated with a business.
-          <p className="mt-2">User ID: {user.uid}</p>
-          <p>Role: {user.role}</p>
-          <button 
-            onClick={handleRefresh}
-            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-          >
-            Retry Loading Business
-          </button>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 shadow-sm">
+            <div className="text-center">
+              <Users className="mx-auto h-16 w-16 text-yellow-500 mb-6" />
+              <h2 className="text-xl font-semibold text-yellow-800 mb-3">Error de Configuración</h2>
+              <p className="text-yellow-700 mb-6">La cuenta de usuario no está asociada a un negocio.</p>
+              <div className="bg-yellow-100 rounded-lg p-4 mb-6 text-sm text-yellow-700">
+                <p><span className="font-medium">User ID:</span> {user.uid}</p>
+                <p><span className="font-medium">Rol:</span> {user.role}</p>
+              </div>
+              <button 
+                onClick={handleRefresh}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2 mx-auto"
+              >
+                <RefreshCw size={18} />
+                Reintentar Cargar Negocio
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -139,23 +171,47 @@ const BusinessProfile: React.FC = () => {
   if (businessError) {
     console.error('❌ BusinessProfile: Business context error:', businessError);
     return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Perfil del Negocio</h1>
-          <p className="text-gray-600">
-            Administra la información y configuración de tu negocio
-          </p>
-        </div>
-        
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>Error Loading Business:</strong> {businessError}
-          <div className="mt-2">
-            <button 
-              onClick={handleRefresh}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            >
-              Try Again
-            </button>
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            
+            {/* Header Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    Perfil del Negocio
+                  </h1>
+                  <p className="text-lg text-gray-600 mt-1">
+                    Administra la información y configuración de tu negocio
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Error Section */}
+            <div className="bg-red-50 border border-red-200 rounded-xl p-8 shadow-sm">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-red-800">Error al Cargar Negocio</h2>
+                  <p className="text-red-600">{businessError}</p>
+                </div>
+              </div>
+              <button 
+                onClick={handleRefresh}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+              >
+                <RefreshCw size={18} />
+                Intentar Nuevamente
+              </button>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -163,87 +219,98 @@ const BusinessProfile: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Perfil del Negocio</h1>
-        <p className="text-gray-600">
-          Administra la información y configuración de tu negocio
-        </p>
-        <div className="mt-2 text-sm text-gray-500">
-          Sesión iniciada como: {user.name || user.email} ({user.email})
-        </div>
-        <div className="mt-1 text-sm text-gray-500">
-          Business ID: {user.businessId}
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          
+          {/* Header Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    Perfil del Negocio
+                  </h1>
+                  <p className="text-lg text-gray-600 mt-1">
+                    Administra la información y configuración de tu negocio
+                  </p>
+                </div>
+              </div>
+              <div className="hidden sm:block">
+                <button 
+                  onClick={handleRefresh}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+                >
+                  <RefreshCw size={18} />
+                  Actualizar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Business Profile Content */}
+          {businessLoading && !business ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-6"></div>
+                <p className="text-gray-600 font-medium mb-2">Cargando información del negocio...</p>
+                <p className="text-sm text-gray-500">Business ID: {user.businessId}</p>
+              </div>
+            </div>
+          ) : business ? (
+            <div className="space-y-8">
+              
+
+              {/* Business Profile Component */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <BusinessProfileComponent
+                  business={business}
+                  onUpdateBusiness={handleUpdateBusiness}
+                  onUpdateOperatingHours={handleUpdateOperatingHours}
+                  loading={businessLoading}
+                  error={businessError}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 shadow-sm">
+              <div className="text-center">
+                <AlertTriangle className="mx-auto h-16 w-16 text-yellow-500 mb-6" />
+                <h2 className="text-xl font-semibold text-yellow-800 mb-3">
+                  Datos del Negocio No Disponibles
+                </h2>
+                <p className="text-yellow-700 mb-6">
+                  La información del negocio no está disponible en este momento.
+                </p>
+                
+                <div className="bg-yellow-100 rounded-lg p-4 mb-6 text-sm text-yellow-700">
+                  <p className="font-medium mb-2">Business ID: {user.businessId}</p>
+                  <p className="mb-2">Esto podría deberse a:</p>
+                  <ul className="text-left space-y-1 max-w-md mx-auto">
+                    <li>• El documento del negocio no existe en Firestore</li>
+                    <li>• Problemas de permisos para acceder a los datos</li>
+                    <li>• El ID del negocio en el perfil de usuario es incorrecto</li>
+                  </ul>
+                </div>
+                
+                <button 
+                  onClick={handleRefresh}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2 mx-auto"
+                >
+                  <RefreshCw size={18} />
+                  Reintentar Cargar Negocio
+                </button>
+              </div>
+            </div>
+          )}
+
+        
+
         </div>
       </div>
-
-      {/* Debug Information Panel (only in development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-semibold mb-2">Debug Information:</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong>User State:</strong>
-              <pre className="text-xs mt-1 overflow-auto">{JSON.stringify({
-                uid: user.uid,
-                email: user.email,
-                role: user.role,
-                businessId: user.businessId
-              }, null, 2)}</pre>
-            </div>
-            <div>
-              <strong>Business State:</strong>
-              <pre className="text-xs mt-1 overflow-auto">{JSON.stringify({
-                hasBusinessData: !!business,
-                businessId: business?.id,
-                storeName: business?.storeName,
-                businessLoading,
-                businessError
-              }, null, 2)}</pre>
-            </div>
-          </div>
-          <button 
-            onClick={handleRefresh}
-            className="mt-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-          >
-            🔄 Refresh Business Data
-          </button>
-        </div>
-      )}
-      
-      {businessLoading && !business ? (
-        <div className="flex justify-center items-center py-12">
-          <LoadingSpinner />
-          <div className="ml-4 text-sm text-gray-500">
-            Loading business data for ID: {user.businessId}...
-          </div>
-        </div>
-      ) : business ? (
-        <BusinessProfileComponent
-          business={business}
-          onUpdateBusiness={handleUpdateBusiness}
-          onUpdateOperatingHours={handleUpdateOperatingHours}
-          loading={businessLoading}
-          error={businessError}
-        />
-      ) : (
-        <div className="p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
-          <strong>No Business Data:</strong> Business information is not available.
-          <p className="mt-2">Business ID: {user.businessId}</p>
-          <p className="text-sm mt-1">This might be because:</p>
-          <ul className="text-sm mt-1 ml-4 list-disc">
-            <li>The business document doesn't exist in Firestore</li>
-            <li>There are permission issues accessing the business data</li>
-            <li>The business ID in the user profile is incorrect</li>
-          </ul>
-          <button 
-            onClick={handleRefresh}
-            className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-          >
-            🔄 Retry Loading Business
-          </button>
-        </div>
-      )}
     </div>
   );
 };

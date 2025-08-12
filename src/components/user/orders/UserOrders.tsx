@@ -70,21 +70,21 @@ const UserOrders: React.FC<UserOrdersProps> = ({
           const data = doc.data();
           ordersData.push({
             id: doc.id,
-            createdAt: data.createdAt.toDate(),
-            updatedAt: data.updatedAt.toDate(),
-            status: data.status,
-            items: data.items,
-            total: data.total,
-            userId: data.userId,
-            businessId: data.businessId,
-            customerName: data.customerName,
-            customerEmail: data.customerEmail,
-            customerPhone: data.customerPhone,
-            customerAddress: data.customerAddress,
-            paymentMethod: data.paymentMethod,
-            paymentStatus: data.paymentStatus,
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
+            status: data.status || 'pending',
+            items: data.items || [],
+            total: data.total || 0,
+            userId: data.userId || '',
+            businessId: data.businessId || '',
+            customerName: data.customerName || '',
+            customerEmail: data.customerEmail || '',
+            customerPhone: data.customerPhone || '',
+            customerAddress: data.customerAddress || '',
+            paymentMethod: data.paymentMethod || '',
+            paymentStatus: data.paymentStatus || 'pending',
             estimatedDeliveryTime: data.estimatedDeliveryTime ? data.estimatedDeliveryTime.toDate() : undefined,
-            notes: data.notes
+            notes: data.notes || ''
           });
         });
         
@@ -125,25 +125,39 @@ const UserOrders: React.FC<UserOrdersProps> = ({
     { value: 'confirmed', label: 'Confirmado' },
     { value: 'preparing', label: 'Preparando' },
     { value: 'ready', label: 'Listo para Recoger' },
-    { value: 'completed', label: 'Completado' },
+    { value: 'delivered', label: 'Entregado' },
     { value: 'cancelled', label: 'Cancelado' },
   ];
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('es-MX', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+  const formatDate = (date: Date | null | undefined) => {
+    if (!date) return 'N/A';
+    try {
+      return new Intl.DateTimeFormat('es-MX', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Fecha inválida';
+    }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-    }).format(amount);
+  const formatCurrency = (amount: number | null | undefined) => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return '$0.00';
+    }
+    try {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+      }).format(amount);
+    } catch (error) {
+      console.error('Error formatting currency:', error);
+      return `$${amount.toFixed(2)}`;
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -156,8 +170,8 @@ const UserOrders: React.FC<UserOrdersProps> = ({
         return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Preparando</span>;
       case 'ready':
         return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Listo para Recoger</span>;
-      case 'completed':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Completado</span>;
+      case 'delivered':
+        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Entregado</span>;
       case 'cancelled':
         return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Cancelado</span>;
       default:
@@ -196,21 +210,21 @@ const UserOrders: React.FC<UserOrdersProps> = ({
         const data = doc.data();
         ordersData.push({
           id: doc.id,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate(),
-          status: data.status,
-          items: data.items,
-          total: data.total,
-          userId: data.userId,
-          businessId: data.businessId,
-          customerName: data.customerName,
-          customerEmail: data.customerEmail,
-          customerPhone: data.customerPhone,
-          customerAddress: data.customerAddress,
-          paymentMethod: data.paymentMethod,
-          paymentStatus: data.paymentStatus,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          status: data.status || 'pending',
+          items: data.items || [],
+          total: data.total || 0,
+          userId: data.userId || '',
+          businessId: data.businessId || '',
+          customerName: data.customerName || '',
+          customerEmail: data.customerEmail || '',
+          customerPhone: data.customerPhone || '',
+          customerAddress: data.customerAddress || '',
+          paymentMethod: data.paymentMethod || '',
+          paymentStatus: data.paymentStatus || 'pending',
           estimatedDeliveryTime: data.estimatedDeliveryTime ? data.estimatedDeliveryTime.toDate() : undefined,
-          notes: data.notes
+          notes: data.notes || ''
         });
       });
       
@@ -225,48 +239,58 @@ const UserOrders: React.FC<UserOrdersProps> = ({
 
   const columns = [
     {
-      key: 'id' as keyof Order,
+      key: 'id',
       title: 'ID de Orden',
-      render: (row: Order) => <span className="text-sm font-medium text-gray-900">{row.id}</span>
+      render: (value: any, row: Order) => (
+        <span className="text-sm font-medium text-gray-900">{row.id}</span>
+      )
     },
     {
-      key: 'createdAt' as keyof Order,
+      key: 'createdAt',
       title: 'Fecha',
-      render: (row: Order) => <span className="text-sm text-gray-500">{formatDate(row.createdAt)}</span>
+      render: (value: any, row: Order) => (
+        <span className="text-sm text-gray-500">{formatDate(row.createdAt)}</span>
+      )
     },
     {
-      key: 'status' as keyof Order,
+      key: 'status',
       title: 'Estado',
-      render: (row: Order) => getStatusBadge(row.status)
+      render: (value: any, row: Order) => getStatusBadge(row.status)
     },
     {
-      key: 'total' as keyof Order,
+      key: 'total',
       title: 'Total',
-      render: (row: Order) => <span className="text-sm font-medium text-gray-900">{formatCurrency(row.total)}</span>
+      render: (value: any, row: Order) => (
+        <span className="text-sm font-medium text-gray-900">{formatCurrency(row.total)}</span>
+      )
     },
     {
-      key: 'items' as keyof Order,
+      key: 'items',
       title: 'Artículos',
-      render: (row: Order) => <span className="text-sm text-gray-900">{row.items.length}</span>
+      render: (value: any, row: Order) => (
+        <span className="text-sm text-gray-900">{row.items?.length || 0}</span>
+      )
     },
     {
-      key: 'paymentMethod' as keyof Order,
+      key: 'paymentMethod',
       title: 'Método de Pago',
-      render: (row: Order) => <span className="text-sm text-gray-900">{row.paymentMethod}</span>
+      render: (value: any, row: Order) => (
+        <span className="text-sm text-gray-900">{row.paymentMethod || 'N/A'}</span>
+      )
     },
     {
-      key: 'estimatedDeliveryTime' as keyof Order,
+      key: 'estimatedDeliveryTime',
       title: 'Tiempo Estimado',
-      render: (row: Order) => (
+      render: (value: any, row: Order) => (
         <span className="text-sm text-gray-900">
-          {row && row.estimatedDeliveryTime ? formatDate(row.estimatedDeliveryTime) : 'N/A'}
+          {formatDate(row.estimatedDeliveryTime)}
         </span>
       )
     },
     {
-      key: 'id' as keyof Order,
+      key: 'actions',
       title: 'Acciones',
-      render: (row: Order) => (
+      render: (value: any, row: Order) => (
         <Button
           variant="outline"
           onClick={() => handleViewDetails(row)}
@@ -277,58 +301,6 @@ const UserOrders: React.FC<UserOrdersProps> = ({
       )
     }
   ];
-
-  return (
-    <BaseCard title="Mis Órdenes">
-      {error && <div className="mb-6 text-red-600">{error}</div>}
-      
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="text"
-              placeholder="Buscar órdenes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full"
-            />
-          </div>
-        </div>
-        
-        <div className="flex space-x-3">
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={statusOptions}
-            className="w-48"
-          />
-          
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualizar
-          </Button>
-        </div>
-      </div>
-
-      {isLoading || loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filteredOrders}
-          emptyMessage="No se encontraron órdenes"
-        />
-      )}
-    </BaseCard>
-  );
 
   return (
     <>

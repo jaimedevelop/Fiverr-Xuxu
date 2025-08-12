@@ -1,8 +1,7 @@
 import React from 'react';
-import { Heart, Eye, ShoppingCart } from 'lucide-react';
+import { Heart, Eye, ShoppingCart, Plus, Check } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
-// Temporarily disabled cart functionality
-// import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '../../../contexts/CartContext';
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
 import ImageDisplay from './ImageDisplay';
@@ -14,22 +13,25 @@ interface PastryCardProps {
 }
 
 const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
-  // Temporarily disabled cart functionality
-  // const { addItem } = useCart();
+  const { addItem, items } = useCart();
+  
+  // Check if this pastry is already in cart
+  const isInCart = items.some(item => 
+    item.pastryId === pastry.id && item.businessId === pastry.businessId
+  );
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Temporarily disabled - show alert instead
-    alert('Funcionalidad de carrito temporalmente deshabilitada. ¡Próximamente disponible!');
+    if (!pastry.available) return;
     
-    // Original code (will be uncommented later):
-    // addItem({
-    //   pastryId: pastry.id,
-    //   name: pastry.name,
-    //   price: pastry.price,
-    //   quantity: 1
-    // });
+    addItem({
+      pastryId: pastry.id,
+      businessId: pastry.businessId,
+      name: pastry.name,
+      price: pastry.price,
+      quantity: 1
+    });
   };
 
   return (
@@ -83,14 +85,30 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
           <button
             onClick={handleAddToCart}
             disabled={!pastry.available}
-            className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all ${
               pastry.available
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? isInCart 
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            {pastry.available ? 'Añadir al Carrito' : 'No Disponible'}
+            {!pastry.available ? (
+              <>
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                No Disponible
+              </>
+            ) : isInCart ? (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                Añadir Más
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Añadir al Carrito
+              </>
+            )}
           </button>
         </div>
       </div>

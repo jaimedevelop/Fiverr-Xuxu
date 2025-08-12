@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, CheckCircle, XCircle, Truck, MapPin, CreditCard, User } from 'lucide-react';
 import { Order, OrderStatus } from '../../../types/order';
+import { useOrders } from '../../../contexts/OrderContext';
 import Button from '../../../components/ui/Button';
 import BaseCard from '../../../components/common/BaseCard';
 
@@ -14,65 +15,31 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getOrderById } = useOrders();
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         setLoading(true);
-        // In a real app, you would fetch the order from your API
-        // For now, we'll simulate it with a timeout
-        setTimeout(() => {
-          // Mock order data
-          const mockOrder: Order = {
-            id: orderId,
-            userId: 'user123',
-            businessId: 'business456',
-            items: [
-              {
-                id: 'item1',
-                pastryId: 'pastry1',
-                name: 'Croissant de Chocolate',
-                price: 25,
-                quantity: 2,
-              },
-              {
-                id: 'item2',
-                pastryId: 'pastry2',
-                name: 'Concha',
-                price: 15,
-                quantity: 3,
-              },
-            ],
-            status: 'confirmed' as OrderStatus,
-            subtotal: 95,
-            tax: 15.2,
-            deliveryFee: 20,
-            total: 130.2,
-            paymentMethod: 'card' as any,
-            deliveryAddress: {
-              street: 'Av. Principal #123',
-              colonia: 'Centro',
-              municipality: 'Ciudad de México',
-              postalCode: '06000',
-              state: 'Ciudad de México',
-              reference: 'Frente a la farmacia',
-            },
-            specialInstructions: 'Dejar en la recepción, por favor',
-            estimatedDeliveryTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
-            createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-            updatedAt: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-          };
-          setOrder(mockOrder);
-          setLoading(false);
-        }, 1000);
+        setError(null);
+        
+        // Use real order data instead of mock data
+        const orderData = await getOrderById(orderId);
+        
+        if (orderData) {
+          setOrder(orderData);
+        } else {
+          setError('No se pudo encontrar el pedido');
+        }
       } catch (err: any) {
         setError(err.message || 'Error al cargar el pedido');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, getOrderById]);
 
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
@@ -101,9 +68,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
       case 'preparing':
         return 'Preparando';
       case 'ready':
-        return 'Listo para entrega';
+        return order?.fulfillmentType === 'pickup' ? 'Listo para recoger' : 'Listo para entrega';
       case 'delivered':
-        return 'Entregado';
+        return order?.fulfillmentType === 'pickup' ? 'Recogido' : 'Entregado';
       case 'cancelled':
         return 'Cancelado';
       default:
@@ -116,11 +83,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
       case 'preparing':
         return 'bg-blue-100 text-blue-800';
       case 'ready':
-        return 'bg-green-100 text-green-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
@@ -226,14 +191,23 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
                 <dd className="text-sm font-medium">{formatDate(order.updatedAt)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-sm text-gray-600">Método de pago:</dt>
-                <dd className="text-sm font-medium flex items-center">
-                  <CreditCard className="h-4 w-4 mr-1" />
-                  {order.paymentMethod === 'card' ? 'Tarjeta' : 'Efectivo'}
+                <dt className="text-sm text-gray-600">Tipo de entrega:</dt>
+                <dd className="text-sm font-medium">
+                  {order.fulfillmentType === 'delivery' ? 'Entrega a domicilio' : 'Recoger en tienda'}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-sm text-gray-600">Tiempo estimado de entrega:</dt>
+                <dt className="text-sm text-gray-600">Método de pago:</dt>
+                <dd className="text-sm font-medium flex items-center">
+                  <CreditCard className="h-4 w-4 mr-1" />
+                  {order.paymentMethod === 'card' ? 'Tarjeta' : 
+                   order.paymentMethod === 'cash' ? 'Efectivo' : 'Digital'}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-sm text-gray-600">
+                  {order.fulfillmentType === 'pickup' ? 'Hora de recogida:' : 'Tiempo estimado de entrega:'}
+                </dt>
                 <dd className="text-sm font-medium">{formatDate(order.estimatedDeliveryTime)}</dd>
               </div>
             </dl>
@@ -250,10 +224,12 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
                 <dt className="text-sm text-gray-600">Impuestos:</dt>
                 <dd className="text-sm font-medium">{formatCurrency(order.tax)}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-600">Envío:</dt>
-                <dd className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</dd>
-              </div>
+              {order.fulfillmentType === 'delivery' && (
+                <div className="flex justify-between">
+                  <dt className="text-sm text-gray-600">Envío:</dt>
+                  <dd className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</dd>
+                </div>
+              )}
               <div className="flex justify-between pt-2 border-t border-gray-200">
                 <dt className="text-sm font-medium text-gray-900">Total:</dt>
                 <dd className="text-sm font-bold text-gray-900">{formatCurrency(order.total)}</dd>
@@ -288,6 +264,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
                 <tr key={item.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {item.name}
+                    {item.notes && (
+                      <p className="text-xs text-gray-500 mt-1">Notas: {item.notes}</p>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatCurrency(item.price)}
@@ -305,25 +284,43 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
         </div>
       </BaseCard>
 
-      {/* Delivery Address */}
-      <BaseCard title="Dirección de entrega">
-        <div className="flex items-start">
-          <MapPin className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
-          <div>
-            <p className="text-sm font-medium text-gray-900">
-              {order.deliveryAddress.street}, {order.deliveryAddress.colonia}
-            </p>
-            <p className="text-sm text-gray-500">
-              {order.deliveryAddress.municipality}, {order.deliveryAddress.state} C.P. {order.deliveryAddress.postalCode}
-            </p>
-            {order.deliveryAddress.reference && (
-              <p className="text-sm text-gray-500 mt-1">
-                Referencia: {order.deliveryAddress.reference}
+      {/* Address or Pickup Info */}
+      {order.fulfillmentType === 'delivery' && order.deliveryAddress && (
+        <BaseCard title="Dirección de entrega">
+          <div className="flex items-start">
+            <MapPin className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                {order.deliveryAddress.street}, {order.deliveryAddress.colonia}
               </p>
-            )}
+              <p className="text-sm text-gray-500">
+                {order.deliveryAddress.municipality}, {order.deliveryAddress.state} C.P. {order.deliveryAddress.postalCode}
+              </p>
+              {order.deliveryAddress.reference && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Referencia: {order.deliveryAddress.reference}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      </BaseCard>
+        </BaseCard>
+      )}
+
+      {order.fulfillmentType === 'pickup' && order.pickupTime && (
+        <BaseCard title="Información de recogida">
+          <div className="flex items-start">
+            <Clock className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                Fecha: {order.pickupTime.date}
+              </p>
+              <p className="text-sm text-gray-500">
+                Hora: {order.pickupTime.time}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+      )}
 
       {/* Special Instructions */}
       {order.specialInstructions && (
@@ -336,7 +333,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
       {order.status !== 'delivered' && order.status !== 'cancelled' && (
         <div className="flex justify-end">
           <Button onClick={handleStatusUpdate}>
-            {order.status === 'ready' ? 'Marcar como entregado' : 
+            {order.status === 'ready' ? 
+              (order.fulfillmentType === 'pickup' ? 'Marcar como recogido' : 'Marcar como entregado') : 
              order.status === 'pending' ? 'Confirmar pedido' :
              order.status === 'confirmed' ? 'Comenzar preparación' :
              'Marcar como listo'}
