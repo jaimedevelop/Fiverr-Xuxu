@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { 
   Menu, 
   ShoppingBag, 
@@ -19,6 +20,7 @@ import {
 
 const AdminMobileNavigation: React.FC = () => {
   const { logout } = useAuth();
+  const { business, loading: businessLoading } = useBusiness();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [startY, setStartY] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
@@ -121,12 +123,26 @@ const AdminMobileNavigation: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Store size={24} className="text-white" />
-            </div>
-            <div>
+            {business?.logoUrl ? (
+              <img 
+                src={business.logoUrl} 
+                alt={business.storeName} 
+                className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                {businessLoading ? (
+                  <div className="w-6 h-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <Store size={24} className="text-white" />
+                )}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-gray-900">Xuxu Admin</h2>
-              <p className="text-sm text-gray-600">Gestión de Pastelería</p>
+              <p className="text-sm text-gray-600 truncate">
+                {businessLoading ? 'Cargando...' : `Bienvenido, ${business?.storeName || 'Sin nombre'}`}
+              </p>
             </div>
           </div>
           <button
@@ -171,12 +187,28 @@ const AdminMobileNavigation: React.FC = () => {
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-white shadow-sm">
-            <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
-              <User size={18} className="text-white" />
-            </div>
+            {business?.logoUrl ? (
+              <img 
+                src={business.logoUrl} 
+                alt={business.storeName} 
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+                {businessLoading ? (
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <User size={18} className="text-white" />
+                )}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">Usuario Administrador</p>
-              <p className="text-xs text-gray-500 truncate">admin@xuxu.com</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {business?.storeName || 'Cargando...'}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                Panel de Administración
+              </p>
             </div>
           </div>
         </div>

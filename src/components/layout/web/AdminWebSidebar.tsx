@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUser } from '../../../contexts/UserContext';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { 
   Menu, 
   ShoppingBag, 
@@ -17,6 +18,7 @@ import {
 const AdminWebSidebar: React.FC = () => {
   const { authState, logout } = useAuth();
   const { user: firestoreUser } = useUser();
+  const { business, loading: businessLoading } = useBusiness();
   
   const adminNavItems = [
     { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
@@ -32,10 +34,31 @@ const AdminWebSidebar: React.FC = () => {
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">
-          Panel de Administración
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">Bienvenido, {firestoreUser?.email}</p>
+        <div className="flex items-center space-x-3 mb-3">
+          {business?.logoUrl ? (
+            <img 
+              src={business.logoUrl} 
+              alt={business.storeName} 
+              className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              {businessLoading ? (
+                <div className="w-6 h-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Building2 className="w-6 h-6 text-white" />
+              )}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-gray-900">
+              Panel de Administración
+            </h1>
+            <p className="text-sm text-gray-600 mt-1 truncate">
+              {businessLoading ? 'Cargando...' : `Bienvenido, ${business?.storeName || 'Sin nombre'}`}
+            </p>
+          </div>
+        </div>
       </div>
       
       <nav className="flex-1 p-4">

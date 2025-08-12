@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, Mail, Phone, MapPin, Lock, Bell, Heart, LogOut } from 'lucide-react';
+import { Save, User, Mail, Phone, MapPin, Lock, Bell, Heart, LogOut, Search, Settings } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
@@ -7,6 +7,7 @@ import Select from '../../../components/ui/Select';
 import FormError from '../../../components/common/FormError';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useUser } from '../../../contexts/UserContext';
 
 interface UserProfileProps {
   loading?: boolean;
@@ -32,10 +33,11 @@ interface UserProfileData {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ 
-  loading = false, 
-  error = null 
+  loading: propLoading = false, 
+  error: propError = null 
 }) => {
   const { logout } = useAuth();
+  const { user: firestoreUser, loading: userLoading, updateUser, error: userError } = useUser();
   
   const [profileData, setProfileData] = useState<UserProfileData>({
     firstName: '',
@@ -64,27 +66,37 @@ const UserProfile: React.FC<UserProfileProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'account'>('profile');
+  const [isSaving, setIsSaving] = useState(false);
 
+  // Load Firebase user data into form
   useEffect(() => {
-    // Mock data for development
-    setProfileData({
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      email: 'juan.perez@example.com',
-      phone: '+52 55 1234 5678',
-      address: 'Av. Principal 123',
-      city: 'Ciudad de México',
-      state: 'CDMX',
-      zipCode: '06000',
-      country: 'MX',
-      language: 'es',
-      notifications: {
-        email: true,
-        sms: false,
-        push: true
-      }
-    });
-  }, []);
+    if (firestoreUser) {
+      console.log("📄 Loading Firebase user data into profile form:", firestoreUser);
+      
+      // Parse full name into first and last name if needed
+      const nameParts = firestoreUser.name ? firestoreUser.name.split(' ') : ['', ''];
+      const firstName = firestoreUser.firstName || nameParts[0] || '';
+      const lastName = firestoreUser.lastName || nameParts.slice(1).join(' ') || '';
+      
+      setProfileData({
+        firstName,
+        lastName,
+        email: firestoreUser.email || '',
+        phone: firestoreUser.phone || '',
+        address: firestoreUser.address || '',
+        city: firestoreUser.city || '',
+        state: firestoreUser.state || '',
+        zipCode: firestoreUser.zipCode || '',
+        country: firestoreUser.country || 'MX',
+        language: firestoreUser.preferences?.language || 'es',
+        notifications: {
+          email: firestoreUser.preferences?.notifications?.email ?? true,
+          sms: firestoreUser.preferences?.notifications?.sms ?? false,
+          push: firestoreUser.preferences?.notifications?.push ?? true
+        }
+      });
+    }
+  }, [firestoreUser]);
 
   const countryOptions = [
     { value: 'MX', label: 'México' },
@@ -114,24 +126,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
       newErrors.email = 'El email no es válido';
     }
     
-    if (!profileData.phone?.trim()) {
-      newErrors.phone = 'El teléfono es requerido';
-    }
-    
-    if (!profileData.address?.trim()) {
-      newErrors.address = 'La dirección es requerida';
-    }
-    
-    if (!profileData.city?.trim()) {
-      newErrors.city = 'La ciudad es requerida';
-    }
-    
-    if (!profileData.state?.trim()) {
-      newErrors.state = 'El estado es requerido';
-    }
-    
-    if (!profileData.zipCode?.trim()) {
-      newErrors.zipCode = 'El código postal es requerido';
+    if (profileData.phone && profileData.phone.trim()) {
+      // Basic phone validation - at least 10 digits
+      const phoneDigits = profileData.phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        newErrors.phone = 'El teléfono debe tener al menos 10 dígitos';
+      }
     }
     
     setErrors(newErrors);
@@ -161,13 +161,44 @@ const UserProfile: React.FC<UserProfileProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateProfileForm()) {
-      // In a real app, this would save the profile data to the API
-      console.log('Saving profile data:', profileData);
+    if (!validateProfileForm()) {
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      // Prepare data for Firebase
+      const updateData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        name: `${profileData.firstName} ${profileData.lastName}`.trim(), // Update full name
+        email: profileData.email,
+        phone: profileData.phone || undefined,
+        address: profileData.address || undefined,
+        city: profileData.city || undefined,
+        state: profileData.state || undefined,
+        zipCode: profileData.zipCode || undefined,
+        country: profileData.country,
+        preferences: {
+          language: profileData.language,
+          timezone: firestoreUser?.preferences?.timezone || 'America/Mexico_City',
+          notifications: profileData.notifications
+        }
+      };
+
+      console.log("💾 Saving profile data to Firebase:", updateData);
+      await updateUser(updateData);
+      
       alert('Perfil guardado correctamente');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Error al guardar el perfil. Inténtalo de nuevo.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -175,9 +206,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
     e.preventDefault();
     
     if (validatePasswordForm()) {
-      // In a real app, this would update the password via the API
-      console.log('Updating password');
-      alert('Contraseña actualizada correctamente');
+      // TODO: Implement password change with Firebase Auth
+      console.log('Password change not yet implemented');
+      alert('Funcionalidad de cambio de contraseña pendiente de implementar');
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -256,41 +287,45 @@ const UserProfile: React.FC<UserProfileProps> = ({
     }));
   };
 
+  // Show loading while user data is loading
+  if (userLoading && !firestoreUser) {
+    return (
+      <div className="space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
+          <p className="text-gray-600">Cargando información del usuario...</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if user couldn't be loaded
+  if (userError && !firestoreUser) {
+    return (
+      <div className="space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
+          <p className="text-gray-600">Error al cargar la información del usuario</p>
+        </div>
+        <div className="bg-red-50 p-4 rounded-md">
+          <p className="text-red-700">{userError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isLoading = propLoading || userLoading || isSaving;
+  const error = propError || userError;
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
         <p className="text-gray-600">Gestiona tu información personal y preferencias</p>
       </div>
-
-      {/* Quick Links */}
-      <BaseCard title="Enlaces Rápidos">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            to="/usuario/pedidos"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Mis Pedidos</h3>
-              <p className="text-xs text-gray-500">Ver el historial de pedidos</p>
-            </div>
-          </Link>
-          
-          <Link
-            to="/usuario/explorar"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Search className="h-6 w-6 text-green-500 mr-3" />
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Explorar</h3>
-              <p className="text-xs text-gray-500">Descubrir pastelerías</p>
-            </div>
-          </Link>
-        </div>
-      </BaseCard>
 
       {error && (
         <div className="bg-red-50 p-4 rounded-md">
@@ -357,6 +392,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.firstName}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
                   />
                   {errors.firstName && <FormError message={errors.firstName} />}
                 </div>
@@ -371,6 +407,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.lastName}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
                   />
                   {errors.lastName && <FormError message={errors.lastName} />}
                 </div>
@@ -386,13 +423,14 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.email}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
                   />
                   {errors.email && <FormError message={errors.email} />}
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
+                    Teléfono (opcional)
                   </label>
                   <Input
                     id="phone"
@@ -400,13 +438,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.phone}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
+                    placeholder="+52 55 1234 5678"
                   />
                   {errors.phone && <FormError message={errors.phone} />}
                 </div>
 
                 <div>
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección
+                    Dirección (opcional)
                   </label>
                   <Input
                     id="address"
@@ -414,13 +454,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.address}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
+                    placeholder="Av. Principal 123"
                   />
                   {errors.address && <FormError message={errors.address} />}
                 </div>
 
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ciudad
+                    Ciudad (opcional)
                   </label>
                   <Input
                     id="city"
@@ -428,13 +470,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.city}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
+                    placeholder="Ciudad de México"
                   />
                   {errors.city && <FormError message={errors.city} />}
                 </div>
 
                 <div>
                   <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado
+                    Estado (opcional)
                   </label>
                   <Input
                     id="state"
@@ -442,13 +486,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.state}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
+                    placeholder="CDMX"
                   />
                   {errors.state && <FormError message={errors.state} />}
                 </div>
 
                 <div>
                   <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-                    Código Postal
+                    Código Postal (opcional)
                   </label>
                   <Input
                     id="zipCode"
@@ -456,6 +502,8 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     value={profileData.zipCode}
                     onChange={handleProfileInputChange}
                     className="w-full"
+                    disabled={isLoading}
+                    placeholder="06000"
                   />
                   {errors.zipCode && <FormError message={errors.zipCode} />}
                 </div>
@@ -471,6 +519,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     onChange={handleSelectChange}
                     options={countryOptions}
                     className="w-full"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -485,6 +534,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     onChange={handleSelectChange}
                     options={languageOptions}
                     className="w-full"
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -492,10 +542,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={isLoading}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                 </Button>
               </div>
             </form>
@@ -514,9 +564,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 <button
                   type="button"
                   onClick={() => handleNotificationChange('email')}
+                  disabled={isLoading}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     profileData.notifications.email ? 'bg-blue-600' : 'bg-gray-200'
-                  }`}
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   role="switch"
                   aria-checked={profileData.notifications.email}
                 >
@@ -540,9 +591,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 <button
                   type="button"
                   onClick={() => handleNotificationChange('sms')}
+                  disabled={isLoading}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     profileData.notifications.sms ? 'bg-blue-600' : 'bg-gray-200'
-                  }`}
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   role="switch"
                   aria-checked={profileData.notifications.sms}
                 >
@@ -566,9 +618,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 <button
                   type="button"
                   onClick={() => handleNotificationChange('push')}
+                  disabled={isLoading}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     profileData.notifications.push ? 'bg-blue-600' : 'bg-gray-200'
-                  }`}
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   role="switch"
                   aria-checked={profileData.notifications.push}
                 >
@@ -587,6 +640,13 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
       {activeTab === 'password' && (
         <BaseCard title="Cambiar Contraseña">
+          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Nota:</strong> La funcionalidad de cambio de contraseña estará disponible próximamente. 
+              Por ahora, puedes restablecer tu contraseña usando la opción "¿Olvidaste tu contraseña?" en la página de inicio de sesión.
+            </p>
+          </div>
+          
           <form onSubmit={handlePasswordSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               <div>
@@ -600,6 +660,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   value={passwordData.currentPassword}
                   onChange={handlePasswordInputChange}
                   className="w-full"
+                  disabled={true}
                 />
                 {passwordErrors.currentPassword && <FormError message={passwordErrors.currentPassword} />}
               </div>
@@ -615,6 +676,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   value={passwordData.newPassword}
                   onChange={handlePasswordInputChange}
                   className="w-full"
+                  disabled={true}
                 />
                 {passwordErrors.newPassword && <FormError message={passwordErrors.newPassword} />}
                 <p className="mt-1 text-xs text-gray-500">
@@ -633,6 +695,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordInputChange}
                   className="w-full"
+                  disabled={true}
                 />
                 {passwordErrors.confirmPassword && <FormError message={passwordErrors.confirmPassword} />}
               </div>
@@ -641,10 +704,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={true}
+                className="opacity-50 cursor-not-allowed"
               >
                 <Lock className="h-4 w-4 mr-2" />
-                {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+                Próximamente
               </Button>
             </div>
           </form>
@@ -664,6 +728,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 variant="danger"
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={isLoading}
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Cerrar Sesión
@@ -676,11 +741,31 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="font-medium text-gray-700">Fecha de registro:</span>
-                    <p className="text-gray-600">15 de enero, 2024</p>
+                    <p className="text-gray-600">
+                      {firestoreUser?.createdAt 
+                        ? new Date(firestoreUser.createdAt).toLocaleDateString('es-MX', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })
+                        : 'No disponible'
+                      }
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Último inicio de sesión:</span>
-                    <p className="text-gray-600">Hoy a las 10:30 AM</p>
+                    <p className="text-gray-600">
+                      {firestoreUser?.lastLogin 
+                        ? new Date(firestoreUser.lastLogin).toLocaleDateString('es-MX', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : 'No disponible'
+                      }
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Estado de la cuenta:</span>
@@ -688,7 +773,19 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Tipo de usuario:</span>
-                    <p className="text-gray-600">Usuario Regular</p>
+                    <p className="text-gray-600">
+                      {firestoreUser?.role === 'user' ? 'Usuario Regular' : 
+                       firestoreUser?.role === 'admin' ? 'Administrador' : 
+                       'Usuario'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Email:</span>
+                    <p className="text-gray-600">{firestoreUser?.email || 'No disponible'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">ID de usuario:</span>
+                    <p className="text-gray-600 text-xs font-mono">{firestoreUser?.uid || 'No disponible'}</p>
                   </div>
                 </div>
               </div>
