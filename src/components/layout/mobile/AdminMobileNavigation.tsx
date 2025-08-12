@@ -139,7 +139,7 @@ const AdminMobileNavigation: React.FC = () => {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-gray-900">Xuxu Admin</h2>
+              <h2 className="text-lg font-bold text-gray-900">Dulces Momentos Admin</h2>
               <p className="text-sm text-gray-600 truncate">
                 {businessLoading ? 'Cargando...' : `Bienvenido, ${business?.storeName || 'Sin nombre'}`}
               </p>
