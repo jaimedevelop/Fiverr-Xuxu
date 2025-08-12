@@ -1,27 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
 import {
   Search,
   Package,
-  User,
-  LogOut
+  Settings
 } from 'lucide-react';
 import CartIcon from '../../../components/user/cart/CartIcon';
 import CartSidebar from '../../../components/user/cart/CartSidebar';
 
 const UserMobileNavigation: React.FC = () => {
-  const { logout } = useAuth();
-
   const userNavItems = [
     { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: Package },
-    { path: '/usuario/favoritos', label: 'Favoritos', icon: User },
+    { path: '/usuario/perfil', label: 'Ajustes', icon: Settings },
   ];
-
-  const handleLogout = () => {
-    logout();
-  };
 
   return (
     <>
@@ -46,17 +38,6 @@ const UserMobileNavigation: React.FC = () => {
               <span className="text-xs mt-1 font-medium">Carrito</span>
             </div>
           </div>
-        </div>
-        
-        {/* Logout Section */}
-        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center w-full py-2 px-3 rounded-lg transition-colors text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100"
-          >
-            <LogOut size={16} className="mr-2" />
-            <span className="text-sm font-medium">Cerrar Sesión</span>
-          </button>
         </div>
       </nav>
       

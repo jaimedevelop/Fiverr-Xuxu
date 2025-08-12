@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, Mail, Phone, MapPin, Lock, Bell, Heart } from 'lucide-react';
+import { Save, User, Mail, Phone, MapPin, Lock, Bell, Heart, LogOut } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/ui/Select';
 import FormError from '../../../components/common/FormError';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface UserProfileProps {
   loading?: boolean;
@@ -34,6 +35,8 @@ const UserProfile: React.FC<UserProfileProps> = ({
   loading = false, 
   error = null 
 }) => {
+  const { logout } = useAuth();
+  
   const [profileData, setProfileData] = useState<UserProfileData>({
     firstName: '',
     lastName: '',
@@ -60,7 +63,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'account'>('profile');
 
   useEffect(() => {
     // Mock data for development
@@ -183,6 +186,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
     }
   };
 
+  const handleLogout = () => {
+    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      logout();
+    }
+  };
+
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
@@ -258,18 +267,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
       <BaseCard title="Enlaces Rápidos">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            to="/user/favorites"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Heart className="h-6 w-6 text-red-500 mr-3" />
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Mis Favoritos</h3>
-              <p className="text-xs text-gray-500">Ver tus pasteles favoritos</p>
-            </div>
-          </Link>
-          
-          <Link
-            to="/user/orders"
+            to="/usuario/pedidos"
             className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,6 +276,17 @@ const UserProfile: React.FC<UserProfileProps> = ({
             <div>
               <h3 className="text-sm font-medium text-gray-900">Mis Pedidos</h3>
               <p className="text-xs text-gray-500">Ver el historial de pedidos</p>
+            </div>
+          </Link>
+          
+          <Link
+            to="/usuario/explorar"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Search className="h-6 w-6 text-green-500 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-gray-900">Explorar</h3>
+              <p className="text-xs text-gray-500">Descubrir pastelerías</p>
             </div>
           </Link>
         </div>
@@ -315,6 +324,19 @@ const UserProfile: React.FC<UserProfileProps> = ({
             <div className="flex items-center">
               <Lock className="h-4 w-4 mr-2" />
               Contraseña
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('account')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'account'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              Cuenta
             </div>
           </button>
         </nav>
@@ -626,6 +648,52 @@ const UserProfile: React.FC<UserProfileProps> = ({
               </Button>
             </div>
           </form>
+        </BaseCard>
+      )}
+
+      {activeTab === 'account' && (
+        <BaseCard title="Gestión de Cuenta">
+          <div className="space-y-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-yellow-800 mb-2">Zona de Peligro</h3>
+              <p className="text-sm text-yellow-700 mb-4">
+                Estas acciones son permanentes e irreversibles. Procede con precaución.
+              </p>
+              
+              <Button
+                variant="danger"
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </Button>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Información de la Cuenta</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Fecha de registro:</span>
+                    <p className="text-gray-600">15 de enero, 2024</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Último inicio de sesión:</span>
+                    <p className="text-gray-600">Hoy a las 10:30 AM</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Estado de la cuenta:</span>
+                    <p className="text-green-600">Activa</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo de usuario:</span>
+                    <p className="text-gray-600">Usuario Regular</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </BaseCard>
       )}
     </div>
