@@ -1,3 +1,4 @@
+// src/pages/admin/Orders.tsx - Updated with requested columns and actions
 import React, { useState, useEffect } from 'react';
 import { useOrders } from '../../contexts/OrderContext';
 import { useUser } from '../../contexts/UserContext';
@@ -5,18 +6,44 @@ import BaseCard from '../../components/common/BaseCard';
 import DataTable from '../../components/common/DataTable';
 import { Order, OrderStatus } from '../../types/order';
 import { formatCurrency, formatDate } from '../../utils/formatting';
-import { ClipboardList, Clock, Package, CheckCircle, RefreshCw, AlertTriangle, Users } from 'lucide-react';
+import userService from '../../services/userService';
+import { ClipboardList, Clock, Package, CheckCircle, RefreshCw, AlertTriangle, Users, Truck, UserCheck } from 'lucide-react';
 
 const AdminOrders: React.FC = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const { orders, loading, error, fetchOrders, updateOrderStatus } = useOrders();
   const { user } = useUser();
 
-  // Reduced logging to prevent console spam
+  // Fetch client names for orders
+  useEffect(() => {
+    const fetchClientNames = async () => {
+      const userIds = [...new Set(orders.map(order => order.userId))];
+      
+      if (userIds.length > 0) {
+        try {
+          const names = await userService.getClientNames(userIds);
+          setClientNames(names);
+        } catch (error) {
+          console.error('Error fetching client names:', error);
+          // Fallback to placeholder names
+          const fallbackNames: Record<string, string> = {};
+          userIds.forEach(userId => {
+            fallbackNames[userId] = `Cliente ${userId.slice(-6)}`;
+          });
+          setClientNames(fallbackNames);
+        }
+      }
+    };
+
+    if (orders.length > 0) {
+      fetchClientNames();
+    }
+  }, [orders]);
+
   console.log('🏢 Admin Orders Page - User:', user?.businessId, 'Orders:', orders.length);
 
   useEffect(() => {
-    // Only fetch if we have a businessId and no orders are currently loaded
     if (user?.businessId && orders.length === 0 && !loading) {
       console.log('✅ Fetching orders for businessId:', user.businessId);
       fetchOrders();
@@ -62,23 +89,44 @@ const AdminOrders: React.FC = () => {
     fetchOrders();
   };
 
+  // Format order items for display
+  const formatOrderItems = (items: any[]) => {
+    if (!items || items.length === 0) return 'Sin artículos';
+    
+    return items.map((item, index) => (
+      <div key={index} className="text-xs">
+        <span className="font-medium">{item.name}</span>
+        <span className="text-gray-500"> x{item.quantity}</span>
+        {index < items.length - 1 && <br />}
+      </div>
+    ));
+  };
+
   const columns = [
     {
       key: 'id' as keyof Order,
       title: 'ID de Pedido',
       render: (value: any, row: Order) => (
-        <span className="text-sm font-medium text-gray-900">
-          #{row.id ? row.id.slice(-6) : 'N/A'}
+        <span className="text-sm font-mono text-gray-900">
+          #{row.id ? row.id.slice(-8) : 'N/A'}
         </span>
       )
     },
     {
       key: 'createdAt' as keyof Order,
-      title: 'Fecha',
+      title: 'Fecha y Hora',
       render: (value: any, row: Order) => (
-        <span className="text-sm text-gray-500">
-          {row.createdAt ? formatDate(row.createdAt) : 'N/A'}
-        </span>
+        <div className="text-sm">
+          <div className="font-medium text-gray-900">
+            {row.createdAt ? new Date(row.createdAt).toLocaleDateString('es-MX') : 'N/A'}
+          </div>
+          <div className="text-gray-500">
+            {row.createdAt ? new Date(row.createdAt).toLocaleTimeString('es-MX', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }) : 'N/A'}
+          </div>
+        </div>
       )
     },
     {
@@ -99,19 +147,28 @@ const AdminOrders: React.FC = () => {
       key: 'items' as keyof Order,
       title: 'Artículos',
       render: (value: any, row: Order) => (
-        <span className="text-sm text-gray-900">
-          {row.items?.length || 0}
-        </span>
+        <div className="max-w-xs">
+          {formatOrderItems(row.items)}
+        </div>
       )
     },
     {
       key: 'fulfillmentType' as keyof Order,
-      title: 'Tipo',
+      title: 'Tipo de Orden',
       render: (value: any, row: Order) => (
-        <span className="text-sm text-gray-900">
-          {row.fulfillmentType === 'delivery' ? 'Entrega' : 
-           row.fulfillmentType === 'pickup' ? 'Recogida' : 'N/A'}
-        </span>
+        <div className="flex items-center gap-1">
+          {row.fulfillmentType === 'delivery' ? (
+            <>
+              <Truck size={14} className="text-blue-600" />
+              <span className="text-sm text-blue-600 font-medium">Entrega</span>
+            </>
+          ) : (
+            <>
+              <UserCheck size={14} className="text-green-600" />
+              <span className="text-sm text-green-600 font-medium">Recogida</span>
+            </>
+          )}
+        </div>
       )
     },
     {
@@ -119,7 +176,7 @@ const AdminOrders: React.FC = () => {
       title: 'Cliente',
       render: (value: any, row: Order) => (
         <span className="text-sm text-gray-900">
-          {row.userId ? row.userId.slice(-6) : 'N/A'}
+          {clientNames[row.userId] || `Cliente ${row.userId?.slice(-6) || 'N/A'}`}
         </span>
       )
     },
@@ -127,25 +184,26 @@ const AdminOrders: React.FC = () => {
       key: 'actions' as any,
       title: 'Acciones',
       render: (value: any, row: Order) => (
-        <div className="flex space-x-2">
+        <div className="flex flex-col gap-1">
           <button
             onClick={() => row.id && handleViewOrder(row.id)}
-            className="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors duration-200"
+            className="text-blue-600 hover:text-blue-900 text-xs font-medium transition-colors duration-200 text-left"
             disabled={!row.id}
           >
-            Ver
+            Ver Detalles
           </button>
           {row.status !== 'delivered' && row.status !== 'cancelled' && row.id && (
             <select
               onChange={(e) => handleStatusUpdate(row.id, e.target.value as OrderStatus)}
               value={row.status || 'pending'}
-              className="text-xs border border-gray-300 rounded-md px-2 py-1 hover:border-gray-400 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
+              className="text-xs border border-gray-300 rounded-md px-2 py-1 hover:border-gray-400 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200 min-w-0"
             >
-              <option value="pending">Pendiente</option>
-              <option value="confirmed">Confirmado</option>
+              <option value="pending">Ordenado</option>
               <option value="preparing">Preparando</option>
               <option value="ready">Listo</option>
-              <option value="delivered">Entregado</option>
+              <option value="delivered">
+                {row.fulfillmentType === 'delivery' ? 'Entregado' : 'Recogido'}
+              </option>
               <option value="cancelled">Cancelado</option>
             </select>
           )}
