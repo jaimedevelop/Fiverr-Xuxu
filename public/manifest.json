@@ -1,12 +1,16 @@
 {
-  "name": "Restaurant Management App",
-  "short_name": "RestaurantApp",
-  "description": "A PWA for restaurant management with user and admin interfaces",
+  "name": "Dulces Momentos",
+  "short_name": "Dulces",
+  "description": "A sweet restaurant management experience with user and admin interfaces",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "theme_color": "#ec4899",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["food", "business", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,6 +23,14 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }

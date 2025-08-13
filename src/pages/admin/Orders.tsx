@@ -338,40 +338,6 @@ const AdminOrders: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-blue-800 mb-2">
-                  📊 Estadísticas Detalladas
-                </h4>
-                <p className="text-sm text-blue-700">
-                  Ver reportes completos de ventas y análisis de pedidos por período.
-                </p>
-              </div>
-              
-              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-green-800 mb-2">
-                  ⚡ Proceso Rápido
-                </h4>
-                <p className="text-sm text-green-700">
-                  Herramientas para procesar múltiples pedidos de manera eficiente.
-                </p>
-              </div>
-              
-              <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-purple-800 mb-2">
-                  🔔 Notificaciones
-                </h4>
-                <p className="text-sm text-purple-700">
-                  Configura alertas automáticas para nuevos pedidos y cambios de estado.
-                </p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
