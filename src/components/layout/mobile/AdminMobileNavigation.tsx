@@ -27,16 +27,16 @@ const AdminMobileNavigation: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // FIXED: Updated navigation paths to match App.tsx routes
   const adminNavItems = [
     { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
     { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu },
-    { path: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
-    { path: '/admin/analytics', label: 'Análisis', icon: TrendingUp },
-    { path: '/admin/inventory', label: 'Inventario', icon: Package },
-    { path: '/admin/business-profile', label: 'Perfil del Negocio', icon: Building2 },
-    { path: '/admin/commission-payments', label: 'Comisiones/Pagos', icon: CreditCard },
-    { path: '/admin/promotions', label: 'Promociones', icon: Megaphone },
-    { path: '/admin/settings', label: 'Configuración', icon: Settings },
+    { path: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag }, // Changed from '/admin/orders'
+    { path: '/admin/analitica', label: 'Análisis', icon: TrendingUp }, // Changed from '/admin/analytics'
+    { path: '/admin/inventario', label: 'Inventario', icon: Package },
+    { path: '/admin/perfil-negocio', label: 'Perfil del Negocio', icon: Building2 }, // Changed from '/admin/business-profile'
+    { path: '/admin/promociones', label: 'Promociones', icon: Megaphone }, // Changed from '/admin/promotions'
+    { path: '/admin/configuracion', label: 'Configuración', icon: Settings }, // Changed from '/admin/settings'
   ];
 
   const toggleMenu = () => {
@@ -92,7 +92,7 @@ const AdminMobileNavigation: React.FC = () => {
       {/* Hamburger Button */}
       <button
         onClick={toggleMenu}
-        className="fixed top-4 left-4 z-60 bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition-all duration-200 hover:shadow-xl"
+        className="fixed top-4 left-4 z-40 bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition-all duration-200 hover:shadow-xl"
         aria-label="Abrir menú de administrador"
       >
         <Menu size={24} className="text-gray-700" />
@@ -101,7 +101,7 @@ const AdminMobileNavigation: React.FC = () => {
       {/* Overlay */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300"
           onClick={closeMenu}
         />
       )}
@@ -109,7 +109,7 @@ const AdminMobileNavigation: React.FC = () => {
       {/* Slide-out Menu */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         onTouchStart={handleTouchStart}
