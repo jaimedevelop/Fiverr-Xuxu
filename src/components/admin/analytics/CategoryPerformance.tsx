@@ -1,11 +1,16 @@
-import React from 'react';
-import { TrendingUp, DollarSign } from 'lucide-react';
+// src/components/admin/analytics/CategoryPerformance.tsx
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, DollarSign, RefreshCw, AlertCircle, Info } from 'lucide-react';
 import { CategoryPerformance } from '../../../types/analytics';
 import BaseCard from '../../../components/common/BaseCard';
+import { getCategoryPerformanceData } from '../../../services/analytics/categoryPerformanceService';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useBusiness } from '../../../contexts/BusinessContext';
+import { useUser } from '../../../contexts/UserContext';
 
 interface CategoryPerformanceProps {
   title: string;
-  data: CategoryPerformance[];
+  timeRange: { start: Date; end: Date };
   className?: string;
 }
 
@@ -13,9 +18,38 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 
 const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({ 
   title, 
-  data, 
+  timeRange, 
   className = '' 
 }) => {
+  const [data, setData] = useState<CategoryPerformance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { authState } = useAuth();
+  const { business } = useBusiness();
+  const { user } = useUser();
+
+  // Add detailed debugging for auth, user, and business state
+  console.log('CategoryPerformance - Auth, User, and Business state:', {
+    isAuthenticated: authState.isAuthenticated,
+    isLoading: authState.isLoading,
+    authUser: authState.user ? `Auth user with ID: ${authState.user.id}` : 'No auth user',
+    user: user ? `User with ID: ${user.uid}, role: ${user.role}` : 'No user',
+    businessId: user?.businessId || 'No businessId in user',
+    business: business ? `Business with ID: ${business.id}` : 'No business',
+  });
+
+  // Add a guard to ensure timeRange is defined
+  if (!timeRange || !timeRange.start || !timeRange.end) {
+    console.log('CategoryPerformance - timeRange is undefined or incomplete');
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="flex justify-center py-8">
+          <p className="text-gray-500">Seleccionando rango de fechas...</p>
+        </div>
+      </BaseCard>
+    );
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
@@ -23,11 +57,126 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
     }).format(amount);
   };
 
-  // Sort by revenue (descending)
-  const sortedData = [...data].sort((a, b) => b.revenue - a.revenue);
+  const fetchCategoryData = async () => {
+    console.log('CategoryPerformance - fetchCategoryData function called');
+    
+    // Try to get businessId from either the user object or the business object
+    const businessId = user?.businessId || business?.id;
+    
+    if (!businessId) {
+      console.log('CategoryPerformance - No businessId found in user or business object');
+      setError('No se encontró el ID del negocio. Por favor, inicia sesión con una cuenta de negocio.');
+      setLoading(false);
+      return;
+    }
+    
+    console.log('CategoryPerformance - Fetching data for business:', businessId);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('CategoryPerformance - Calling getCategoryPerformanceData with:', {
+        businessId,
+        startDate: timeRange.start.toISOString(),
+        endDate: timeRange.end.toISOString()
+      });
+      
+      const categoryData = await getCategoryPerformanceData(businessId, timeRange.start, timeRange.end);
+      console.log('CategoryPerformance - Received data from service:', categoryData);
+      
+      setData(categoryData);
+    } catch (err) {
+      console.error('CategoryPerformance - Error in fetchCategoryData:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los datos de categorías');
+    } finally {
+      console.log('CategoryPerformance - fetchCategoryData completed, setting loading to false');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Only fetch if we have a businessId from either source
+    const businessId = user?.businessId || business?.id;
+    
+    if (businessId) {
+      fetchCategoryData();
+    } else if (!authState.isLoading && user) {
+      // If auth is not loading and we have a user but no businessId, set error
+      setError('No se encontró el ID del negocio. Por favor, inicia sesión con una cuenta de negocio.');
+      setLoading(false);
+    }
+  }, [user?.businessId, business?.id, timeRange, authState.isLoading, user]);
+
+  // Add a retry button
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    fetchCategoryData();
+  };
+
+  console.log('CategoryPerformance state:', { 
+    loading, 
+    error, 
+    dataCount: data.length,
+    data: data.slice(0, 2) // Log first 2 items to see structure
+  });
+
+  if (loading) {
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Cargando datos de categorías...</p>
+        </div>
+      </BaseCard>
+    );
+  }
+
+  if (error) {
+    // Check if the error is related to missing businessId
+    const isMissingBusinessError = error.includes('No se encontró el ID del negocio');
+    
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="flex items-center text-red-500 mb-4">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p>{error}</p>
+          </div>
+          
+          {isMissingBusinessError && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 max-w-md">
+              <div className="flex">
+                <Info className="h-5 w-5 text-blue-400 mr-2 flex-shrink-0" />
+                <div className="text-sm text-blue-700">
+                  <p className="font-medium mb-1">Información importante</p>
+                  <p>Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
+                  <ol className="list-decimal pl-5 mt-2 space-y-1">
+                    <li>Iniciar sesión con una cuenta de negocio</li>
+                    <li>O asociar esta cuenta a un negocio existente</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <button 
+            onClick={handleRetry}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reintentar
+          </button>
+        </div>
+      </BaseCard>
+    );
+  }
 
   // Calculate total revenue for percentage calculations
   const totalRevenue = data.reduce((sum, category) => sum + category.revenue, 0);
+  
+  // Sort by revenue (descending)
+  const sortedData = [...data].sort((a, b) => b.revenue - a.revenue);
 
   return (
     <BaseCard title={title} className={className}>
@@ -40,7 +189,7 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
           </div>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
           <p className="mt-1 text-sm text-gray-500">
-            No se encontraron categorías para mostrar.
+            No se encontraron categorías para mostrar en el período seleccionado.
           </p>
         </div>
       ) : (

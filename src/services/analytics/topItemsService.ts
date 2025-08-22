@@ -9,8 +9,15 @@ export const getTopItemsData = async (
   startDate: Date,
   endDate: Date
 ): Promise<ItemPerformance[]> => {
+  console.log('getTopItemsData called with:', {
+    businessId,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString()
+  });
+
   try {
     // Fetch orders within the specified time range
+    console.log('Creating Firestore query...');
     const ordersQuery = query(
       collection(db, 'orders'),
       where('businessId', '==', businessId),
@@ -18,10 +25,14 @@ export const getTopItemsData = async (
       where('createdAt', '<=', Timestamp.fromDate(endDate))
     );
     
+    console.log('Executing query...');
     const querySnapshot = await getDocs(ordersQuery);
+    console.log('Query executed. Documents found:', querySnapshot.size);
+    
     const orders: Order[] = [];
     
     querySnapshot.forEach((doc) => {
+      console.log('Processing document:', doc.id);
       const data = doc.data();
       orders.push({
         id: doc.id,
@@ -32,12 +43,16 @@ export const getTopItemsData = async (
       } as Order);
     });
 
+    console.log('Orders processed:', orders.length);
+
     // Aggregate item data
     const itemMap: Record<string, ItemPerformance> = {};
     
     orders.forEach(order => {
+      console.log('Processing order:', order.id, 'with items:', order.items.length);
       order.items.forEach((item: OrderItem) => {
         if (!itemMap[item.pastryId]) {
+          console.log('Creating new item entry for:', item.pastryId);
           itemMap[item.pastryId] = {
             pastryId: item.pastryId,
             name: item.name,
@@ -56,18 +71,26 @@ export const getTopItemsData = async (
       });
     });
 
+    console.log('Item map created with entries:', Object.keys(itemMap).length);
+
     // Calculate popularity score
     const maxRevenue = Math.max(...Object.values(itemMap).map(item => item.revenue), 1);
+    console.log('Max revenue calculated:', maxRevenue);
     
     const items = Object.values(itemMap).map(item => ({
       ...item,
       popularityScore: Math.round((item.revenue / maxRevenue) * 100)
     }));
 
+    console.log('Items with popularity scores:', items);
+
     // Sort by revenue (descending)
-    return items.sort((a, b) => b.revenue - a.revenue);
+    const sortedItems = items.sort((a, b) => b.revenue - a.revenue);
+    console.log('Final sorted items:', sortedItems);
+
+    return sortedItems;
   } catch (error) {
-    console.error('Error fetching top items:', error);
+    console.error('Error in getTopItemsData:', error);
     throw new Error('No se pudieron obtener los datos de productos más vendidos');
   }
 };

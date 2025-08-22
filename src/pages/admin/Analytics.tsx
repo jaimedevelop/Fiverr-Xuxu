@@ -175,6 +175,11 @@ const Analytics: React.FC = () => {
     );
   }
 
+const timeRangeForTopItems = {
+  start: selectedTimeRange?.start || new Date(),
+  end: selectedTimeRange?.end || new Date()
+};
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-6 lg:p-8">
@@ -277,11 +282,10 @@ const Analytics: React.FC = () => {
                 Evolución de ingresos y pedidos a lo largo del tiempo
               </p>
             </div>
-            
+          
             <SalesChart
               title="Ventas"
-              data={salesData || mockSalesData}
-              comparison={salesComparison}
+              timeRange={{ start: selectedTimeRange.start, end: selectedTimeRange.end }}
             />
           </div>
 
@@ -298,10 +302,10 @@ const Analytics: React.FC = () => {
                 </p>
               </div>
               
-              <TopItems
-                title="Productos más vendidos"
-                items={topItems || mockTopItems}
-              />
+            <TopItems
+              title="Productos más vendidos"
+              timeRange={timeRangeForTopItems}
+            />
             </div>
 
             {/* Customer Analytics */}
@@ -332,10 +336,10 @@ const Analytics: React.FC = () => {
                 Análisis del desempeño de ventas por cada categoría de productos
               </p>
             </div>
-            
+          
             <CategoryPerformanceComponent
               title="Rendimiento por categoría"
-              data={categoryPerformance || mockCategoryPerformance}
+              timeRange={{ start: selectedTimeRange.start, end: selectedTimeRange.end }}
             />
           </div>
 

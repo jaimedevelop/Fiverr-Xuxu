@@ -1,10 +1,12 @@
 // src/components/admin/analytics/TopItems.tsx
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Star, Package } from 'lucide-react';
+import { TrendingUp, Star, Package, RefreshCw, AlertCircle, Info } from 'lucide-react';
 import { ItemPerformance } from '../../../types/analytics';
 import BaseCard from '../../../components/common/BaseCard';
 import { getTopItemsData } from '../../../services/analytics/topItemsService';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useBusiness } from '../../../contexts/BusinessContext';
+import { useUser } from '../../../contexts/UserContext';
 
 interface TopItemsProps {
   title: string;
@@ -17,7 +19,30 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { authState } = useAuth();
-  const user = authState.user;
+  const { business } = useBusiness();
+  const { user } = useUser();
+
+  // Add detailed debugging for auth, user, and business state
+  console.log('Auth, User, and Business state:', {
+    isAuthenticated: authState.isAuthenticated,
+    isLoading: authState.isLoading,
+    authUser: authState.user ? `Auth user with ID: ${authState.user.id}` : 'No auth user',
+    user: user ? `User with ID: ${user.uid}, role: ${user.role}` : 'No user',
+    businessId: user?.businessId || 'No businessId in user',
+    business: business ? `Business with ID: ${business.id}` : 'No business',
+  });
+
+  // Add a guard to ensure timeRange is defined
+  if (!timeRange || !timeRange.start || !timeRange.end) {
+    console.log('timeRange is undefined or incomplete');
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="flex justify-center py-8">
+          <p className="text-gray-500">Seleccionando rango de fechas...</p>
+        </div>
+      </BaseCard>
+    );
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -26,41 +51,116 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
     }).format(amount);
   };
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      if (!user?.businessId) return;
+  const fetchItems = async () => {
+    console.log('fetchItems function called');
+    
+    // Try to get businessId from either the user object or the business object
+    const businessId = user?.businessId || business?.id;
+    
+    if (!businessId) {
+      console.log('No businessId found in user or business object');
+      setError('No se encontró el ID del negocio. Por favor, inicia sesión con una cuenta de negocio.');
+      setLoading(false);
+      return;
+    }
+    
+    console.log('Fetching items for business:', businessId);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Calling getTopItemsData with:', {
+        businessId,
+        startDate: timeRange.start.toISOString(),
+        endDate: timeRange.end.toISOString()
+      });
       
-      setLoading(true);
-      setError(null);
+      const data = await getTopItemsData(businessId, timeRange.start, timeRange.end);
+      console.log('Received data from service:', data);
       
-      try {
-        const data = await getTopItemsData(user.businessId, timeRange.start, timeRange.end);
-        setItems(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al cargar los datos');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setItems(data);
+    } catch (err) {
+      console.error('Error in fetchItems:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los datos');
+    } finally {
+      console.log('fetchItems completed, setting loading to false');
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    // Only fetch if we have a businessId from either source
+    const businessId = user?.businessId || business?.id;
+    
+    if (businessId) {
+      fetchItems();
+    } else if (!authState.isLoading && user) {
+      // If auth is not loading and we have a user but no businessId, set error
+      setError('No se encontró el ID del negocio. Por favor, inicia sesión con una cuenta de negocio.');
+      setLoading(false);
+    }
+  }, [user?.businessId, business?.id, timeRange, authState.isLoading, user]);
+
+  // Add a retry button
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
     fetchItems();
-  }, [user?.businessId, timeRange]);
+  };
+
+  console.log('TopItems state:', { 
+    loading, 
+    error, 
+    itemsCount: items.length,
+    items: items.slice(0, 3) // Log first 3 items to see structure
+  });
 
   if (loading) {
     return (
       <BaseCard title={title} className={className}>
-        <div className="flex justify-center py-8">
+        <div className="flex flex-col items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Cargando datos...</p>
         </div>
       </BaseCard>
     );
   }
 
   if (error) {
+    // Check if the error is related to missing businessId
+    const isMissingBusinessError = error.includes('No se encontró el ID del negocio');
+    
     return (
       <BaseCard title={title} className={className}>
-        <div className="text-center py-8">
-          <p className="text-red-500">{error}</p>
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="flex items-center text-red-500 mb-4">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p>{error}</p>
+          </div>
+          
+          {isMissingBusinessError && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 max-w-md">
+              <div className="flex">
+                <Info className="h-5 w-5 text-blue-400 mr-2 flex-shrink-0" />
+                <div className="text-sm text-blue-700">
+                  <p className="font-medium mb-1">Información importante</p>
+                  <p>Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
+                  <ol className="list-decimal pl-5 mt-2 space-y-1">
+                    <li>Iniciar sesión con una cuenta de negocio</li>
+                    <li>O asociar esta cuenta a un negocio existente</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <button 
+            onClick={handleRetry}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reintentar
+          </button>
         </div>
       </BaseCard>
     );
@@ -73,7 +173,7 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
           <Package className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
           <p className="mt-1 text-sm text-gray-500">
-            No se encontraron productos para mostrar.
+            No se encontraron productos para mostrar en el período seleccionado.
           </p>
         </div>
       ) : (
