@@ -1,15 +1,24 @@
-import React from 'react';
+// src/components/admin/analytics/TopItems.tsx
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Star, Package } from 'lucide-react';
 import { ItemPerformance } from '../../../types/analytics';
 import BaseCard from '../../../components/common/BaseCard';
+import { getTopItemsData } from '../../../services/analytics/topItemsService';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface TopItemsProps {
   title: string;
-  items: ItemPerformance[];
+  timeRange: { start: Date; end: Date };
   className?: string;
 }
 
-const TopItems: React.FC<TopItemsProps> = ({ title, items, className = '' }) => {
+const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' }) => {
+  const [items, setItems] = useState<ItemPerformance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { authState } = useAuth();
+  const user = authState.user;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
@@ -17,22 +26,59 @@ const TopItems: React.FC<TopItemsProps> = ({ title, items, className = '' }) => 
     }).format(amount);
   };
 
-  // Sort items by revenue (descending)
-  const sortedItems = [...items].sort((a, b) => b.revenue - a.revenue);
+  useEffect(() => {
+    const fetchItems = async () => {
+      if (!user?.businessId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const data = await getTopItemsData(user.businessId, timeRange.start, timeRange.end);
+        setItems(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al cargar los datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [user?.businessId, timeRange]);
+
+  if (loading) {
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </BaseCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <BaseCard title={title} className={className}>
+        <div className="text-center py-8">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </BaseCard>
+    );
+  }
 
   return (
     <BaseCard title={title} className={className}>
-      {sortedItems.length === 0 ? (
+      {items.length === 0 ? (
         <div className="text-center py-8">
           <Package className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
           <p className="mt-1 text-sm text-gray-500">
-            No se encontraron items para mostrar.
+            No se encontraron productos para mostrar.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedItems.slice(0, 10).map((item, index) => (
+          {items.slice(0, 10).map((item, index) => (
             <div key={item.pastryId} className="flex items-center justify-between p-3 bg-white rounded-lg border">
               <div className="flex items-center">
                 <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-800 font-medium text-sm">
