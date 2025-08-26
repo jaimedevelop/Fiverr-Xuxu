@@ -23,7 +23,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
         setLoading(true);
         setError(null);
         
-        // Use real order data instead of mock data
         const orderData = await getOrderById(orderId);
         
         if (orderData) {
@@ -102,14 +101,53 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
     }).format(amount);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | any) => {
+    // Handle Firestore Timestamp objects
+    let actualDate: Date;
+    
+    if (date && typeof date === 'object' && 'seconds' in date) {
+      // Firestore Timestamp - convert to Date
+      actualDate = new Date(date.seconds * 1000);
+    } else if (date instanceof Date) {
+      actualDate = date;
+    } else if (typeof date === 'string' || typeof date === 'number') {
+      actualDate = new Date(date);
+    } else {
+      return 'Fecha inválida';
+    }
+    
+    // Check if the date is valid
+    if (isNaN(actualDate.getTime())) {
+      return 'Fecha inválida';
+    }
+    
     return new Intl.DateTimeFormat('es-MX', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }).format(date);
+    }).format(actualDate);
+  };
+
+  const formatPickupDate = (datetime: Date | any) => {
+    // Handle Firestore Timestamp objects
+    let actualDate: Date;
+    
+    if (datetime && typeof datetime === 'object' && 'seconds' in datetime) {
+      actualDate = new Date(datetime.seconds * 1000);
+    } else if (datetime instanceof Date) {
+      actualDate = datetime;
+    } else {
+      actualDate = new Date(datetime);
+    }
+    
+    return new Intl.DateTimeFormat('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(actualDate);
   };
 
   const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null => {
@@ -127,12 +165,23 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
     }
   };
 
-  const handleStatusUpdate = () => {
+  const handleStatusUpdate = async () => {
     if (!order) return;
     
     const nextStatus = getNextStatus(order.status);
     if (nextStatus) {
-      onUpdateStatus(orderId, nextStatus);
+      // Update the status
+      await onUpdateStatus(orderId, nextStatus);
+      
+      // Refresh the order data to show updated information
+      try {
+        const updatedOrderData = await getOrderById(orderId);
+        if (updatedOrderData) {
+          setOrder(updatedOrderData);
+        }
+      } catch (err) {
+        console.error('Error refreshing order after status update:', err);
+      }
     }
   };
 
@@ -210,6 +259,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
                 </dt>
                 <dd className="text-sm font-medium">{formatDate(order.estimatedDeliveryTime)}</dd>
               </div>
+              {/* Show delivered/picked up time if order is completed */}
+              {order.status === 'delivered' && order.deliveredAt && (
+                <div className="flex justify-between">
+                  <dt className="text-sm text-gray-600">
+                    {order.fulfillmentType === 'pickup' ? 'Recogido el:' : 'Entregado el:'}
+                  </dt>
+                  <dd className="text-sm font-medium text-green-600">{formatDate(order.deliveredAt)}</dd>
+                </div>
+              )}
             </dl>
           </div>
           
@@ -306,17 +364,24 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack, onUpdateSt
         </BaseCard>
       )}
 
+      {/* Fixed Pickup Information Section */}
       {order.fulfillmentType === 'pickup' && order.pickupTime && (
-        <BaseCard title="Información de recogida">
+        <BaseCard title={order.status === 'delivered' ? 'Información de recogida completada' : 'Información de recogida'}>
           <div className="flex items-start">
             <Clock className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
             <div>
               <p className="text-sm font-medium text-gray-900">
-                Fecha: {order.pickupTime.date}
+                Fecha: {formatPickupDate(order.pickupTime.datetime)}
               </p>
               <p className="text-sm text-gray-500">
-                Hora: {order.pickupTime.time}
+                Hora: {order.pickupTime.displayTime}
               </p>
+              {/* Show actual pickup time if order is completed */}
+              {order.status === 'delivered' && order.deliveredAt && (
+                <p className="text-sm text-green-600 font-medium mt-2">
+                  ✓ Recogido el: {formatDate(order.deliveredAt)}
+                </p>
+              )}
             </div>
           </div>
         </BaseCard>

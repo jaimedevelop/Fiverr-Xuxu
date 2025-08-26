@@ -1,4 +1,5 @@
 import React from 'react';
+import { FulfillmentType } from '../../../types/order';
 
 export type OrderStatus = 
   | 'pending'
@@ -12,14 +13,16 @@ export type OrderStatus =
 
 interface OrderStatusBadgeProps {
   status: OrderStatus;
+  fulfillmentType?: FulfillmentType;
   size?: 'sm' | 'md' | 'lg';
 }
 
 export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ 
   status, 
+  fulfillmentType = 'delivery',
   size = 'md' 
 }) => {
-  const getStatusConfig = (status: OrderStatus) => {
+  const getStatusConfig = (status: OrderStatus, fulfillmentType: FulfillmentType) => {
     switch (status) {
       case 'pending':
         return {
@@ -44,21 +47,21 @@ export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({
         };
       case 'ready':
         return {
-          label: 'Listo',
+          label: fulfillmentType === 'pickup' ? 'Listo para Recoger' : 'Listo para Entregar',
           bgColor: 'bg-green-100',
           textColor: 'text-green-800',
           borderColor: 'border-green-200'
         };
       case 'out-for-delivery':
         return {
-          label: 'En camino',
+          label: 'En Camino',
           bgColor: 'bg-indigo-100',
           textColor: 'text-indigo-800',
           borderColor: 'border-indigo-200'
         };
       case 'delivered':
         return {
-          label: 'Entregado',
+          label: fulfillmentType === 'pickup' ? 'Recogido' : 'Entregado',
           bgColor: 'bg-green-100',
           textColor: 'text-green-800',
           borderColor: 'border-green-200'
@@ -87,7 +90,7 @@ export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({
     }
   };
 
-  const config = getStatusConfig(status);
+  const config = getStatusConfig(status, fulfillmentType);
   
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',

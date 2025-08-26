@@ -1,9 +1,10 @@
-// src/pages/admin/Orders.tsx - Updated with requested columns and actions
+// src/pages/admin/Orders.tsx - Fixed with OrderDetails integration
 import React, { useState, useEffect } from 'react';
 import { useOrders } from '../../contexts/OrderContext';
 import { useUser } from '../../contexts/UserContext';
 import BaseCard from '../../components/common/BaseCard';
 import DataTable from '../../components/common/DataTable';
+import OrderDetails from '../../components/admin/orders/OrderDetails';
 import { Order, OrderStatus } from '../../types/order';
 import { formatCurrency, formatDate } from '../../utils/formatting';
 import userService from '../../services/userService';
@@ -84,6 +85,11 @@ const AdminOrders: React.FC = () => {
     setSelectedOrderId(orderId);
   };
 
+  const handleBackToOrders = () => {
+    console.log('🔙 Returning to orders list');
+    setSelectedOrderId(null);
+  };
+
   const handleManualRefresh = () => {
     console.log('🔄 Manual refresh clicked');
     fetchOrders();
@@ -101,6 +107,17 @@ const AdminOrders: React.FC = () => {
       </div>
     ));
   };
+
+  // If an order is selected, show OrderDetails component
+  if (selectedOrderId) {
+    return (
+      <OrderDetails
+        orderId={selectedOrderId}
+        onBack={handleBackToOrders}
+        onUpdateStatus={handleStatusUpdate}
+      />
+    );
+  }
 
   const columns = [
     {
