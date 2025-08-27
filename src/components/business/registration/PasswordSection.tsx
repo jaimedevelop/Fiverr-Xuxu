@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeHelper } from '../../../utils/themeHelper';
 import BusinessRegistrationData from '../../../types/business';
 import FormErrors from '../../../types/form';
 import FormInput from '../../common/FormInput';
@@ -26,7 +27,7 @@ const PasswordSection = ({
 
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-900 mb-4">
+      <h2 className={`text-lg font-medium text-${ThemeHelper.colors.roles.business} mb-4`}>
         Crear Contraseña
       </h2>
       
@@ -40,11 +41,12 @@ const PasswordSection = ({
             placeholder="Cree una contraseña segura"
             value={formData.password}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.password && <FormError message={errors.password} />}
           <PasswordStrength password={formData.password} />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className={`mt-1 text-sm text-${ThemeHelper.colors.neutral.muted}`}>
             La contraseña debe tener al menos 8 caracteres y un carácter especial.
           </p>
         </div>
@@ -58,6 +60,7 @@ const PasswordSection = ({
             placeholder="Repita su contraseña"
             value={formData.confirmPassword}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.confirmPassword && <FormError message={errors.confirmPassword} />}

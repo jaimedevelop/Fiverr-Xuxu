@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import PhotoUpload from './PhotoUpload';
 import AvailabilityToggle from './AvailabilityToggle';
 import { X, Save, AlertCircle } from 'lucide-react';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 const MenuItemForm = ({ item, categories, onClose }) => {
   const { user } = useUser();
@@ -167,17 +168,17 @@ const MenuItemForm = ({ item, categories, onClose }) => {
   // Don't render form if user doesn't have businessId
   if (user?.role === 'admin' && !user.businessId) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full">
-          <div className="flex items-center gap-3 text-red-600 mb-4">
-            <AlertCircle size={24} />
-            <h2 className="text-lg font-semibold">Error de Configuración</h2>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="card-base p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="text-red-600" size={32} />
           </div>
-          <p className="text-gray-700 mb-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Error de Configuración</h2>
+          <p className="text-gray-700 mb-6">
             Su cuenta de administrador no tiene un negocio asignado. Cerrando sesión...
           </p>
           <div className="flex justify-center">
-            <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
       </div>
@@ -192,15 +193,15 @@ const MenuItemForm = ({ item, categories, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-base max-w-5xl w-full max-h-[95vh] overflow-hidden shadow-brand-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-8 border-b border-gray-200 bg-gradient-main">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-2xl font-bold text-gray-900">
               {item ? 'Editar Postre' : 'Añadir Nuevo Postre'}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 mt-2">
               {item ? 'Actualizar detalles y configuración del postre' : 'Crear un nuevo listado de postre para su menú'}
             </p>
           </div>
@@ -208,7 +209,7 @@ const MenuItemForm = ({ item, categories, onClose }) => {
           <button
             onClick={onClose}
             disabled={saving}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-white/50 p-3 rounded-xl transition-all duration-200"
           >
             <X size={24} />
           </button>
@@ -216,31 +217,31 @@ const MenuItemForm = ({ item, categories, onClose }) => {
         
         {/* Error Alert */}
         {errors.general && (
-          <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center gap-2">
-              <AlertCircle size={16} className="text-red-600" />
-              <p className="text-sm text-red-600">{errors.general}</p>
+          <div className="mx-8 mt-6 bg-red-50 border-2 border-red-200 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="text-red-600" />
+              <p className="text-sm text-red-600 font-semibold">{errors.general}</p>
             </div>
           </div>
         )}
         
         {/* Tabs */}
-        <div className="border-b">
-          <nav className="flex space-x-8 px-6">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-8">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {tab.label}
                   {tab.hasError && (
-                    <AlertCircle size={14} className="text-red-500" />
+                    <AlertCircle size={16} className="text-red-500" />
                   )}
                 </div>
               </button>
@@ -249,16 +250,16 @@ const MenuItemForm = ({ item, categories, onClose }) => {
         </div>
         
         {/* Form Content */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(95vh-200px)]">
-          <div className="p-6">
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(95vh-250px)]">
+          <div className="p-8">
             
             {/* Basic Info Tab */}
             {activeTab === 'basic' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Pastry Name */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
                       Nombre del Postre *
                     </label>
                     <input
@@ -266,23 +267,24 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                       value={formData.name}
                       onChange={(e) => handleChange('name', e.target.value)}
                       disabled={saving}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.name ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`input-base ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                       placeholder="p.ej., Pastel de Chocolate, Tarta de Fresa"
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle size={16} />
+                        {errors.name}
+                      </p>
                     )}
                   </div>
                   
                   {/* Price */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
                       Precio (MXN) *
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                      <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-500 font-bold">$</span>
                       <input
                         type="number"
                         step="0.01"
@@ -290,29 +292,28 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                         value={formData.price}
                         onChange={(e) => handleChange('price', e.target.value)}
                         disabled={saving}
-                        className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          errors.price ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`input-base pl-10 ${errors.price ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                         placeholder="0.00"
                       />
                     </div>
                     {errors.price && (
-                      <p className="mt-1 text-sm text-red-600">{errors.price}</p>
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle size={16} />
+                        {errors.price}
+                      </p>
                     )}
                   </div>
                   
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
                       Categoría
                     </label>
                     <select
                       value={formData.categoryId}
                       onChange={(e) => handleChange('categoryId', e.target.value)}
                       disabled={saving}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.categoryId ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`input-base ${errors.categoryId ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     >
                       <option value="">Seleccione una categoría</option>
                       {categories.map(category => (
@@ -322,10 +323,13 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                       ))}
                     </select>
                     {errors.categoryId && (
-                      <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle size={16} />
+                        {errors.categoryId}
+                      </p>
                     )}
                     {categories.length === 0 && (
-                      <p className="mt-1 text-sm text-orange-600">
+                      <p className="mt-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
                         No hay categorías disponibles. Cree categorías primero para organizar sus postres.
                       </p>
                     )}
@@ -334,7 +338,7 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">
                     Descripción *
                   </label>
                   <textarea
@@ -342,15 +346,16 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                     onChange={(e) => handleChange('description', e.target.value)}
                     disabled={saving}
                     rows={4}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.description ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`input-base ${errors.description ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     placeholder="Describa su postre - ingredientes, sabor, textura, características especiales..."
                   />
                   {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle size={16} />
+                      {errors.description}
+                    </p>
                   )}
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-purple-600 bg-purple-50 p-2 rounded-lg">
                     Una buena descripción ayuda a los clientes a entender qué hace especial a su postre
                   </p>
                 </div>
@@ -359,10 +364,10 @@ const MenuItemForm = ({ item, categories, onClose }) => {
             
             {/* Images Tab */}
             {activeTab === 'images' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Fotos del Postre</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Fotos del Postre</h3>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                     Suba fotos de alta calidad de su postre. La primera imagen será la foto principal que se mostrará en los listados.
                   </p>
                 </div>
@@ -372,10 +377,10 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                   disabled={saving}
                 />
                 {errors.images && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle size={16} className="text-red-600" />
-                      <p className="text-sm text-red-600">{errors.images}</p>
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle size={20} className="text-red-600" />
+                      <p className="text-sm text-red-600 font-semibold">{errors.images}</p>
                     </div>
                   </div>
                 )}
@@ -384,10 +389,10 @@ const MenuItemForm = ({ item, categories, onClose }) => {
             
             {/* Availability Tab */}
             {activeTab === 'availability' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Configuración de Disponibilidad</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Configuración de Disponibilidad</h3>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                     Controle cuándo los clientes pueden ver y pedir este postre
                   </p>
                 </div>
@@ -403,17 +408,17 @@ const MenuItemForm = ({ item, categories, onClose }) => {
             
             {/* Advanced Tab */}
             {activeTab === 'advanced' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Configuración Avanzada</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Configuración Avanzada</h3>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                     Opciones adicionales y metadatos
                   </p>
                 </div>
                 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">
                     Etiquetas
                   </label>
                   <input
@@ -421,17 +426,17 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                     value={formData.tags.join(', ')}
                     onChange={(e) => handleChange('tags', e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag))}
                     disabled={saving}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-base"
                     placeholder="p.ej., sin gluten, vegano, cumpleaños, personalizado"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-purple-600 bg-purple-50 p-2 rounded-lg">
                     Separe las etiquetas con comas. Estas ayudan con la búsqueda y filtrado.
                   </p>
                 </div>
                 
                 {/* Inventory */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">
                     Inventario Inicial
                   </label>
                   <input
@@ -440,10 +445,10 @@ const MenuItemForm = ({ item, categories, onClose }) => {
                     value={formData.inventory}
                     onChange={(e) => handleChange('inventory', parseInt(e.target.value) || 0)}
                     disabled={saving}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-base"
                     placeholder="0"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-purple-600 bg-purple-50 p-2 rounded-lg">
                     Establezca la cantidad inicial de stock para este postre
                   </p>
                 </div>
@@ -452,17 +457,17 @@ const MenuItemForm = ({ item, categories, onClose }) => {
           </div>
           
           {/* Form Actions */}
-          <div className="px-6 py-4 bg-gray-50 border-t flex justify-between items-center">
-            <div className="text-sm text-gray-500">
+          <div className="px-8 py-6 bg-gradient-main border-t border-gray-200 flex justify-between items-center">
+            <div className="text-sm text-gray-600 font-medium">
               * Campos obligatorios
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={saving}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className={`${getButtonClass('outline')} disabled:opacity-50`}
               >
                 Cancelar
               </button>
@@ -470,18 +475,18 @@ const MenuItemForm = ({ item, categories, onClose }) => {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className={`${getButtonClass('admin')} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {saving ? (
-                  <>
+                  <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Guardando...
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span className="flex items-center gap-2">
                     <Save size={16} />
                     {item ? 'Actualizar Postre' : 'Crear Postre'}
-                  </>
+                  </span>
                 )}
               </button>
             </div>

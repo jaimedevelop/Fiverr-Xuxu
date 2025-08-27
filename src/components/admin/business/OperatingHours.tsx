@@ -4,6 +4,7 @@ import { Business, type OperatingHours, type DayHours } from '../../../types/bus
 import Button from '../../../components/ui/Button';
 import Select from '../../../components/ui/Select';
 import BaseCard from '../../../components/common/BaseCard';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface OperatingHoursProps {
   business: Business;
@@ -87,109 +88,125 @@ const OperatingHours: React.FC<OperatingHoursProps> = ({
   };
 
   return (
-    <BaseCard title="Horarios de Operación">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium text-gray-900">
-          Configura los horarios de tu negocio
-        </h2>
-        {!isEditing && (
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing(true)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Editar
-          </Button>
+    <div className="card-base shadow-brand-lg">
+      <div className="p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Horarios de Operación</h2>
+            <p className="text-sm text-gray-600 mt-1">Configura cuándo está abierto tu negocio</p>
+          </div>
+          {!isEditing && (
+            <button
+              className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className="h-4 w-4" />
+              Editar
+            </button>
+          )}
+        </div>
+
+        {isEditing ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              {daysOfWeek.map((day) => (
+                <div key={day.id} className="card-base p-6 border-2 border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`${day.id}-isOpen`}
+                        checked={formData[day.id as keyof OperatingHours].isOpen}
+                        onChange={() => handleDayToggle(day.id as keyof OperatingHours)}
+                        className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor={`${day.id}-isOpen`} className="ml-4 block text-base font-bold text-gray-700">
+                        {day.name}
+                      </label>
+                    </div>
+
+                    {formData[day.id as keyof OperatingHours].isOpen && (
+                      <div className="flex items-center space-x-6">
+                        <div>
+                          <label className="block text-xs font-semibold text-purple-600 mb-2 uppercase tracking-wide">Apertura</label>
+                          <select
+                            value={formData[day.id as keyof OperatingHours].openTime}
+                            onChange={(e) => handleTimeChange(day.id as keyof OperatingHours, 'openTime', e.target.value)}
+                            className="input-base w-36"
+                          >
+                            {timeOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-purple-600 mb-2 uppercase tracking-wide">Cierre</label>
+                          <select
+                            value={formData[day.id as keyof OperatingHours].closeTime}
+                            onChange={(e) => handleTimeChange(day.id as keyof OperatingHours, 'closeTime', e.target.value)}
+                            className="input-base w-36"
+                          >
+                            {timeOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                className={`${getButtonClass('outline')} flex items-center gap-2`}
+                onClick={handleCancel}
+              >
+                <X className="h-4 w-4" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`${getButtonClass('admin')} flex items-center gap-2 disabled:opacity-50`}
+              >
+                <Save className="h-4 w-4" />
+                {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            {daysOfWeek.map((day) => {
+              const dayHours = formData[day.id as keyof OperatingHours];
+              return (
+                <div key={day.id} className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                  <div className="flex items-center">
+                    <div className={`h-4 w-4 rounded-full mr-4 shadow-sm ${dayHours.isOpen ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
+                    <span className="text-base font-bold text-gray-700">{day.name}</span>
+                  </div>
+                  <div className="text-sm font-medium">
+                    {dayHours.isOpen ? (
+                      <span className="text-gray-700">
+                        {formatTime(dayHours.openTime)} - {formatTime(dayHours.closeTime)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 px-3 py-1 bg-gray-200 rounded-full">Cerrado</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
-
-      {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            {daysOfWeek.map((day) => (
-              <div key={day.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`${day.id}-isOpen`}
-                    checked={formData[day.id as keyof OperatingHours].isOpen}
-                    onChange={() => handleDayToggle(day.id as keyof OperatingHours)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor={`${day.id}-isOpen`} className="ml-3 block text-sm font-medium text-gray-700">
-                    {day.name}
-                  </label>
-                </div>
-
-                {formData[day.id as keyof OperatingHours].isOpen && (
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Apertura</label>
-                      <Select
-                        value={formData[day.id as keyof OperatingHours].openTime}
-                        onChange={(e) => handleTimeChange(day.id as keyof OperatingHours, 'openTime', e.target.value)}
-                        options={timeOptions}
-                        className="w-32"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Cierre</label>
-                      <Select
-                        value={formData[day.id as keyof OperatingHours].closeTime}
-                        onChange={(e) => handleTimeChange(day.id as keyof OperatingHours, 'closeTime', e.target.value)}
-                        options={timeOptions}
-                        className="w-32"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <div className="space-y-4">
-          {daysOfWeek.map((day) => {
-            const dayHours = formData[day.id as keyof OperatingHours];
-            return (
-              <div key={day.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center">
-                  <div className={`h-3 w-3 rounded-full mr-3 ${dayHours.isOpen ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  <span className="text-sm font-medium text-gray-700">{day.name}</span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  {dayHours.isOpen ? (
-                    <span>
-                      {formatTime(dayHours.openTime)} - {formatTime(dayHours.closeTime)}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400">Cerrado</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </BaseCard>
+    </div>
   );
 };
 

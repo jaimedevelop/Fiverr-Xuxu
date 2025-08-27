@@ -42,10 +42,12 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }) => {
 
   if (!mainImage || imageError) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
-        <div className="text-center text-gray-400">
-          <ImageIcon size={32} className="mx-auto mb-2" />
-          <span className="text-xs">Sin Imagen</span>
+      <div className={`bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${className}`}>
+        <div className="text-center text-gray-500">
+          <div className="w-12 h-12 bg-white/60 rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm">
+            <ImageIcon size={24} />
+          </div>
+          <span className="text-xs font-medium">Sin Imagen</span>
         </div>
       </div>
     );
@@ -53,9 +55,9 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }) => {
 
   if (!imageLoaded) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
+      <div className={`bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${className}`}>
         <div className="animate-pulse">
-          <div className="bg-gray-300 rounded w-8 h-8"></div>
+          <div className="w-10 h-10 bg-gradient-to-r from-saffron-200 to-saffron-300 rounded-full opacity-60"></div>
         </div>
       </div>
     );
@@ -64,42 +66,48 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }) => {
   if (shouldUseBlurBackground) {
     return (
       <div className={`relative overflow-hidden ${className}`}>
-        {/* Blurred background */}
+        {/* Blurred background with theme colors */}
         <div 
-          className="absolute inset-0 scale-110 blur-lg opacity-60"
+          className="absolute inset-0 scale-110 opacity-40"
           style={{
             backgroundImage: `url(${mainImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            filter: 'blur(20px) brightness(0.8)',
+            filter: 'blur(25px) brightness(0.7) saturate(1.2)',
           }}
         />
         
+        {/* Gradient overlay for brand consistency */}
+        <div className="absolute inset-0 bg-gradient-to-t from-saffron-500/20 via-transparent to-purple-500/20" />
+        
         {/* Main image */}
-        <div className="relative w-full h-full flex items-center justify-center p-2">
+        <div className="relative w-full h-full flex items-center justify-center p-3">
           <img
             src={mainImage}
             alt={alt}
-            className="max-w-full max-h-full object-contain rounded-sm shadow-lg"
+            className="max-w-full max-h-full object-contain rounded-lg shadow-brand-lg border border-white/20"
             onError={() => setImageError(true)}
           />
         </div>
         
-        {/* Overlay gradient for better contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        {/* Enhanced overlay for better contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
       </div>
     );
   }
 
-  // Standard image display
+  // Standard image display with theme enhancements
   return (
-    <div className={`overflow-hidden ${className}`}>
+    <div className={`overflow-hidden relative ${className}`}>
       <img
         src={mainImage}
         alt={alt}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         onError={() => setImageError(true)}
       />
+      
+      {/* Subtle overlay for consistent branding */}
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent to-transparent hover:from-black/5 transition-all duration-300 pointer-events-none" />
     </div>
   );
 };

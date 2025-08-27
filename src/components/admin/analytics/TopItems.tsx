@@ -7,6 +7,7 @@ import { getTopItemsData } from '../../../services/analytics/topItemsService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { useUser } from '../../../contexts/UserContext';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface TopItemsProps {
   title: string;
@@ -36,11 +37,14 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
   if (!timeRange || !timeRange.start || !timeRange.end) {
     console.log('timeRange is undefined or incomplete');
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex justify-center py-8">
-          <p className="text-gray-500">Seleccionando rango de fechas...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">Seleccionando rango de fechas...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -117,12 +121,15 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
 
   if (loading) {
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Cargando datos...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 font-medium">Cargando datos...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -131,89 +138,105 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
     const isMissingBusinessError = error.includes('No se encontró el ID del negocio');
     
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="flex items-center text-red-500 mb-4">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <p>{error}</p>
-          </div>
-          
-          {isMissingBusinessError && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 max-w-md">
-              <div className="flex">
-                <Info className="h-5 w-5 text-blue-400 mr-2 flex-shrink-0" />
-                <div className="text-sm text-blue-700">
-                  <p className="font-medium mb-1">Información importante</p>
-                  <p>Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
-                  <ol className="list-decimal pl-5 mt-2 space-y-1">
-                    <li>Iniciar sesión con una cuenta de negocio</li>
-                    <li>O asociar esta cuenta a un negocio existente</li>
-                  </ol>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex items-center text-red-500 mb-6">
+              <AlertCircle className="h-6 w-6 mr-3" />
+              <p className="font-semibold">{error}</p>
+            </div>
+            
+            {isMissingBusinessError && (
+              <div className="bg-sky-50 border-2 border-sky-200 rounded-xl p-6 mb-6 max-w-md">
+                <div className="flex">
+                  <Info className="h-5 w-5 text-sky-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-sky-800">
+                    <p className="font-bold mb-2">Información importante</p>
+                    <p className="mb-3">Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>Iniciar sesión con una cuenta de negocio</li>
+                      <li>O asociar esta cuenta a un negocio existente</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          
-          <button 
-            onClick={handleRetry}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reintentar
-          </button>
+            )}
+            
+            <button 
+              onClick={handleRetry}
+              className={`${getButtonClass('admin')} flex items-center gap-2`}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reintentar
+            </button>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
   return (
-    <BaseCard title={title} className={className}>
-      {items.length === 0 ? (
-        <div className="text-center py-8">
-          <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No se encontraron productos para mostrar en el período seleccionado.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {items.slice(0, 10).map((item, index) => (
-            <div key={item.pastryId} className="flex items-center justify-between p-3 bg-white rounded-lg border">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-800 font-medium text-sm">
-                  {index + 1}
-                </div>
-                <div className="ml-4">
-                  <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                  <p className="text-sm text-gray-500">{item.categoryName}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{formatCurrency(item.revenue)}</p>
-                  <p className="text-xs text-gray-500">{item.ordersCount} pedidos</p>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${item.popularityScore}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex items-center text-yellow-500">
-                    <Star className="h-4 w-4 fill-current" />
-                    <span className="ml-1 text-xs font-medium">{item.popularityScore}</span>
-                  </div>
-                </div>
-              </div>
+    <div className="card-base shadow-brand-lg">
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+        
+        {items.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package className="h-8 w-8 text-purple-600" />
             </div>
-          ))}
-        </div>
-      )}
-    </BaseCard>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay datos</h3>
+            <p className="text-gray-500">
+              No se encontraron productos para mostrar en el período seleccionado.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {items.slice(0, 10).map((item, index) => (
+              <div key={item.pastryId} className="card-interactive p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-white shadow-lg ${
+                      index === 0 ? 'bg-gradient-to-r from-saffron-500 to-amber-500' :
+                      index === 1 ? 'bg-gradient-to-r from-emerald-500 to-green-500' :
+                      index === 2 ? 'bg-gradient-to-r from-purple-500 to-violet-500' :
+                      'bg-gradient-to-r from-gray-500 to-gray-600'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="ml-4">
+                      <h4 className="text-base font-bold text-gray-900">{item.name}</h4>
+                      <p className="text-sm text-purple-600 font-semibold">{item.categoryName}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-6">
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-saffron-600">{formatCurrency(item.revenue)}</p>
+                      <p className="text-sm text-gray-600 font-medium">{item.ordersCount} {item.ordersCount === 1 ? 'pedido' : 'pedidos'}</p>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-24 bg-gray-200 rounded-full h-3 mr-3">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out" 
+                          style={{ width: `${item.popularityScore}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex items-center text-amber-500">
+                        <Star className="h-4 w-4 fill-current" />
+                        <span className="ml-1 text-sm font-bold">{item.popularityScore}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

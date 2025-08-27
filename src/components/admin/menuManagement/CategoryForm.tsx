@@ -2,30 +2,31 @@ import React, { useState } from 'react';
 import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
 import { X, Save, Palette } from 'lucide-react';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 const CategoryForm = ({ category, onClose }) => {
   const [formData, setFormData] = useState({
     name: category?.name || '',
     description: category?.description || '',
-    color: category?.color || '#3B82F6',
+    color: category?.color || '#8b5cf6',
     sortOrder: category?.sortOrder || 0
   });
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
   const predefinedColors = [
-    '#3B82F6', // Blue
-    '#EF4444', // Red
-    '#10B981', // Green
-    '#F59E0B', // Yellow
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
-    '#F97316', // Orange
-    '#06B6D4', // Cyan
-    '#84CC16', // Lime
-    '#6366F1', // Indigo
-    '#14B8A6', // Teal
-    '#F43F5E', // Rose
+    '#8b5cf6', // Purple (admin theme)
+    '#F5CB5C', // Saffron (brand primary)
+    '#10B981', // Emerald (success)
+    '#EF4444', // Red (error)
+    '#F59E0B', // Amber (warning)
+    '#FF96D7', // Persian Pink (brand)
+    '#3B82F6', // Sky (info)
+    '#EC4899', // Rose (accent)
+    '#06B6D4', // Cyan (cool)
+    '#84CC16', // Lime (fresh)
+    '#6366F1', // Indigo (deep)
+    '#F43F5E', // Rose Red (bold)
   ];
 
   const validateForm = () => {
@@ -77,12 +78,12 @@ const CategoryForm = ({ category, onClose }) => {
   };
 
   return (
-    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="card-base max-w-lg w-full max-h-[90vh] overflow-hidden shadow-brand-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-main">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900">
               {category ? 'Editar Categoría' : 'Crear Nueva Categoría'}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -93,16 +94,17 @@ const CategoryForm = ({ category, onClose }) => {
           <button
             onClick={onClose}
             disabled={saving}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-white/50 p-2 rounded-lg transition-all duration-200"
           >
             <X size={20} />
           </button>
         </div>
+
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
           {/* Category Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Nombre de la Categoría *
             </label>
             <input
@@ -110,18 +112,20 @@ const CategoryForm = ({ category, onClose }) => {
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               disabled={saving}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.name ? 'border-red-300' : 'border-gray-300'
-              }`}
+              className={`input-base ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
               placeholder="p.ej., Pasteles, Galletas, Panes"
             />
             {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+              <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-red-100 text-red-600 text-xs flex items-center justify-center">!</span>
+                {errors.name}
+              </p>
             )}
           </div>
+
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Descripción
             </label>
             <textarea
@@ -129,56 +133,65 @@ const CategoryForm = ({ category, onClose }) => {
               onChange={(e) => handleChange('description', e.target.value)}
               disabled={saving}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-base"
               placeholder="Descripción opcional para esta categoría..."
             />
           </div>
+
           {/* Color Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
               Color de la Categoría
             </label>
             
             {/* Color Preview */}
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-4 mb-4 p-4 bg-gray-50 rounded-xl">
               <div 
-                className="w-8 h-8 rounded-full border-2 border-gray-200 shadow-sm"
+                className="w-10 h-10 rounded-full shadow-md border-2 border-white"
                 style={{ backgroundColor: formData.color }}
               />
-              <span className="text-sm text-gray-600">{formData.color}</span>
+              <div>
+                <span className="text-sm font-medium text-gray-900">{formData.color}</span>
+                <p className="text-xs text-gray-600">Color seleccionado</p>
+              </div>
             </div>
+
             {/* Predefined Colors */}
-            <div className="grid grid-cols-6 gap-2 mb-3">
+            <div className="grid grid-cols-6 gap-3 mb-4">
               {predefinedColors.map(color => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => handleChange('color', color)}
                   disabled={saving}
-                  className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
-                    formData.color === color ? 'border-gray-400 shadow-md' : 'border-gray-200'
+                  className={`w-10 h-10 rounded-full border-2 hover:scale-110 transition-all duration-200 shadow-md ${
+                    formData.color === color 
+                      ? 'border-purple-400 shadow-lg ring-2 ring-purple-200' 
+                      : 'border-white hover:border-gray-300'
                   }`}
                   style={{ backgroundColor: color }}
                   title={color}
                 />
               ))}
             </div>
+
             {/* Custom Color Input */}
-            <div className="flex items-center gap-2">
-              <Palette size={16} className="text-gray-400" />
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <Palette size={18} className="text-purple-500" />
               <input
                 type="color"
                 value={formData.color}
                 onChange={(e) => handleChange('color', e.target.value)}
                 disabled={saving}
-                className="w-12 h-8 border border-gray-300 rounded cursor-pointer"
+                className="w-12 h-8 border border-gray-300 rounded-lg cursor-pointer shadow-sm"
               />
-              <span className="text-xs text-gray-500">Color personalizado</span>
+              <span className="text-sm text-gray-600 font-medium">Color personalizado</span>
             </div>
           </div>
+
           {/* Sort Order */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Orden de Clasificación
             </label>
             <input
@@ -186,39 +199,44 @@ const CategoryForm = ({ category, onClose }) => {
               value={formData.sortOrder}
               onChange={(e) => handleChange('sortOrder', e.target.value)}
               disabled={saving}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-base"
               placeholder="0"
               min="0"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-gray-500">
               Los números más bajos aparecen primero en la lista
             </p>
           </div>
+
           {/* Preview */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">Vista previa:</p>
+          <div className="card-base p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-dashed border-2 border-purple-200">
+            <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 text-xs flex items-center justify-center">👁</span>
+              Vista previa:
+            </p>
             <div className="flex items-center gap-3">
               <div 
-                className="w-4 h-4 rounded-full border border-gray-200"
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
                 style={{ backgroundColor: formData.color }}
               />
-              <span className="font-medium">
+              <span className="font-semibold text-gray-900">
                 {formData.name || 'Nombre de la Categoría'}
               </span>
             </div>
             {formData.description && (
-              <p className="text-sm text-gray-600 mt-1 ml-7">
+              <p className="text-sm text-gray-600 mt-2 ml-8">
                 {formData.description}
               </p>
             )}
           </div>
+
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className={`flex-1 ${getButtonClass('outline')} disabled:opacity-50`}
             >
               Cancelar
             </button>
@@ -226,18 +244,18 @@ const CategoryForm = ({ category, onClose }) => {
             <button
               type="submit"
               disabled={saving || !formData.name.trim()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={`flex-1 ${getButtonClass('admin')} disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {saving ? (
-                <>
+                <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Guardando...
-                </>
+                </span>
               ) : (
-                <>
+                <span className="flex items-center justify-center gap-2">
                   <Save size={16} />
                   {category ? 'Actualizar Categoría' : 'Crear Categoría'}
-                </>
+                </span>
               )}
             </button>
           </div>
@@ -247,4 +265,4 @@ const CategoryForm = ({ category, onClose }) => {
   );
 };
 
-export default CategoryForm;  
+export default CategoryForm;

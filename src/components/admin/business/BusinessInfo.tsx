@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/common/Input';
 import FormError from '../../../components/common/FormError';
 import BaseCard from '../../../components/common/BaseCard';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface BusinessInfoProps {
   business: Business;
@@ -114,230 +115,247 @@ const BusinessInfo: React.FC<BusinessInfoProps> = ({
   };
 
   return (
-    <BaseCard title="Información del Negocio">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium text-gray-900">
-          Detalles de tu negocio
-        </h2>
-        {!isEditing && (
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing(true)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Editar
-          </Button>
+    <div className="card-base shadow-brand-lg">
+      <div className="p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Información del Negocio</h2>
+            <p className="text-sm text-gray-600 mt-1">Administra los detalles de tu negocio</p>
+          </div>
+          {!isEditing && (
+            <button
+              className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className="h-4 w-4" />
+              Editar
+            </button>
+          )}
+        </div>
+
+        {isEditing ? (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label htmlFor="storeName" className="block text-sm font-bold text-gray-700 mb-3">
+                  Nombre del Negocio
+                </label>
+                <input
+                  id="storeName"
+                  name="storeName"
+                  value={formData.storeName || ''}
+                  onChange={handleInputChange}
+                  className={`input-base ${errors.storeName ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                />
+                {errors.storeName && (
+                  <p className="mt-2 text-sm text-red-600">{errors.storeName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-3">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email || ''}
+                  onChange={handleInputChange}
+                  className={`input-base ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                />
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-bold text-gray-700 mb-3">
+                  Teléfono
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  value={formData.phone || ''}
+                  onChange={handleInputChange}
+                  className={`input-base ${errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                />
+                {errors.phone && (
+                  <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-3">
+                  Dirección
+                </label>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="street" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Calle
+                    </label>
+                    <input
+                      id="street"
+                      name="street"
+                      value={formData.address?.street || ''}
+                      onChange={handleInputChange}
+                      className="input-base"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="colonia" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Colonia
+                    </label>
+                    <input
+                      id="colonia"
+                      name="colonia"
+                      value={formData.address?.colonia || ''}
+                      onChange={handleInputChange}
+                      className="input-base"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="municipality" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Municipio
+                    </label>
+                    <input
+                      id="municipality"
+                      name="municipality"
+                      value={formData.address?.municipality || ''}
+                      onChange={handleInputChange}
+                      className="input-base"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="postalCode" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Código Postal
+                      </label>
+                      <input
+                        id="postalCode"
+                        name="postalCode"
+                        value={formData.address?.postalCode || ''}
+                        onChange={handleInputChange}
+                        className="input-base"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="state" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Estado
+                      </label>
+                      <input
+                        id="state"
+                        name="state"
+                        value={formData.address?.state || ''}
+                        onChange={handleInputChange}
+                        className="input-base"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-3">
+                  Horario de Apertura
+                </label>
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-sm text-purple-700">
+                  Los horarios de operación se configuran en la sección de horarios.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                className={`${getButtonClass('outline')} flex items-center gap-2`}
+                onClick={handleCancel}
+              >
+                <X className="h-4 w-4" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`${getButtonClass('admin')} flex items-center gap-2 disabled:opacity-50`}
+              >
+                <Save className="h-4 w-4" />
+                {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-8">
+            <div className="flex items-center p-6 bg-gradient-to-r from-purple-50 to-saffron-50 rounded-2xl">
+              <div className="flex-shrink-0 h-20 w-20 rounded-full bg-gradient-to-r from-purple-500 to-saffron-500 flex items-center justify-center text-white shadow-lg">
+                <span className="text-2xl font-bold">
+                  {business.storeName ? business.storeName.charAt(0).toUpperCase() : 'B'}
+                </span>
+              </div>
+              <div className="ml-6">
+                <h3 className="text-2xl font-bold text-gray-900">{business.storeName}</h3>
+                <p className="text-sm text-purple-600 font-medium mt-1">{business.accountManager}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex items-start p-4 bg-gray-50 rounded-xl">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-purple-600" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-bold text-gray-900 mb-1">Dirección</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {business.address.street}, {business.address.colonia}<br />
+                    {business.address.municipality}, {business.address.state} {business.address.postalCode}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start p-4 bg-gray-50 rounded-xl">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-emerald-600" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-bold text-gray-900 mb-1">Teléfono</p>
+                  <p className="text-sm text-gray-700">{business.phone}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start p-4 bg-gray-50 rounded-xl">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-sky-600" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-bold text-gray-900 mb-1">Email</p>
+                  <p className="text-sm text-gray-700">{business.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start p-4 bg-gray-50 rounded-xl">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-amber-600" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-bold text-gray-900 mb-1">Horario</p>
+                  <p className="text-sm text-gray-700">
+                    Configurado en la sección de horarios
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre del Negocio
-              </label>
-              <Input
-                id="storeName"
-                name="storeName"
-                value={formData.storeName || ''}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.storeName && <FormError message={errors.storeName} />}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email || ''}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.email && <FormError message={errors.email} />}
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Teléfono
-              </label>
-              <Input
-                id="phone"
-                name="phone"
-                value={formData.phone || ''}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.phone && <FormError message={errors.phone} />}
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                Dirección
-              </label>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                    Calle
-                  </label>
-                  <Input
-                    id="street"
-                    name="street"
-                    value={formData.address?.street || ''}
-                    onChange={handleInputChange}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="colonia" className="block text-sm font-medium text-gray-700 mb-1">
-                    Colonia
-                  </label>
-                  <Input
-                    id="colonia"
-                    name="colonia"
-                    value={formData.address?.colonia || ''}
-                    onChange={handleInputChange}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="municipality" className="block text-sm font-medium text-gray-700 mb-1">
-                    Municipio
-                  </label>
-                  <Input
-                    id="municipality"
-                    name="municipality"
-                    value={formData.address?.municipality || ''}
-                    onChange={handleInputChange}
-                    className="w-full"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                      Código Postal
-                    </label>
-                    <Input
-                      id="postalCode"
-                      name="postalCode"
-                      value={formData.address?.postalCode || ''}
-                      onChange={handleInputChange}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                      Estado
-                    </label>
-                    <Input
-                      id="state"
-                      name="state"
-                      value={formData.address?.state || ''}
-                      onChange={handleInputChange}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            <div className="md:col-span-2">
-              <label htmlFor="openingHours" className="block text-sm font-medium text-gray-700 mb-1">
-                Horario de Apertura
-              </label>
-              <div className="text-sm text-gray-500">
-                Los horarios de operación se configuran en la sección de horarios.
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-              <span className="text-xl font-bold">
-                {business.storeName ? business.storeName.charAt(0).toUpperCase() : 'B'}
-              </span>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">{business.storeName}</h3>
-              <p className="text-sm text-gray-500">{business.accountManager}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-1">
-                <MapPin className="h-5 w-5 text-gray-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Dirección</p>
-                <p className="text-sm text-gray-500">
-                  {business.address.street}, {business.address.colonia}<br />
-                  {business.address.municipality}, {business.address.state} {business.address.postalCode}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-1">
-                <Phone className="h-5 w-5 text-gray-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Teléfono</p>
-                <p className="text-sm text-gray-500">{business.phone}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-1">
-                <Mail className="h-5 w-5 text-gray-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Email</p>
-                <p className="text-sm text-gray-500">{business.email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-1">
-                <Clock className="h-5 w-5 text-gray-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Horario</p>
-                <p className="text-sm text-gray-500">
-                  Configurado en la sección de horarios
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </BaseCard>
+    </div>
   );
 };
 

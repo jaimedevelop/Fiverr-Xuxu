@@ -1,6 +1,8 @@
 // src/components/common/ImageUpload.tsx
 import React, { useRef } from 'react';
+import { X, Upload } from 'lucide-react';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import { getButtonClass } from '../../utils/themeHelper';
 
 interface ImageUploadProps {
   onImageChange: (file: File | null, url: string) => void;
@@ -57,50 +59,53 @@ const ImageUpload = ({ onImageChange, currentImageUrl }: ImageUploadProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-4">
+    <div className="flex flex-col items-center space-y-4">
+      {/* Image Preview Area */}
+      <div className="relative">
         {previewUrl ? (
-          <div className="relative">
+          <div className="relative group">
             <img 
               src={previewUrl} 
               alt="Logo preview" 
-              className="w-32 h-32 object-contain border border-gray-300 rounded-md"
+              className="w-32 h-32 object-contain card-base p-2 transition-transform duration-200 group-hover:scale-105"
             />
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full p-1.5 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           </div>
         ) : (
-          <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+          <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 hover:border-saffron-400 hover:bg-gradient-to-br hover:from-saffron-50 hover:to-orange-50 transition-all duration-300 cursor-pointer"
+               onClick={() => fileInputRef.current?.click()}>
+            <Upload className="h-12 w-12 text-gray-400" />
           </div>
         )}
       </div>
       
+      {/* Loading Progress */}
       {isLoading && (
-        <div className="w-full mb-2">
-          <div className="text-xs text-gray-600 mb-1">Subiendo: {progress}%</div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
+        <div className="w-full max-w-xs space-y-2">
+          <div className="text-xs text-gray-600 font-medium">Subiendo: {progress}%</div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-blue-600 h-1.5 rounded-full" 
+              className="bg-gradient-saffron h-2 rounded-full transition-all duration-300 ease-out shadow-sm"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
       )}
       
+      {/* Error Display */}
       {error && (
-        <div className="text-red-500 text-sm mb-2">{error}</div>
+        <div className="text-red-600 text-sm font-medium bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+          {error}
+        </div>
       )}
       
+      {/* Upload Button */}
       <div>
         <input
           type="file"
@@ -112,11 +117,17 @@ const ImageUpload = ({ onImageChange, currentImageUrl }: ImageUploadProps) => {
         />
         <label
           htmlFor="logo-upload"
-          className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className={`${getButtonClass('outline')} cursor-pointer inline-flex items-center space-x-2`}
         >
-          {isLoading ? 'Subiendo...' : 'Seleccionar Imagen'}
+          <Upload className="h-4 w-4" />
+          <span>{isLoading ? 'Subiendo...' : 'Seleccionar Imagen'}</span>
         </label>
       </div>
+      
+      {/* Helper Text */}
+      <p className="text-xs text-gray-500 text-center max-w-xs">
+        Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+      </p>
     </div>
   );
 };

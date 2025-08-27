@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Calendar, Tag, Percent } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import { Plus, Edit, Trash2, Eye, Calendar, Tag, Percent, DollarSign, Gift, Truck, Search, Filter, Users, TrendingUp } from 'lucide-react';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import BaseCard from '../../../components/common/BaseCard';
 import DataTable from '../../../components/common/DataTable';
 import Input from '../../../components/common/Input';
@@ -154,33 +154,48 @@ const PromotionsList: React.FC<PromotionsListProps> = ({
     }).format(date);
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeConfig = (type: string) => {
     switch (type) {
       case 'percentage':
-        return 'Porcentaje';
+        return { 
+          label: 'Porcentaje', 
+          icon: <Percent className="h-4 w-4" />,
+          bgColor: 'bg-purple-100',
+          textColor: 'text-purple-800',
+          iconColor: 'text-purple-600'
+        };
       case 'fixed_amount':
-        return 'Monto Fijo';
+        return { 
+          label: 'Monto Fijo', 
+          icon: <DollarSign className="h-4 w-4" />,
+          bgColor: 'bg-emerald-100',
+          textColor: 'text-emerald-800',
+          iconColor: 'text-emerald-600'
+        };
       case 'buy_one_get_one':
-        return '2x1';
+        return { 
+          label: '2x1', 
+          icon: <Gift className="h-4 w-4" />,
+          bgColor: 'bg-pink-100',
+          textColor: 'text-pink-800',
+          iconColor: 'text-pink-600'
+        };
       case 'free_shipping':
-        return 'Envío Gratis';
+        return { 
+          label: 'Envío Gratis', 
+          icon: <Truck className="h-4 w-4" />,
+          bgColor: 'bg-blue-100',
+          textColor: 'text-blue-800',
+          iconColor: 'text-blue-600'
+        };
       default:
-        return type;
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'percentage':
-        return <Percent className="h-4 w-4" />;
-      case 'fixed_amount':
-        return <Tag className="h-4 w-4" />;
-      case 'buy_one_get_one':
-        return <Tag className="h-4 w-4" />;
-      case 'free_shipping':
-        return <Tag className="h-4 w-4" />;
-      default:
-        return <Tag className="h-4 w-4" />;
+        return { 
+          label: type, 
+          icon: <Tag className="h-4 w-4" />,
+          bgColor: 'bg-gray-100',
+          textColor: 'text-gray-800',
+          iconColor: 'text-gray-600'
+        };
     }
   };
 
@@ -201,8 +216,8 @@ const PromotionsList: React.FC<PromotionsListProps> = ({
 
   const getStatusBadge = (isActive: boolean) => {
     return isActive 
-      ? <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
-      : <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Inactivo</span>;
+      ? <span className="badge-success">Activo</span>
+      : <span className="badge-closed">Inactivo</span>;
   };
 
   const getUsagePercentage = (promotion: Promotion) => {
@@ -222,11 +237,25 @@ const PromotionsList: React.FC<PromotionsListProps> = ({
       key: 'title' as keyof Promotion,
       title: 'Promoción',
       render: (row: Promotion) => (
-        <div>
-          <div className="text-sm font-medium text-gray-900">{row.title}</div>
-          <div className="text-xs text-gray-500">{row.description}</div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-gradient-pink rounded-lg flex items-center justify-center flex-shrink-0">
+              <Tag className="h-5 w-5 text-pink-700" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-gray-900 truncate">{row.title}</div>
+              <div className="text-xs text-gray-600 line-clamp-2">{row.description}</div>
+            </div>
+          </div>
           {row.code && (
-            <div className="text-xs text-blue-600 font-medium">Código: {row.code}</div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                <Tag className="h-3 w-3 text-blue-600" />
+              </div>
+              <span className="text-xs font-mono font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                {row.code}
+              </span>
+            </div>
           )}
         </div>
       )
@@ -234,34 +263,42 @@ const PromotionsList: React.FC<PromotionsListProps> = ({
     {
       key: 'type' as keyof Promotion,
       title: 'Tipo',
-      render: (row: Promotion) => (
-        <div className="flex items-center">
-          <div className="mr-2 text-blue-500">
-            {getTypeIcon(row.type)}
+      render: (row: Promotion) => {
+        const typeConfig = getTypeConfig(row.type);
+        return (
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${typeConfig.bgColor} ${typeConfig.textColor}`}>
+            <div className={typeConfig.iconColor}>
+              {typeConfig.icon}
+            </div>
+            <span>{typeConfig.label}</span>
           </div>
-          <span className="text-sm text-gray-900">{getTypeLabel(row.type)}</span>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'value' as keyof Promotion,
       title: 'Valor',
       render: (row: Promotion) => (
-        <span className="text-sm font-medium text-gray-900">{getValueDisplay(row)}</span>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-saffron rounded-lg flex items-center justify-center">
+            <TrendingUp className="h-4 w-4 text-orange-900" />
+          </div>
+          <span className="text-sm font-bold text-gray-900">{getValueDisplay(row)}</span>
+        </div>
       )
     },
     {
       key: 'startDate' as keyof Promotion,
-      title: 'Fechas',
+      title: 'Período',
       render: (row: Promotion) => (
-        <div className="text-sm text-gray-900">
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-            {formatDate(row.startDate)}
+        <div className="text-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar className="h-3 w-3 text-green-500" />
+            <span className="text-gray-900 font-medium">{formatDate(row.startDate)}</span>
           </div>
-          <div className="flex items-center mt-1">
-            <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-            {formatDate(row.endDate)}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-3 w-3 text-red-500" />
+            <span className="text-gray-600">{formatDate(row.endDate)}</span>
           </div>
         </div>
       )
@@ -274,100 +311,271 @@ const PromotionsList: React.FC<PromotionsListProps> = ({
     {
       key: 'usageLimit' as keyof Promotion,
       title: 'Uso',
-      render: (row: Promotion) => (
-        <div>
-          <div className="text-sm text-gray-900">
-            {row.usedCount} / {row.usageLimit}
+      render: (row: Promotion) => {
+        const percentage = getUsagePercentage(row);
+        return (
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-3 w-3 text-gray-400" />
+              <span className="text-sm font-medium text-gray-900">
+                {row.usedCount} / {row.usageLimit}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  percentage > 80 ? 'bg-red-500' : percentage > 60 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`} 
+                style={{ width: `${Math.min(percentage, 100)}%` }}
+              ></div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {percentage}% utilizado
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-            <div 
-              className={`h-1.5 rounded-full ${getUsagePercentage(row) > 80 ? 'bg-red-600' : 'bg-blue-600'}`} 
-              style={{ width: `${getUsagePercentage(row)}%` }}
-            ></div>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'id' as keyof Promotion,
       title: 'Acciones',
       render: (row: Promotion) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
+        <div className="flex items-center gap-2">
+          <button
             onClick={() => onView(row)}
-            className="h-8 w-8 p-0"
+            className="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+            title="Ver detalles"
           >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
+            <Eye className="h-4 w-4 text-blue-600" />
+          </button>
+          <button
             onClick={() => onEdit(row)}
-            className="h-8 w-8 p-0"
+            className="w-8 h-8 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+            title="Editar promoción"
           >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
+            <Edit className="h-4 w-4 text-emerald-600" />
+          </button>
+          <button
             onClick={() => handleDelete(row.id)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
+            className="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+            title="Eliminar promoción"
           >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </button>
         </div>
       )
     }
   ];
 
+  if (loading) {
+    return (
+      <BaseCard>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="w-12 h-12 bg-gradient-pink rounded-full flex items-center justify-center animate-pulse mb-4">
+            <Tag className="w-6 h-6 text-pink-700" />
+          </div>
+          <div className="space-y-2 text-center">
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
+            <div className="h-3 bg-gray-100 rounded animate-pulse w-32"></div>
+          </div>
+          <p className="text-gray-600 font-medium mt-4">Cargando promociones...</p>
+        </div>
+      </BaseCard>
+    );
+  }
+
   return (
-    <BaseCard title="Promociones">
-      {error && <div className="mb-6"><FormError message={error} /></div>}
-      
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div className="flex-1 max-w-md">
-          <Input
-            type="text"
-            placeholder="Buscar promociones..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        
-        <div className="flex space-x-3">
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={statusOptions}
-            className="w-40"
-          />
+    <div className="space-y-6">
+      {/* Header and Controls */}
+      <div className="card-base p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center">
+              <Tag className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Lista de Promociones</h2>
+              <p className="text-gray-600 text-sm">
+                {filteredPromotions.length} promociones encontradas
+              </p>
+            </div>
+          </div>
           
-          <Select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            options={typeOptions}
-            className="w-40"
-          />
-          
-          <Button onClick={() => onEdit({} as Promotion)}>
+          <button
+            onClick={() => onEdit({} as Promotion)}
+            className={getButtonClass('primary')}
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Nueva
-          </Button>
+            Nueva Promoción
+          </button>
         </div>
+
+        {/* Search and Filters */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Buscar promociones por título, descripción o código..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 input-base"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={statusOptions}
+                className="pl-10 input-base"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <div className="relative">
+              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                options={typeOptions}
+                className="pl-10 input-base"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filters Display */}
+        {(searchTerm || statusFilter !== 'all' || typeFilter !== 'all') && (
+          <div className="mt-4 flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-gray-600">Filtros activos:</span>
+            {searchTerm && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                Búsqueda: "{searchTerm}"
+                <button onClick={() => setSearchTerm('')} className="hover:bg-blue-200 rounded-full p-0.5">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {statusFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                Estado: {statusOptions.find(o => o.value === statusFilter)?.label}
+                <button onClick={() => setStatusFilter('all')} className="hover:bg-purple-200 rounded-full p-0.5">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {typeFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full">
+                Tipo: {typeOptions.find(o => o.value === typeFilter)?.label}
+                <button onClick={() => setTypeFilter('all')} className="hover:bg-emerald-200 rounded-full p-0.5">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      {/* Error Display */}
+      {error && (
+        <div className="card-base p-4 bg-red-50 border-red-200 border">
+          <FormError message={error} />
         </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filteredPromotions}
-          emptyMessage="No se encontraron promociones"
-        />
       )}
-    </BaseCard>
+
+      {/* Promotions Table */}
+      <BaseCard>
+        {filteredPromotions.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Tag className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
+                ? 'No se encontraron promociones' 
+                : 'No hay promociones creadas'}
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
+                ? 'Intenta ajustar los filtros o crear una nueva promoción.'
+                : 'Crea tu primera promoción para atraer más clientes con descuentos especiales.'}
+            </p>
+            <button
+              onClick={() => onEdit({} as Promotion)}
+              className={getButtonClass('primary')}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
+                ? 'Nueva Promoción' 
+                : 'Crear Primera Promoción'}
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-hidden">
+            <DataTable
+              columns={columns}
+              data={filteredPromotions}
+              emptyMessage="No se encontraron promociones"
+            />
+          </div>
+        )}
+      </BaseCard>
+
+      {/* Quick Stats */}
+      {filteredPromotions.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-emerald-800">Promociones Activas</p>
+                <p className="text-2xl font-bold text-emerald-900">
+                  {filteredPromotions.filter(p => p.isActive).length}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-800">Usos Totales</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {filteredPromotions.reduce((sum, p) => sum + p.usedCount, 0)}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-800">Tasa de Uso Promedio</p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {filteredPromotions.length > 0 
+                    ? Math.round(filteredPromotions.reduce((sum, p) => sum + getUsagePercentage(p), 0) / filteredPromotions.length)
+                    : 0}%
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Percent className="h-5 w-5 text-purple-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

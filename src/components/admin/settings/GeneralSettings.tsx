@@ -1,7 +1,7 @@
-// src/components/admin/settings/GeneralSettings.tsx - Simplified (for future general settings)
+// src/components/admin/settings/GeneralSettings.tsx - Theme Converted
 import React, { useState, useEffect } from 'react';
-import { Save, Settings, Globe } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import { Save, Settings, Globe, Store, MapPin, Phone, Mail } from 'lucide-react';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/ui/Select';
@@ -40,8 +40,8 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
   useEffect(() => {
     // Mock data for development - In real app, fetch from API
     setConfig({
-      storeName: 'Pastelería Delicias',
-      storeEmail: 'contacto@pasteleriadelicias.com',
+      storeName: 'Dulces Momentos',
+      storeEmail: 'contacto@dulcesmomentos.mx',
       storePhone: '+52 55 1234 5678',
       currency: 'MXN',
       timezone: 'America/Mexico_City',
@@ -130,19 +130,23 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
 
   return (
     <BaseCard title="Configuración General">
-      {error && <div className="mb-6"><FormError message={error} /></div>}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <FormError message={error} />
+        </div>
+      )}
 
       {saveSuccess && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">¡Éxito!</h3>
-              <p className="text-sm text-green-700 mt-1">
+            <div>
+              <h3 className="text-sm font-semibold text-emerald-800">¡Configuración Guardada!</h3>
+              <p className="text-sm text-emerald-700">
                 La configuración general se guardó correctamente.
               </p>
             </div>
@@ -150,59 +154,78 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Settings className="h-5 w-5 mr-2 text-blue-500" />
-            Información de la Tienda
-          </h3>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Store Information Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-saffron-200">
+            <div className="w-10 h-10 bg-gradient-saffron rounded-lg flex items-center justify-center">
+              <Store className="h-5 w-5 text-orange-900" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Información de la Tienda
+              </h3>
+              <p className="text-sm text-gray-600">
+                Configura los datos principales de tu negocio
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="storeName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="storeName" className="block text-sm font-semibold text-gray-700 mb-2">
                 Nombre de la Tienda
               </label>
-              <Input
-                id="storeName"
-                name="storeName"
-                value={config.storeName}
-                onChange={handleInputChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="storeName"
+                  name="storeName"
+                  value={config.storeName}
+                  onChange={handleInputChange}
+                  className="pl-10 input-base"
+                />
+              </div>
               {errors.storeName && <FormError message={errors.storeName} />}
             </div>
 
             <div>
-              <label htmlFor="storeEmail" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="storeEmail" className="block text-sm font-semibold text-gray-700 mb-2">
                 Email de la Tienda
               </label>
-              <Input
-                id="storeEmail"
-                name="storeEmail"
-                type="email"
-                value={config.storeEmail}
-                onChange={handleInputChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="storeEmail"
+                  name="storeEmail"
+                  type="email"
+                  value={config.storeEmail}
+                  onChange={handleInputChange}
+                  className="pl-10 input-base"
+                />
+              </div>
               {errors.storeEmail && <FormError message={errors.storeEmail} />}
             </div>
 
             <div>
-              <label htmlFor="storePhone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="storePhone" className="block text-sm font-semibold text-gray-700 mb-2">
                 Teléfono de la Tienda
               </label>
-              <Input
-                id="storePhone"
-                name="storePhone"
-                value={config.storePhone}
-                onChange={handleInputChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="storePhone"
+                  name="storePhone"
+                  value={config.storePhone}
+                  onChange={handleInputChange}
+                  className="pl-10 input-base"
+                />
+              </div>
               {errors.storePhone && <FormError message={errors.storePhone} />}
             </div>
 
             <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="currency" className="block text-sm font-semibold text-gray-700 mb-2">
                 Moneda
               </label>
               <Select
@@ -211,12 +234,12 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
                 value={config.currency}
                 onChange={handleInputChange}
                 options={currencyOptions}
-                className="w-full"
+                className="input-base"
               />
             </div>
 
             <div>
-              <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="timezone" className="block text-sm font-semibold text-gray-700 mb-2">
                 Zona Horaria
               </label>
               <Select
@@ -225,12 +248,12 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
                 value={config.timezone}
                 onChange={handleInputChange}
                 options={timezoneOptions}
-                className="w-full"
+                className="input-base"
               />
             </div>
 
             <div>
-              <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="language" className="block text-sm font-semibold text-gray-700 mb-2">
                 Idioma
               </label>
               <Select
@@ -239,43 +262,56 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
                 value={config.language}
                 onChange={handleInputChange}
                 options={languageOptions}
-                className="w-full"
+                className="input-base"
               />
             </div>
           </div>
         </div>
 
-        {/* Business Hours Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Globe className="h-5 w-5 mr-2 text-green-500" />
-            Horarios de Atención
-          </h3>
+        {/* Business Hours Preview Section */}
+        <div className="space-y-6 pt-6 border-t border-gray-200">
+          <div className="flex items-center gap-3 pb-2">
+            <div className="w-10 h-10 bg-gradient-mint rounded-lg flex items-center justify-center">
+              <Globe className="h-5 w-5 text-emerald-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Horarios de Atención
+              </h3>
+              <p className="text-sm text-gray-600">
+                Próximamente: configuración de horarios de negocio
+              </p>
+            </div>
+          </div>
 
-          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <Globe className="h-5 w-5 text-blue-400" />
+          <div className="bg-gradient-to-br from-mint-50 to-emerald-50 border border-mint-200 p-6 rounded-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 bg-mint-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Globe className="h-5 w-5 text-emerald-600" />
               </div>
-              <div className="ml-3">
-                <h4 className="text-sm font-medium text-blue-800">Configuración de Horarios</h4>
-                <div className="mt-2 text-sm text-blue-700">
+              <div>
+                <h4 className="text-sm font-semibold text-emerald-800 mb-3">Próximamente: Gestión de Horarios</h4>
+                <div className="space-y-3 text-sm text-emerald-700">
                   <p>
-                    Esta sección estará disponible próximamente. Aquí podrás configurar los horarios de atención 
+                    Esta sección estará disponible próximamente para configurar los horarios de atención 
                     de tu negocio, días de cierre, y horarios especiales para días festivos.
                   </p>
-                  <div className="mt-3 space-y-1">
-                    <div className="flex items-center text-blue-600">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                       <span className="text-xs">Horarios de lunes a domingo</span>
                     </div>
-                    <div className="flex items-center text-blue-600">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                       <span className="text-xs">Configuración de días festivos</span>
                     </div>
-                    <div className="flex items-center text-blue-600">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                       <span className="text-xs">Horarios especiales y excepciones</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-xs">Zonas de entrega por horario</span>
                     </div>
                   </div>
                 </div>
@@ -284,57 +320,90 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({
           </div>
         </div>
 
-        {/* Additional Settings Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Settings className="h-5 w-5 mr-2 text-purple-500" />
-            Configuraciones Adicionales
-          </h3>
+        {/* Future Features Section */}
+        <div className="space-y-6 pt-6 border-t border-gray-200">
+          <div className="flex items-center gap-3 pb-2">
+            <div className="w-10 h-10 bg-gradient-pink rounded-lg flex items-center justify-center">
+              <Settings className="h-5 w-5 text-pink-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Configuraciones Adicionales
+              </h3>
+              <p className="text-sm text-gray-600">
+                Funciones avanzadas para personalizar tu experiencia
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-green-800 mb-2">
-                📍 Información de Ubicación
-              </h4>
-              <p className="text-sm text-green-700">
-                Configura la dirección de tu negocio, zonas de entrega y opciones de delivery.
-              </p>
+            <div className="card-base p-4 hover:shadow-brand-xl transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📍</div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                    Información de Ubicación
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Configura la dirección de tu negocio, zonas de entrega y opciones de delivery.
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-amber-800 mb-2">
-                💳 Métodos de Pago
-              </h4>
-              <p className="text-sm text-amber-700">
-                Gestiona los métodos de pago aceptados y configuración de pasarelas de pago.
-              </p>
+            <div className="card-base p-4 hover:shadow-brand-xl transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">💳</div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                    Métodos de Pago
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Gestiona los métodos de pago aceptados y configuración de pasarelas.
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-purple-800 mb-2">
-                🏪 Información Pública
-              </h4>
-              <p className="text-sm text-purple-700">
-                Edita la información que ven los clientes: descripción, fotos, especialidades.
-              </p>
+            <div className="card-base p-4 hover:shadow-brand-xl transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">🏪</div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                    Información Pública
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Edita la información que ven los clientes: descripción, fotos, especialidades.
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-800 mb-2">
-                📱 Integración con Redes
-              </h4>
-              <p className="text-sm text-blue-700">
-                Conecta tus redes sociales y configura opciones de marketing digital.
-              </p>
+            <div className="card-base p-4 hover:shadow-brand-xl transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📱</div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                    Integración con Redes
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Conecta tus redes sociales y configura opciones de marketing digital.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={loading}>
+        <div className="flex justify-end pt-6 border-t border-gray-200">
+          <button
+            type="submit"
+            disabled={loading}
+            className={getButtonClass('admin')}
+          >
             <Save className="h-4 w-4 mr-2" />
             {loading ? 'Guardando...' : 'Guardar Configuración'}
-          </Button>
+          </button>
         </div>
       </form>
     </BaseCard>

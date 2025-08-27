@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/fire
 import { db } from '../../../firebase/config';
 import CategoryForm from './CategoryForm';
 import { Plus, Edit, Trash2, X, AlertTriangle, Tag } from 'lucide-react';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 const CategoryManager = ({ categories, onClose }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -57,12 +58,12 @@ const CategoryManager = ({ categories, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-base max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-brand-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-main">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Gestionar Categorías</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Gestionar Categorías</h2>
             <p className="text-sm text-gray-600 mt-1">
               Organice sus postres en categorías para una mejor navegación
             </p>
@@ -70,41 +71,45 @@ const CategoryManager = ({ categories, onClose }) => {
           
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-white/50 p-2 rounded-lg transition-all duration-200"
           >
             <X size={24} />
           </button>
         </div>
+
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           {/* Add Button */}
           <div className="mb-6">
             <button
               onClick={handleAddNew}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className={`${getButtonClass('admin')} flex items-center gap-2`}
             >
               <Plus size={18} />
               Añadir Nueva Categoría
             </button>
           </div>
+
           {/* Categories List */}
           {categories.length === 0 ? (
-            <div className="text-center py-12">
-              <Tag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Aún no hay categorías</h3>
-              <p className="text-gray-500 mb-4">
-                Cree su primera categoría para ayudar a organizar sus postres
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Tag className="h-10 w-10 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Aún no hay categorías</h3>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                Cree su primera categoría para ayudar a organizar sus postres y mejorar la experiencia de navegación
               </p>
               <button
                 onClick={handleAddNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2"
+                className={`${getButtonClass('admin')} inline-flex items-center gap-2`}
               >
                 <Plus size={18} />
-                Crear Categoría
+                Crear Primera Categoría
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-4">
               {categories.map(category => (
                 <CategoryCard
                   key={category.id}
@@ -116,6 +121,7 @@ const CategoryManager = ({ categories, onClose }) => {
             </div>
           )}
         </div>
+
         {/* Form Modal */}
         {isFormOpen && (
           <CategoryForm
@@ -123,39 +129,51 @@ const CategoryManager = ({ categories, onClose }) => {
             onClose={handleFormClose}
           />
         )}
+
         {/* Delete Confirmation */}
         {deletingCategory && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <div className="flex items-center gap-3 mb-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-60">
+            <div className="card-base max-w-md w-full p-6 shadow-brand-xl">
+              <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                   <AlertTriangle className="text-red-600" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Eliminar Categoría</h3>
+                  <h3 className="text-lg font-bold text-gray-900">Eliminar Categoría</h3>
                   <p className="text-sm text-gray-600">Esta acción no se puede deshacer</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <h4 className="font-medium text-gray-900">{deletingCategory.name}</h4>
-                {deletingCategory.description && (
-                  <p className="text-sm text-gray-600 mt-1">{deletingCategory.description}</p>
-                )}
+
+              <div className="card-base p-4 mb-6 bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                    style={{ backgroundColor: deletingCategory.color }}
+                  />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{deletingCategory.name}</h4>
+                    {deletingCategory.description && (
+                      <p className="text-sm text-gray-600 mt-1">{deletingCategory.description}</p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
                 <div className="flex gap-3">
-                  <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5" size={16} />
+                  <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
                   <div className="text-sm text-red-800">
-                    <p className="font-medium mb-1">Antes de eliminar esta categoría:</p>
+                    <p className="font-semibold mb-2">Antes de eliminar esta categoría:</p>
                     <p>Asegúrese de que no haya postres asignados a ella, o se volverán sin categorizar.</p>
                   </div>
                 </div>
               </div>
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeletingCategory(null)}
                   disabled={deleting}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`flex-1 ${getButtonClass('outline')} disabled:opacity-50`}
                 >
                   Cancelar
                 </button>
@@ -163,7 +181,7 @@ const CategoryManager = ({ categories, onClose }) => {
                 <button
                   onClick={handleDeleteConfirm}
                   disabled={deleting}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300 disabled:opacity-50 font-semibold"
                 >
                   {deleting ? (
                     <span className="flex items-center justify-center gap-2">
@@ -205,48 +223,55 @@ const CategoryCard = ({ category, onEdit, onDelete }) => {
   }, [category.id]);
 
   return (
-    <div className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="card-interactive p-6 hover:shadow-brand-xl transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-4 mb-3">
             {category.color && (
               <div 
-                className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                className="w-6 h-6 rounded-full border-2 border-white shadow-md"
                 style={{ backgroundColor: category.color }}
               />
             )}
-            <h3 className="font-semibold text-gray-900">{category.name}</h3>
-            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+            <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+            <span className="badge-base bg-purple-100 text-purple-700 font-semibold">
               {pastryCount} {pastryCount === 1 ? 'postre' : 'postres'}
             </span>
           </div>
           
           {category.description && (
-            <p className="text-sm text-gray-600">{category.description}</p>
+            <p className="text-sm text-gray-600 mb-3 leading-relaxed">{category.description}</p>
           )}
           
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-            <span>Creado: {new Date(category.createdAt?.toDate?.() || category.createdAt).toLocaleDateString()}</span>
+          <div className="flex items-center gap-6 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
+              Creado: {new Date(category.createdAt?.toDate?.() || category.createdAt).toLocaleDateString()}
+            </span>
             {category.updatedAt && (
-              <span>Actualizado: {new Date(category.updatedAt?.toDate?.() || category.updatedAt).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
+                Actualizado: {new Date(category.updatedAt?.toDate?.() || category.updatedAt).toLocaleDateString()}
+              </span>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 ml-4">
+        
+        <div className="flex items-center gap-2 ml-6">
           <button
             onClick={() => onEdit(category)}
-            className="text-blue-600 hover:bg-blue-50 p-2 rounded-md transition-colors"
+            className="text-purple-600 hover:bg-purple-50 p-3 rounded-xl transition-all duration-200 hover:scale-105"
             title="Editar categoría"
           >
-            <Edit size={16} />
+            <Edit size={18} />
           </button>
           
           <button
             onClick={() => onDelete(category)}
-            className="text-red-600 hover:bg-red-50 p-2 rounded-md transition-colors"
+            className="text-red-600 hover:bg-red-50 p-3 rounded-xl transition-all duration-200 hover:scale-105"
             title="Eliminar categoría"
           >
-            <Trash2 size={16} />
+            <Trash2 size={18} />
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X, Tag, Calendar, Percent } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import { Save, X, Tag, Calendar, Percent, DollarSign, Gift, Truck, Hash } from 'lucide-react';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/ui/Select';
@@ -162,6 +162,21 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     { value: 'free_shipping', label: 'Envío Gratis' },
   ];
 
+  const getPromotionIcon = (type: string) => {
+    switch (type) {
+      case 'percentage':
+        return <Percent className="w-5 h-5" />;
+      case 'fixed_amount':
+        return <DollarSign className="w-5 h-5" />;
+      case 'buy_one_get_one':
+        return <Gift className="w-5 h-5" />;
+      case 'free_shipping':
+        return <Truck className="w-5 h-5" />;
+      default:
+        return <Tag className="w-5 h-5" />;
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -313,13 +328,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   const getValueLabel = () => {
     switch (formData.type) {
       case 'percentage':
-        return 'Porcentaje de Descuento';
+        return 'Porcentaje de Descuento (%)';
       case 'fixed_amount':
-        return 'Monto de Descuento ($)';
+        return 'Monto de Descuento (MXN)';
       case 'buy_one_get_one':
         return 'No aplica';
       case 'free_shipping':
-        return 'Monto Mínimo para Envío Gratis ($)';
+        return 'Monto Mínimo para Envío Gratis (MXN)';
       default:
         return 'Valor';
     }
@@ -330,214 +345,361 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       case 'percentage':
         return 'Ej: 20';
       case 'fixed_amount':
-        return 'Ej: 50';
+        return 'Ej: 50.00';
       case 'free_shipping':
-        return 'Ej: 300';
+        return 'Ej: 300.00';
       default:
         return 'Ingrese un valor';
     }
   };
 
   return (
-    <BaseCard title={promotion ? 'Editar Promoción' : 'Nueva Promoción'}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Título de la Promoción
-            </label>
-            <Input
-              id="title"
-              name="title"
-              value={formData.title || ''}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-            {errors.title && <FormError message={errors.title} />}
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="card-base p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-pink rounded-xl flex items-center justify-center shadow-brand-lg">
+              <Tag className="w-6 h-6 text-pink-700" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {promotion ? 'Editar Promoción' : 'Nueva Promoción'}
+              </h2>
+              <p className="text-gray-600">
+                {promotion ? 'Actualiza los detalles de la promoción' : 'Crea una nueva promoción para atraer clientes'}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={onCancel}
+            className={getButtonClass('outline')}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancelar
+          </button>
+        </div>
+      </div>
 
-          <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de Promoción
-            </label>
-            <Select
-              id="type"
-              name="type"
-              value={formData.type || 'percentage'}
-              onChange={handleSelectChange}
-              options={promotionTypeOptions}
-              className="w-full"
-            />
-            {errors.type && <FormError message={errors.type} />}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information */}
+        <BaseCard title="Información Básica">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-saffron-200">
+              <div className="w-8 h-8 bg-gradient-saffron rounded-lg flex items-center justify-center">
+                <Tag className="w-4 h-4 text-orange-900" />
+              </div>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Detalles de la Promoción
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Define el nombre y tipo de promoción
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Título de la Promoción
+                </label>
+                <div className="relative">
+                  <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title || ''}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                    placeholder="Ej: Descuento de Verano"
+                  />
+                </div>
+                {errors.title && <FormError message={errors.title} />}
+              </div>
+
+              <div>
+                <label htmlFor="type" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tipo de Promoción
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    {getPromotionIcon(formData.type || 'percentage')}
+                  </div>
+                  <Select
+                    id="type"
+                    name="type"
+                    value={formData.type || 'percentage'}
+                    onChange={handleSelectChange}
+                    options={promotionTypeOptions}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.type && <FormError message={errors.type} />}
+              </div>
+
+              <div>
+                <label htmlFor="value" className="block text-sm font-semibold text-gray-700 mb-2">
+                  {getValueLabel()}
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    {formData.type === 'percentage' && <Percent className="h-5 w-5" />}
+                    {formData.type === 'fixed_amount' && <DollarSign className="h-5 w-5" />}
+                    {formData.type === 'free_shipping' && <DollarSign className="h-5 w-5" />}
+                    {formData.type === 'buy_one_get_one' && <Gift className="h-5 w-5" />}
+                  </div>
+                  <Input
+                    id="value"
+                    name="value"
+                    type="number"
+                    min="0"
+                    step={formData.type === 'percentage' ? '1' : '0.01'}
+                    value={formData.value || ''}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                    placeholder={getValuePlaceholder()}
+                    disabled={formData.type === 'buy_one_get_one'}
+                  />
+                </div>
+                {errors.value && <FormError message={errors.value} />}
+                {formData.type === 'buy_one_get_one' && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Para promociones 2x1 no se requiere valor específico
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="code" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Código de Promoción (Opcional)
+                </label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="code"
+                    name="code"
+                    value={formData.code || ''}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                    placeholder="Ej: VERANO20"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Código que los clientes usarán para aplicar la promoción
+                </p>
+              </div>
+
+              <div className="md:col-span-2">
+                <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Descripción
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows={3}
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="input-base min-h-[100px] resize-y"
+                  placeholder="Describe los detalles de la promoción..."
+                />
+                {errors.description && <FormError message={errors.description} />}
+              </div>
+            </div>
           </div>
+        </BaseCard>
 
-          <div>
-            <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">
-              {getValueLabel()}
-            </label>
-            <Input
-              id="value"
-              name="value"
-              type="number"
-              min="0"
-              step={formData.type === 'percentage' ? '1' : '0.01'}
-              value={formData.value || ''}
-              onChange={handleInputChange}
-              className="w-full"
-              placeholder={getValuePlaceholder()}
-              disabled={formData.type === 'buy_one_get_one'}
-            />
-            {errors.value && <FormError message={errors.value} />}
-          </div>
+        {/* Schedule & Limits */}
+        <BaseCard title="Programación y Límites">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-emerald-200">
+              <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-emerald-700" />
+              </div>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Fechas y Límites de Uso
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Configura cuando será válida la promoción
+                </p>
+              </div>
+            </div>
 
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-              Código de Promoción (Opcional)
-            </label>
-            <Input
-              id="code"
-              name="code"
-              value={formData.code || ''}
-              onChange={handleInputChange}
-              className="w-full"
-              placeholder="Ej: VERANO20"
-            />
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="startDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Inicio
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    value={formData.startDate ? formData.startDate.toISOString().split('T')[0] : ''}
+                    onChange={handleDateChange}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.startDate && <FormError message={errors.startDate} />}
+              </div>
 
-          <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de Inicio
-            </label>
-            <Input
-              id="startDate"
-              name="startDate"
-              type="date"
-              value={formData.startDate ? formData.startDate.toISOString().split('T')[0] : ''}
-              onChange={handleDateChange}
-              className="w-full"
-            />
-            {errors.startDate && <FormError message={errors.startDate} />}
-          </div>
+              <div>
+                <label htmlFor="endDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Fin
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="date"
+                    value={formData.endDate ? formData.endDate.toISOString().split('T')[0] : ''}
+                    onChange={handleDateChange}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.endDate && <FormError message={errors.endDate} />}
+              </div>
 
-          <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de Fin
-            </label>
-            <Input
-              id="endDate"
-              name="endDate"
-              type="date"
-              value={formData.endDate ? formData.endDate.toISOString().split('T')[0] : ''}
-              onChange={handleDateChange}
-              className="w-full"
-            />
-            {errors.endDate && <FormError message={errors.endDate} />}
-          </div>
+              <div>
+                <label htmlFor="usageLimit" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Límite de Uso
+                </label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="usageLimit"
+                    name="usageLimit"
+                    type="number"
+                    min="1"
+                    value={formData.usageLimit || ''}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                    placeholder="100"
+                  />
+                </div>
+                {errors.usageLimit && <FormError message={errors.usageLimit} />}
+                <p className="text-xs text-gray-500 mt-1">
+                  Número máximo de veces que se puede usar
+                </p>
+              </div>
+            </div>
 
-          <div>
-            <label htmlFor="usageLimit" className="block text-sm font-medium text-gray-700 mb-1">
-              Límite de Uso
-            </label>
-            <Input
-              id="usageLimit"
-              name="usageLimit"
-              type="number"
-              min="1"
-              value={formData.usageLimit || ''}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-            {errors.usageLimit && <FormError message={errors.usageLimit} />}
-          </div>
-
-          <div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
               <input
                 id="isActive"
                 name="isActive"
                 type="checkbox"
                 checked={formData.isActive || false}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                Promoción Activa
+              <label htmlFor="isActive" className="text-sm font-medium text-purple-900">
+                Activar promoción inmediatamente
               </label>
+              <p className="text-xs text-purple-700 ml-auto">
+                La promoción estará disponible según las fechas configuradas
+              </p>
             </div>
           </div>
+        </BaseCard>
 
-          <div className="md:col-span-2">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              value={formData.description || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            />
-            {errors.description && <FormError message={errors.description} />}
-          </div>
+        {/* Product Selection */}
+        <BaseCard title="Productos Aplicables">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-pink-200">
+              <div className="w-8 h-8 bg-gradient-pink rounded-lg flex items-center justify-center">
+                <Gift className="w-4 h-4 text-pink-700" />
+              </div>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Seleccionar Productos
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Elige a qué productos se aplicará la promoción
+                </p>
+              </div>
+            </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Productos Aplicables
-            </label>
-            <div className="border rounded-md p-4 bg-gray-50">
-              <div className="mb-3">
+            <div className="bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-medium text-gray-700">
+                  Productos disponibles ({pastries.length})
+                </p>
                 <button
                   type="button"
                   onClick={handleSelectAll}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200"
                 >
                   {selectedItems.length === pastries.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {pastries.map((pastry) => (
-                  <div key={pastry.id} className="flex items-center">
+                  <div 
+                    key={pastry.id} 
+                    className={`flex items-center p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-sm ${
+                      selectedItems.includes(pastry.id) 
+                        ? 'border-pink-300 bg-pink-50' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    onClick={() => handleItemToggle(pastry.id)}
+                  >
                     <input
                       id={`item-${pastry.id}`}
                       type="checkbox"
                       checked={selectedItems.includes(pastry.id)}
                       onChange={() => handleItemToggle(pastry.id)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded mr-3"
                     />
-                    <label htmlFor={`item-${pastry.id}`} className="ml-2 text-sm text-gray-700">
-                      {pastry.name}
-                    </label>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {pastry.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        ${pastry.price.toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Selecciona los productos a los que se aplicará esta promoción.
-                Si no seleccionas ninguno, la promoción se aplicará a todos los productos.
-              </p>
+
+              <div className="mt-4 p-3 bg-blue-100 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800">
+                  <strong>Seleccionados:</strong> {selectedItems.length} de {pastries.length} productos.
+                  {selectedItems.length === 0 && ' Si no seleccionas ninguno, la promoción se aplicará a todos los productos.'}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </BaseCard>
 
-        <div className="flex justify-end space-x-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Guardando...' : 'Guardar Promoción'}
-          </Button>
+        {/* Action Buttons */}
+        <div className="card-base p-6">
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className={getButtonClass('outline')}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className={getButtonClass('admin')}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Guardando...' : (promotion ? 'Actualizar Promoción' : 'Crear Promoción')}
+            </button>
+          </div>
         </div>
       </form>
-    </BaseCard>
+    </div>
   );
 };
 

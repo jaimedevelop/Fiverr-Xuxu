@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeHelper } from '../../../utils/themeHelper';
 import BusinessRegistrationData from '../../../types/business';
 import FormErrors from '../../../types/form';
 import FormInput from '../../common/FormInput';
@@ -25,7 +26,7 @@ const AddressSection = ({
 
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-900 mb-4">
+      <h2 className={`text-lg font-medium text-${ThemeHelper.colors.roles.business} mb-4`}>
         Dirección del Negocio
       </h2>
       
@@ -39,6 +40,7 @@ const AddressSection = ({
             placeholder="Nombre de la calle y número"
             value={formData.street}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.street && <FormError message={errors.street} />}
@@ -53,6 +55,7 @@ const AddressSection = ({
             placeholder="Nombre de la colonia"
             value={formData.colonia}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.colonia && <FormError message={errors.colonia} />}
@@ -67,6 +70,7 @@ const AddressSection = ({
             placeholder="Nombre del municipio o alcaldía"
             value={formData.municipality}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.municipality && <FormError message={errors.municipality} />}
@@ -82,6 +86,7 @@ const AddressSection = ({
               placeholder="12345"
               value={formData.postalCode}
               onChange={handleChange}
+              className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
               required
             />
             {errors.postalCode && <FormError message={errors.postalCode} />}
@@ -96,6 +101,7 @@ const AddressSection = ({
               placeholder="Ciudad de México"
               value={formData.state}
               onChange={handleChange}
+              className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
               required
             />
             {errors.state && <FormError message={errors.state} />}

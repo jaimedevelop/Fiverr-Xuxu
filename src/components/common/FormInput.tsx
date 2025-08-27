@@ -1,3 +1,4 @@
+// src/components/common/FormInput.tsx
 import React from 'react';
 
 interface FormInputProps {
@@ -9,6 +10,7 @@ interface FormInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
+  error?: boolean;
 }
 
 const FormInput = ({ 
@@ -19,12 +21,13 @@ const FormInput = ({
   placeholder, 
   value, 
   onChange, 
-  required = false 
+  required = false,
+  error = false
 }: FormInputProps) => {
   return (
     <div className="mb-4">
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
-        {label} {required && <span className="text-orange-500">*</span>}
+      <label htmlFor={id} className="block text-sm font-semibold text-gray-700 mb-2">
+        {label} {required && <span className="text-saffron-600">*</span>}
       </label>
       <input
         id={id}
@@ -34,7 +37,7 @@ const FormInput = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="block w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        className={`input-base ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
       />
     </div>
   );

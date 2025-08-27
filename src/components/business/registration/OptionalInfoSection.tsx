@@ -5,7 +5,7 @@ import Input from '../../common/Input';
 import Select from '../../ui/Select';
 import Button from '../../ui/Button';
 import OperatingHoursInput from '../../operatingHours/OperatingHoursInput';
-import { BusinessRegistrationData } from '../../../types/business';
+import type { BusinessRegistrationData } from '../../../types/business';
 import { OrderSettings, DEFAULT_ORDER_SETTINGS } from '../../../utils/orderScheduler';
 
 interface OptionalInfoSectionProps {

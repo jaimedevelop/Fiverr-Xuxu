@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X } from 'lucide-react';
+import { Save, X, Package, DollarSign, Hash, Tag } from 'lucide-react';
 import { InventoryWithDetails } from '../../../types/inventory';
-import Button from '../../../components/ui/Button';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/ui/Select';
 import FormError from '../../../components/common/FormError';
@@ -128,108 +128,236 @@ const InventoryForm: React.FC<InventoryFormProps> = ({
   ];
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium text-gray-900">
-          {item ? 'Editar producto' : 'Agregar producto'}
-        </h2>
-        <Button variant="outline" onClick={onCancel}>
+    <div className="card-base p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-saffron rounded-lg flex items-center justify-center">
+            <Package className="w-5 h-5 text-orange-900" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {item ? 'Editar Producto en Inventario' : 'Agregar Nuevo Producto'}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {item ? 'Actualiza la información del producto' : 'Completa los detalles del producto'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onCancel}
+          className={getButtonClass('outline')}
+        >
           <X className="h-4 w-4 mr-2" />
           Cancelar
-        </Button>
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="pastryId" className="block text-sm font-medium text-gray-700 mb-1">
-              Producto
-            </label>
-            <Select
-              id="pastryId"
-              name="pastryId"
-              value={formData.pastryId || ''}
-              onChange={handleSelectChange}
-              options={pastryOptions}
-              className="w-full"
-              disabled={!!item} // Disable editing pastry for existing items
-            />
-            {errors.pastryId && <FormError message={errors.pastryId} />}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Product Information Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-emerald-200">
+            <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center">
+              <Tag className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div>
+              <h3 className="text-md font-semibold text-gray-900">
+                Información del Producto
+              </h3>
+              <p className="text-sm text-gray-600">
+                Selecciona el producto y su categoría
+              </p>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría
-            </label>
-            <Select
-              id="categoryName"
-              name="categoryName"
-              value={formData.categoryName || ''}
-              onChange={handleSelectChange}
-              options={categoryOptions}
-              className="w-full"
-            />
-            {errors.categoryName && <FormError message={errors.categoryName} />}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="pastryId" className="block text-sm font-semibold text-gray-700 mb-2">
+                Producto
+              </label>
+              <Select
+                id="pastryId"
+                name="pastryId"
+                value={formData.pastryId || ''}
+                onChange={handleSelectChange}
+                options={pastryOptions}
+                className="input-base"
+                disabled={!!item} // Disable editing pastry for existing items
+              />
+              {errors.pastryId && <FormError message={errors.pastryId} />}
+              {item && (
+                <p className="text-xs text-gray-500 mt-1">
+                  El producto no se puede cambiar en productos existentes
+                </p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="currentStock" className="block text-sm font-medium text-gray-700 mb-1">
-              Stock Actual
-            </label>
-            <Input
-              id="currentStock"
-              name="currentStock"
-              type="number"
-              min="0"
-              value={formData.currentStock || ''}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-            {errors.currentStock && <FormError message={errors.currentStock} />}
-          </div>
-
-          <div>
-            <label htmlFor="minimumStock" className="block text-sm font-medium text-gray-700 mb-1">
-              Stock Mínimo
-            </label>
-            <Input
-              id="minimumStock"
-              name="minimumStock"
-              type="number"
-              min="0"
-              value={formData.minimumStock || ''}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-            {errors.minimumStock && <FormError message={errors.minimumStock} />}
-          </div>
-
-          <div className="md:col-span-2">
-            <label htmlFor="unitPrice" className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Unitario
-            </label>
-            <Input
-              id="unitPrice"
-              name="unitPrice"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.unitPrice || ''}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-            {errors.unitPrice && <FormError message={errors.unitPrice} />}
+            <div>
+              <label htmlFor="categoryName" className="block text-sm font-semibold text-gray-700 mb-2">
+                Categoría
+              </label>
+              <Select
+                id="categoryName"
+                name="categoryName"
+                value={formData.categoryName || ''}
+                onChange={handleSelectChange}
+                options={categoryOptions}
+                className="input-base"
+              />
+              {errors.categoryName && <FormError message={errors.categoryName} />}
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button
+        {/* Stock Information Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-purple-200">
+            <div className="w-8 h-8 bg-gradient-purple rounded-lg flex items-center justify-center">
+              <Hash className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-md font-semibold text-gray-900">
+                Configuración de Stock
+              </h3>
+              <p className="text-sm text-gray-600">
+                Establece los niveles de inventario
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="currentStock" className="block text-sm font-semibold text-gray-700 mb-2">
+                Stock Actual
+              </label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="currentStock"
+                  name="currentStock"
+                  type="number"
+                  min="0"
+                  value={formData.currentStock || ''}
+                  onChange={handleInputChange}
+                  className="pl-10 input-base"
+                  placeholder="0"
+                />
+              </div>
+              {errors.currentStock && <FormError message={errors.currentStock} />}
+              <p className="text-xs text-gray-500 mt-1">
+                Cantidad disponible actualmente
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="minimumStock" className="block text-sm font-semibold text-gray-700 mb-2">
+                Stock Mínimo
+              </label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="minimumStock"
+                  name="minimumStock"
+                  type="number"
+                  min="0"
+                  value={formData.minimumStock || ''}
+                  onChange={handleInputChange}
+                  className="pl-10 input-base"
+                  placeholder="5"
+                />
+              </div>
+              {errors.minimumStock && <FormError message={errors.minimumStock} />}
+              <p className="text-xs text-gray-500 mt-1">
+                Nivel mínimo antes de recibir alertas
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-pink-200">
+            <div className="w-8 h-8 bg-gradient-pink rounded-lg flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-pink-700" />
+            </div>
+            <div>
+              <h3 className="text-md font-semibold text-gray-900">
+                Información de Precio
+              </h3>
+              <p className="text-sm text-gray-600">
+                Establece el precio unitario del producto
+              </p>
+            </div>
+          </div>
+
+          <div className="max-w-md">
+            <label htmlFor="unitPrice" className="block text-sm font-semibold text-gray-700 mb-2">
+              Precio Unitario (MXN)
+            </label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                id="unitPrice"
+                name="unitPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.unitPrice || ''}
+                onChange={handleInputChange}
+                className="pl-10 input-base"
+                placeholder="0.00"
+              />
+            </div>
+            {errors.unitPrice && <FormError message={errors.unitPrice} />}
+            <p className="text-xs text-gray-500 mt-1">
+              Precio por unidad en pesos mexicanos
+            </p>
+          </div>
+        </div>
+
+        {/* Stock Status Preview */}
+        {formData.currentStock !== undefined && formData.minimumStock !== undefined && (
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-xl p-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Vista Previa del Estado</h4>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span className="text-gray-700">Stock actual: {formData.currentStock}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                <span className="text-gray-700">Stock mínimo: {formData.minimumStock}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${
+                  formData.currentStock <= 0 
+                    ? 'bg-red-500' 
+                    : formData.currentStock < formData.minimumStock 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                }`}></div>
+                <span className="font-medium">
+                  {formData.currentStock <= 0 
+                    ? 'Agotado' 
+                    : formData.currentStock < formData.minimumStock 
+                      ? 'Stock bajo' 
+                      : 'Stock normal'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex justify-end pt-6 border-t border-gray-200">
+          <button
             type="submit"
             disabled={loading}
+            className={getButtonClass('admin')}
           >
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Guardando...' : 'Guardar'}
-          </Button>
+            {loading ? 'Guardando...' : (item ? 'Actualizar Producto' : 'Guardar Producto')}
+          </button>
         </div>
       </form>
     </div>

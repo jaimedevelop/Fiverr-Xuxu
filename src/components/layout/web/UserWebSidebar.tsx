@@ -5,7 +5,7 @@ import { useUser } from '../../../contexts/UserContext';
 import {
   Search,
   ShoppingBag,
-  User,
+  Heart,
   LogOut
 } from 'lucide-react';
 // Temporarily disabled cart functionality
@@ -19,19 +19,30 @@ const UserWebSidebar: React.FC = () => {
   const userNavItems = [
     { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: ShoppingBag },
-    { path: '/usuario/favoritos', label: 'Favoritos', icon: User },
+    { path: '/usuario/favoritos', label: 'Favoritos', icon: Heart },
   ];
   
   return (
     <>
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">
-            Dulces Momentos
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">Bienvenido, {firestoreUser?.email}</p>
+      <aside className="w-64 bg-white/95 backdrop-blur-sm border-r border-saffron-200 flex flex-col shadow-brand-lg">
+        {/* Header Section */}
+        <div className="p-6 border-b border-saffron-200 bg-gradient-saffron">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-white/30 to-white/20 rounded-xl flex items-center justify-center border border-white/40">
+              <span className="text-2xl">🧁</span>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-orange-900">
+                Dulces Momentos
+              </h1>
+              <p className="text-sm text-orange-800 mt-1">
+                Hola, {firestoreUser?.name || firestoreUser?.email?.split('@')[0] || 'Cliente'}
+              </p>
+            </div>
+          </div>
         </div>
         
+        {/* Navigation Section */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {userNavItems.map(({ path, label, icon: Icon }) => (
@@ -39,15 +50,15 @@ const UserWebSidebar: React.FC = () => {
                 <NavLink
                   to={path}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    `flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-gradient-saffron text-orange-900 shadow-saffron border-r-4 border-orange-600 transform scale-105'
+                        : 'text-gray-700 hover:bg-saffron-50 hover:text-saffron-700 hover:scale-105'
                     }`
                   }
                 >
                   <Icon size={20} className="mr-3" />
-                  {label}
+                  <span className="font-medium">{label}</span>
                 </NavLink>
               </li>
             ))}
@@ -55,19 +66,20 @@ const UserWebSidebar: React.FC = () => {
             {/* Temporarily disabled cart functionality */}
             {/* 
             <li>
-              <div className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+              <div className="flex items-center px-4 py-3 text-gray-700 hover:bg-saffron-50 hover:text-saffron-700 rounded-xl transition-all duration-300 cursor-pointer hover:scale-105">
                 <CartIcon />
-                <span className="ml-3">Carrito</span>
+                <span className="ml-3 font-medium">Carrito</span>
               </div>
             </li>
             */}
           </ul>
         </nav>
         
-        <div className="p-4 border-t border-gray-200">
+        {/* Footer Section */}
+        <div className="p-4 border-t border-saffron-200 bg-gradient-to-r from-saffron-50 to-orange-50">
           <button
             onClick={logout}
-            className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            className="btn-outline w-full flex items-center justify-center text-gray-700 hover:text-saffron-700"
           >
             <LogOut size={20} className="mr-3" />
             Cerrar Sesión

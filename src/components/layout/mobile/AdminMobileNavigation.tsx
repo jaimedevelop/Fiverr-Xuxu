@@ -5,16 +5,13 @@ import { useBusiness } from '../../../contexts/BusinessContext';
 import { 
   Menu, 
   ShoppingBag, 
-  User, 
   BarChart3, 
   Settings, 
   Package, 
   TrendingUp,
-  Store,
   Building2,
   Megaphone,
   X,
-  CreditCard,
   LogOut
 } from 'lucide-react';
 
@@ -27,16 +24,16 @@ const AdminMobileNavigation: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // FIXED: Updated navigation paths to match App.tsx routes
+  // Navigation items with corrected paths
   const adminNavItems = [
     { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
     { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu },
-    { path: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag }, // Changed from '/admin/orders'
-    { path: '/admin/analitica', label: 'Análisis', icon: TrendingUp }, // Changed from '/admin/analytics'
+    { path: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag },
+    { path: '/admin/analitica', label: 'Análisis', icon: TrendingUp },
     { path: '/admin/inventario', label: 'Inventario', icon: Package },
-    { path: '/admin/perfil-negocio', label: 'Perfil del Negocio', icon: Building2 }, // Changed from '/admin/business-profile'
-    { path: '/admin/promociones', label: 'Promociones', icon: Megaphone }, // Changed from '/admin/promotions'
-    { path: '/admin/configuracion', label: 'Configuración', icon: Settings }, // Changed from '/admin/settings'
+    { path: '/admin/perfil-negocio', label: 'Perfil del Negocio', icon: Building2 },
+    { path: '/admin/promociones', label: 'Promociones', icon: Megaphone },
+    { path: '/admin/configuracion', label: 'Configuración', icon: Settings },
   ];
 
   const toggleMenu = () => {
@@ -92,16 +89,16 @@ const AdminMobileNavigation: React.FC = () => {
       {/* Hamburger Button */}
       <button
         onClick={toggleMenu}
-        className="fixed top-4 left-4 z-40 bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition-all duration-200 hover:shadow-xl"
+        className="fixed top-4 left-4 z-40 bg-gradient-purple text-white rounded-xl shadow-purple p-3 border border-purple-300 hover:shadow-xl transition-all duration-300 hover:scale-110"
         aria-label="Abrir menú de administrador"
       >
-        <Menu size={24} className="text-gray-700" />
+        <Menu size={24} />
       </button>
       
       {/* Overlay */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-all duration-300"
           onClick={closeMenu}
         />
       )}
@@ -109,7 +106,7 @@ const AdminMobileNavigation: React.FC = () => {
       {/* Slide-out Menu */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed top-0 left-0 h-full w-80 bg-white/95 backdrop-blur-sm shadow-brand-xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         onTouchStart={handleTouchStart}
@@ -121,93 +118,93 @@ const AdminMobileNavigation: React.FC = () => {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center justify-between p-6 border-b border-purple-200 bg-gradient-purple">
           <div className="flex items-center space-x-3">
             {business?.logoUrl ? (
               <img 
                 src={business.logoUrl} 
                 alt={business.storeName} 
-                className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm"
+                className="w-12 h-12 rounded-xl object-cover border-2 border-white/30 shadow-lg"
               />
             ) : (
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/10 rounded-xl flex items-center justify-center shadow-lg border border-white/30">
                 {businessLoading ? (
                   <div className="w-6 h-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (
-                  <Store size={24} className="text-white" />
+                  <Building2 size={24} className="text-white" />
                 )}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-gray-900">Dulces Momentos Admin</h2>
-              <p className="text-sm text-gray-600 truncate">
-                {businessLoading ? 'Cargando...' : `Bienvenido, ${business?.storeName || 'Sin nombre'}`}
+              <h2 className="text-lg font-bold text-white">Panel Administrativo</h2>
+              <p className="text-sm text-purple-100 truncate">
+                {businessLoading ? 'Cargando...' : `${business?.storeName || 'Dulces Momentos'}`}
               </p>
             </div>
           </div>
           <button
             onClick={closeMenu}
-            className="p-2 hover:bg-white hover:bg-opacity-50 rounded-lg transition-colors duration-200"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors duration-200"
             aria-label="Cerrar menú"
           >
-            <X size={22} className="text-gray-600" />
+            <X size={22} className="text-white" />
           </button>
         </div>
         
         {/* Navigation Items */}
         <div className="flex-1 px-4 py-6">
-          <div className="space-y-1">
+          <div className="space-y-2">
             {adminNavItems.map(({ path, label, icon: Icon }) => (
               <Link
                 key={path}
                 to={path}
                 onClick={closeMenu}
-                className="flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-200 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-sm group"
+                className="flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 text-gray-700 hover:bg-gradient-purple hover:text-white hover:shadow-purple hover:scale-105 group"
               >
                 <div className="flex-shrink-0">
-                  <Icon size={20} className="group-hover:text-blue-600 transition-colors duration-200" />
+                  <Icon size={20} className="group-hover:text-white transition-colors duration-200" />
                 </div>
                 <span className="font-medium text-sm">{label}</span>
               </Link>
             ))}
-            
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-200 text-red-600 hover:bg-red-50 hover:text-red-700 w-full mt-4"
-            >
-              <div className="flex-shrink-0">
-                <LogOut size={20} />
-              </div>
-              <span className="font-medium text-sm">Cerrar Sesión</span>
-            </button>
           </div>
         </div>
         
+        {/* Logout Section */}
+        <div className="p-4 border-t border-purple-100">
+          <button
+            onClick={handleLogout}
+            className="btn-admin w-full flex items-center justify-center"
+          >
+            <LogOut size={20} className="mr-3" />
+            <span className="font-medium">Cerrar Sesión</span>
+          </button>
+        </div>
+        
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-white shadow-sm">
+        <div className="p-4 border-t border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
+          <div className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/80 backdrop-blur-sm shadow-sm">
             {business?.logoUrl ? (
               <img 
                 src={business.logoUrl} 
                 alt={business.storeName} 
-                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                className="w-10 h-10 rounded-full object-cover border border-purple-200"
               />
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-purple rounded-full flex items-center justify-center">
                 {businessLoading ? (
                   <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (
-                  <User size={18} className="text-white" />
+                  <Building2 size={18} className="text-white" />
                 )}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">
-                {business?.storeName || 'Cargando...'}
+                {business?.storeName || 'Dulces Momentos'}
               </p>
               <p className="text-xs text-gray-500 truncate">
-                Panel de Administración
+                Administrador
               </p>
             </div>
           </div>

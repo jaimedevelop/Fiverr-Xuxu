@@ -10,6 +10,7 @@ import CategoryPerformanceComponent from '../../components/admin/analytics/Categ
 import BaseCard from '../../components/common/BaseCard';
 import FormError from '../../components/common/FormError';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { getButtonClass, colors } from '../../utils/themeHelper';
 
 const Analytics: React.FC = () => {
   const {
@@ -166,9 +167,9 @@ const Analytics: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
           <p className="text-gray-600 font-medium">Cargando analíticas...</p>
         </div>
       </div>
@@ -181,15 +182,15 @@ const timeRangeForTopItems = {
 };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-main">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
           {/* Header Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <div className="card-base p-6 sm:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="mb-6 lg:mb-0">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 mb-3">
                   Analíticas
                 </h1>
                 <p className="text-lg text-gray-600">
@@ -212,70 +213,70 @@ const timeRangeForTopItems = {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-6 shadow-sm">
+            <div className="card-base p-6 border border-red-200 bg-red-50">
               <FormError message={error} />
             </div>
           )}
 
           {/* Overview Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Ingresos Totales</p>
-                  <p className="text-3xl font-bold text-gray-900">$21,950</p>
-                  <p className="text-xs text-green-600 mt-1">+12.5% vs período anterior</p>
+                  <p className="text-3xl font-bold text-gray-700">$21,950</p>
+                  <p className="text-xs text-emerald-600 mt-1">+12.5% vs período anterior</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-gradient-purple rounded-lg flex items-center justify-center shadow-purple">
+                  <DollarSign className="w-6 h-6 text-white" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total de Pedidos</p>
-                  <p className="text-3xl font-bold text-gray-900">123</p>
-                  <p className="text-xs text-green-600 mt-1">+8.3% vs período anterior</p>
+                  <p className="text-3xl font-bold text-gray-700">123</p>
+                  <p className="text-xs text-emerald-600 mt-1">+8.3% vs período anterior</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-gradient-mint rounded-lg flex items-center justify-center shadow-mint">
+                  <TrendingUp className="w-6 h-6 text-emerald-800" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total de Clientes</p>
-                  <p className="text-3xl font-bold text-gray-900">128</p>
-                  <p className="text-xs text-blue-600 mt-1">24 clientes nuevos</p>
+                  <p className="text-3xl font-bold text-gray-700">128</p>
+                  <p className="text-xs text-persian-pink-600 mt-1">24 clientes nuevos</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-gradient-pink rounded-lg flex items-center justify-center shadow-pink">
+                  <Users className="w-6 h-6 text-pink-800" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Valor Promedio</p>
-                  <p className="text-3xl font-bold text-gray-900">$178.45</p>
-                  <p className="text-xs text-orange-600 mt-1">+5.2% vs período anterior</p>
+                  <p className="text-3xl font-bold text-gray-700">$178.45</p>
+                  <p className="text-xs text-saffron-600 mt-1">+5.2% vs período anterior</p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-6 h-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-gradient-saffron rounded-lg flex items-center justify-center shadow-saffron">
+                  <Package className="w-6 h-6 text-orange-800" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Sales Chart Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-base p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
                 Tendencia de Ventas
               </h2>
               <p className="text-gray-600">
@@ -292,9 +293,9 @@ const timeRangeForTopItems = {
           {/* Analytics Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Top Items */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="card-base p-6">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">
                   Productos Más Vendidos
                 </h2>
                 <p className="text-gray-600">
@@ -309,9 +310,9 @@ const timeRangeForTopItems = {
             </div>
 
             {/* Customer Analytics */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="card-base p-6">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">
                   Analítica de Clientes
                 </h2>
                 <p className="text-gray-600">
@@ -327,9 +328,9 @@ const timeRangeForTopItems = {
           </div>
 
           {/* Category Performance Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-base p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
                 Rendimiento por Categoría
               </h2>
               <p className="text-gray-600">

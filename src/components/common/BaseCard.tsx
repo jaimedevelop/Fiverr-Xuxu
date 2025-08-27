@@ -1,3 +1,4 @@
+// src/components/common/BaseCard.tsx
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -23,16 +24,16 @@ const BaseCard: React.FC<BaseCardProps> = ({
   footer,
 }) => {
   return (
-    <div className={`bg-white rounded-lg border shadow-sm overflow-hidden ${className}`}>
+    <div className={`card-base ${className}`}>
       {/* Header */}
       {(title || actions) && (
-        <div className="px-6 py-4 border-b flex justify-between items-start">
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-start">
           <div>
             {title && (
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
             )}
             {description && (
-              <p className="mt-1 text-sm text-gray-500">{description}</p>
+              <p className="mt-1 text-sm text-gray-600">{description}</p>
             )}
           </div>
           {actions && (
@@ -45,15 +46,16 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
       {/* Error State */}
       {error && (
-        <div className="px-6 py-4 bg-red-50 border-b">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="px-6 py-4 bg-red-50/90 backdrop-blur-sm border-b border-red-100">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
         </div>
       )}
 
       {/* Loading State */}
       {loading ? (
-        <div className="px-6 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <div className="px-6 py-12 flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-saffron-500" />
+          <span className="ml-3 text-sm text-gray-600 font-medium">Cargando...</span>
         </div>
       ) : (
         /* Content */
@@ -64,7 +66,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
       {/* Footer */}
       {footer && (
-        <div className="px-6 py-4 bg-gray-50 border-t">
+        <div className="px-6 py-4 bg-gray-50/80 backdrop-blur-sm border-t border-gray-100">
           {footer}
         </div>
       )}

@@ -9,7 +9,7 @@ const ResponsiveLayout: React.FC = () => {
   const { user } = useUser();
   
   return (
-    <>
+    <div className="min-h-screen bg-gradient-main">
       {/* Mobile Layout (screens < 768px) */}
       <div className="md:hidden">
         <MobileLayout>
@@ -25,8 +25,12 @@ const ResponsiveLayout: React.FC = () => {
       </div>
 
       {/* Floating Cart Button - Only show for regular users, not admins */}
-      {user?.role === 'user' && <FloatingCartButton />}
-    </>
+      {user?.role === 'user' && (
+        <div className="md:hidden">
+          <FloatingCartButton />
+        </div>
+      )}
+    </div>
   );
 };
 

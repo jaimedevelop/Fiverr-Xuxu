@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, CreditCard, Shield, Info } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import { Settings, Save, CreditCard, Shield, Info, DollarSign, Clock, AlertTriangle } from 'lucide-react';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import BaseCard from '../../../components/common/BaseCard';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/ui/Select';
@@ -40,6 +40,7 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     // In a real app, this would fetch the settings from the API
@@ -92,11 +93,13 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSaveSuccess(false);
     
     if (validateForm()) {
       // In a real app, this would save the settings to the API
       console.log('Saving payment settings:', config);
-      alert('Configuración guardada correctamente');
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
 
@@ -144,222 +147,336 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
   };
 
   return (
-    <BaseCard title="Configuración de Pagos">
-      {error && <div className="mb-6"><FormError message={error} /></div>}
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <CreditCard className="h-5 w-5 mr-2 text-blue-500" />
-            Configuración General
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-                Moneda
-              </label>
-              <Select
-                id="currency"
-                name="currency"
-                value={config.currency}
-                onChange={handleSelectChange}
-                options={currencyOptions}
-                className="w-full"
-              />
-              {errors.currency && <FormError message={errors.currency} />}
-            </div>
-
-            <div>
-              <label htmlFor="paymentGateway" className="block text-sm font-medium text-gray-700 mb-1">
-                Pasarela de Pago
-              </label>
-              <Select
-                id="paymentGateway"
-                name="paymentGateway"
-                value={config.paymentGateway}
-                onChange={handleSelectChange}
-                options={gatewayOptions}
-                className="w-full"
-              />
-              {errors.paymentGateway && <FormError message={errors.paymentGateway} />}
-            </div>
-
-            <div>
-              <label htmlFor="minPaymentAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                Monto Mínimo de Pago
-              </label>
-              <Input
-                id="minPaymentAmount"
-                name="minPaymentAmount"
-                type="number"
-                min="0"
-                value={config.minPaymentAmount}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.minPaymentAmount && <FormError message={errors.minPaymentAmount} />}
-            </div>
-
-            <div>
-              <label htmlFor="maxPaymentAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                Monto Máximo de Pago
-              </label>
-              <Input
-                id="maxPaymentAmount"
-                name="maxPaymentAmount"
-                type="number"
-                min="0"
-                value={config.maxPaymentAmount}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.maxPaymentAmount && <FormError message={errors.maxPaymentAmount} />}
-            </div>
-          </div>
+    <div className="space-y-8">
+      {/* Error Display */}
+      {error && (
+        <div className="card-base p-4 bg-red-50 border-red-200 border">
+          <FormError message={error} />
         </div>
+      )}
 
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Shield className="h-5 w-5 mr-2 text-green-500" />
-            Seguridad y Verificación
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center">
-                <input
-                  id="testMode"
-                  name="testMode"
-                  type="checkbox"
-                  checked={config.testMode}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="testMode" className="ml-2 block text-sm text-gray-900">
-                  Modo de Prueba
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Las transacciones se procesarán en modo de prueba sin cobrar a los clientes.
-              </p>
+      {/* Success Display */}
+      {saveSuccess && (
+        <div className="card-base p-4 bg-emerald-50 border-emerald-200 border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <Save className="h-5 w-5 text-emerald-600" />
             </div>
-
             <div>
-              <div className="flex items-center">
-                <input
-                  id="requireVerification"
-                  name="requireVerification"
-                  type="checkbox"
-                  checked={config.requireVerification}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="requireVerification" className="ml-2 block text-sm text-gray-900">
-                  Requerir Verificación
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Los usuarios deberán verificar su identidad antes de realizar pagos.
+              <h3 className="text-sm font-semibold text-emerald-800">¡Configuración Guardada!</h3>
+              <p className="text-sm text-emerald-700">
+                Los ajustes de pago se han actualizado correctamente.
               </p>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Settings className="h-5 w-5 mr-2 text-purple-500" />
-            Opciones Avanzadas
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center">
-                <input
-                  id="allowPartialPayments"
-                  name="allowPartialPayments"
-                  type="checkbox"
-                  checked={config.allowPartialPayments}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="allowPartialPayments" className="ml-2 block text-sm text-gray-900">
-                  Permitir Pagos Parciales
-                </label>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* General Configuration */}
+        <BaseCard title="Configuración General">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-saffron-200">
+              <div className="w-8 h-8 bg-gradient-saffron rounded-lg flex items-center justify-center">
+                <CreditCard className="w-4 h-4 text-orange-900" />
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Permite a los clientes pagar una parte del total de la orden.
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center">
-                <input
-                  id="autoRefundEnabled"
-                  name="autoRefundEnabled"
-                  type="checkbox"
-                  checked={config.autoRefundEnabled}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="autoRefundEnabled" className="ml-2 block text-sm text-gray-900">
-                  Reembolsos Automáticos
-                </label>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Configuración Básica
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Ajustes principales para el procesamiento de pagos
+                </p>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Procesa automáticamente las solicitudes de reembolso.
-              </p>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="currency" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Moneda Principal
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Select
+                    id="currency"
+                    name="currency"
+                    value={config.currency}
+                    onChange={handleSelectChange}
+                    options={currencyOptions}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.currency && <FormError message={errors.currency} />}
+              </div>
 
-            <div>
-              <label htmlFor="refundWindowDays" className="block text-sm font-medium text-gray-700 mb-1">
-                Período de Reembolso (días)
-              </label>
-              <Input
-                id="refundWindowDays"
-                name="refundWindowDays"
-                type="number"
-                min="1"
-                value={config.refundWindowDays}
-                onChange={handleInputChange}
-                className="w-full"
-              />
-              {errors.refundWindowDays && <FormError message={errors.refundWindowDays} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Los clientes pueden solicitar reembolsos dentro de este período.
-              </p>
+              <div>
+                <label htmlFor="paymentGateway" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Pasarela de Pago
+                </label>
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Select
+                    id="paymentGateway"
+                    name="paymentGateway"
+                    value={config.paymentGateway}
+                    onChange={handleSelectChange}
+                    options={gatewayOptions}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.paymentGateway && <FormError message={errors.paymentGateway} />}
+              </div>
+
+              <div>
+                <label htmlFor="minPaymentAmount" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Monto Mínimo (MXN)
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="minPaymentAmount"
+                    name="minPaymentAmount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={config.minPaymentAmount}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.minPaymentAmount && <FormError message={errors.minPaymentAmount} />}
+              </div>
+
+              <div>
+                <label htmlFor="maxPaymentAmount" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Monto Máximo (MXN)
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="maxPaymentAmount"
+                    name="maxPaymentAmount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={config.maxPaymentAmount}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.maxPaymentAmount && <FormError message={errors.maxPaymentAmount} />}
+              </div>
             </div>
           </div>
-        </div>
+        </BaseCard>
 
-        <div className="bg-blue-50 p-4 rounded-md">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <Info className="h-5 w-5 text-blue-400" />
+        {/* Security Configuration */}
+        <BaseCard title="Seguridad y Verificación">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-emerald-200">
+              <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-700" />
+              </div>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Configuración de Seguridad
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Ajustes para proteger las transacciones
+                </p>
+              </div>
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">Información Importante</h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  Los cambios en la configuración de pagos pueden afectar las transacciones en curso.
-                  Asegúrate de guardar una copia de seguridad de tu configuración actual antes de realizar cambios.
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="card-base p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <input
+                        id="testMode"
+                        name="testMode"
+                        type="checkbox"
+                        checked={config.testMode}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="testMode" className="ml-3 block text-sm font-semibold text-gray-900">
+                        Modo de Prueba
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-600">
+                      Las transacciones se procesarán sin cobrar a los clientes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-base p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <input
+                        id="requireVerification"
+                        name="requireVerification"
+                        type="checkbox"
+                        checked={config.requireVerification}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="requireVerification" className="ml-3 block text-sm font-semibold text-gray-900">
+                        Requerir Verificación
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-600">
+                      Los usuarios verificarán su identidad antes de pagar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </BaseCard>
+
+        {/* Advanced Options */}
+        <BaseCard title="Opciones Avanzadas">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-2 border-b border-purple-200">
+              <div className="w-8 h-8 bg-gradient-purple rounded-lg flex items-center justify-center">
+                <Settings className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-md font-semibold text-gray-900">
+                  Configuración Avanzada
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Opciones adicionales para pagos y reembolsos
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="card-base p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <input
+                        id="allowPartialPayments"
+                        name="allowPartialPayments"
+                        type="checkbox"
+                        checked={config.allowPartialPayments}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="allowPartialPayments" className="ml-3 block text-sm font-semibold text-gray-900">
+                        Permitir Pagos Parciales
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-600">
+                      Los clientes pueden pagar parte del total de la orden.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-base p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Settings className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <input
+                        id="autoRefundEnabled"
+                        name="autoRefundEnabled"
+                        type="checkbox"
+                        checked={config.autoRefundEnabled}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="autoRefundEnabled" className="ml-3 block text-sm font-semibold text-gray-900">
+                        Reembolsos Automáticos
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-600">
+                      Procesa automáticamente solicitudes de reembolso.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="refundWindowDays" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Período de Reembolso (días)
+                </label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="refundWindowDays"
+                    name="refundWindowDays"
+                    type="number"
+                    min="1"
+                    value={config.refundWindowDays}
+                    onChange={handleInputChange}
+                    className="pl-10 input-base"
+                  />
+                </div>
+                {errors.refundWindowDays && <FormError message={errors.refundWindowDays} />}
+                <p className="mt-1 text-xs text-gray-500">
+                  Tiempo límite para solicitar reembolsos
                 </p>
               </div>
             </div>
           </div>
+        </BaseCard>
+
+        {/* Important Information */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-xl">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Info className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-blue-900 mb-2">Información Importante</h3>
+              <div className="text-sm text-blue-800 space-y-2">
+                <p>
+                  Los cambios en la configuración de pagos pueden afectar las transacciones en curso.
+                  Te recomendamos hacer una copia de seguridad de tu configuración actual.
+                </p>
+                <ul className="list-disc list-inside space-y-1 mt-3">
+                  <li>El modo de prueba evita cobros reales a los clientes</li>
+                  <li>Los límites de monto ayudan a prevenir fraudes</li>
+                  <li>La verificación adicional aumenta la seguridad</li>
+                  <li>Los reembolsos automáticos mejoran la experiencia del cliente</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={loading}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Guardando...' : 'Guardar Configuración'}
-          </Button>
+        {/* Action Button */}
+        <div className="card-base p-6">
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className={getButtonClass('admin')}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Guardando...' : 'Guardar Configuración'}
+            </button>
+          </div>
         </div>
       </form>
-    </BaseCard>
+    </div>
   );
 };
 

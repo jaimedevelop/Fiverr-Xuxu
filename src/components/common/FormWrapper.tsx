@@ -1,3 +1,4 @@
+// src/components/common/FormWrapper.tsx
 import React, { useState } from 'react';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import FormError from './FormError';
@@ -94,7 +95,18 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
       {/* Error Alert */}
       {error && (
         <div id="form-error" className="mb-6">
-          <FormError message={error} />
+          <div className="card-base bg-red-50/90 border-red-200 p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-semibold text-red-800">
+                  {error}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -106,16 +118,16 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
       )}
 
       {/* Form Content */}
-      <div className={`${loading ? 'opacity-70' : ''}`}>
+      <div className={`transition-opacity duration-300 ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
         {childrenWithProps}
       </div>
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 flex flex-col items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-            <p className="text-gray-700">Procesando...</p>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="card-base p-8 flex flex-col items-center shadow-brand-xl">
+            <Loader2 className="h-10 w-10 animate-spin text-saffron-500 mb-4" />
+            <p className="text-gray-700 font-medium">Procesando...</p>
           </div>
         </div>
       )}

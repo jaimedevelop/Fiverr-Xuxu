@@ -5,6 +5,7 @@ import Button from '../ui/Button';
 import FormInput from '../common/FormInput';
 import FormError from '../common/FormError';
 import { useAuth } from '../../contexts/AuthContext';
+import { getButtonClass } from '../../utils/themeHelper';
 
 const AdminAuthForm = () => {
   const navigate = useNavigate();
@@ -83,8 +84,8 @@ const AdminAuthForm = () => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {errors.general && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="flex">
+        <div className="card-base bg-red-50 border-red-200">
+          <div className="flex p-4">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
                 {errors.general}
@@ -124,20 +125,23 @@ const AdminAuthForm = () => {
 
       <div className="flex items-center justify-between">
         <div className="text-sm">
-          <a href="/recuperar-contrasena" className="font-medium text-blue-600 hover:text-blue-500">
+          <a 
+            href="/recuperar-contrasena" 
+            className="font-medium text-purple-600 hover:text-purple-500 transition-colors duration-200"
+          >
             ¿Olvidaste tu contraseña?
           </a>
         </div>
       </div>
 
       <div>
-        <Button
+        <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full"
+          className={`${getButtonClass('admin')} w-full`}
         >
           {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
-        </Button>
+        </button>
       </div>
     </form>
   );

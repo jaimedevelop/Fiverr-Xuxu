@@ -1,12 +1,13 @@
 // src/components/admin/analytics/SalesChart.tsx
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, RefreshCw, AlertCircle, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, RefreshCw, AlertCircle, Info, BarChart3 } from 'lucide-react';
 import { SalesDataPoint, SalesComparison } from '../../../types/analytics';
 import BaseCard from '../../../components/common/BaseCard';
 import { getSalesData } from '../../../services/analytics/salesDataService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { useUser } from '../../../contexts/UserContext';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface SalesChartProps {
   title: string;
@@ -40,11 +41,14 @@ const SalesChart: React.FC<SalesChartProps> = ({
   if (!timeRange || !timeRange.start || !timeRange.end) {
     console.log('SalesChart - timeRange is undefined or incomplete');
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex justify-center py-8">
-          <p className="text-gray-500">Cargando rango de fechas...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">Cargando rango de fechas...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -128,12 +132,15 @@ const SalesChart: React.FC<SalesChartProps> = ({
 
   if (loading) {
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Cargando datos de ventas...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 font-medium">Cargando datos de ventas...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -142,38 +149,41 @@ const SalesChart: React.FC<SalesChartProps> = ({
     const isMissingBusinessError = error.includes('No se encontró el ID del negocio');
     
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="flex items-center text-red-500 mb-4">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <p>{error}</p>
-          </div>
-          
-          {isMissingBusinessError && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 max-w-md">
-              <div className="flex">
-                <Info className="h-5 w-5 text-blue-400 mr-2 flex-shrink-0" />
-                <div className="text-sm text-blue-700">
-                  <p className="font-medium mb-1">Información importante</p>
-                  <p>Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
-                  <ol className="list-decimal pl-5 mt-2 space-y-1">
-                    <li>Iniciar sesión con una cuenta de negocio</li>
-                    <li>O asociar esta cuenta a un negocio existente</li>
-                  </ol>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex items-center text-red-500 mb-6">
+              <AlertCircle className="h-6 w-6 mr-3" />
+              <p className="font-semibold">{error}</p>
+            </div>
+            
+            {isMissingBusinessError && (
+              <div className="bg-sky-50 border-2 border-sky-200 rounded-xl p-6 mb-6 max-w-md">
+                <div className="flex">
+                  <Info className="h-5 w-5 text-sky-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-sky-800">
+                    <p className="font-bold mb-2">Información importante</p>
+                    <p className="mb-3">Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>Iniciar sesión con una cuenta de negocio</li>
+                      <li>O asociar esta cuenta a un negocio existente</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          
-          <button 
-            onClick={handleRetry}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reintentar
-          </button>
+            )}
+            
+            <button 
+              onClick={handleRetry}
+              className={`${getButtonClass('admin')} flex items-center gap-2`}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reintentar
+            </button>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -190,48 +200,48 @@ const SalesChart: React.FC<SalesChartProps> = ({
   const formatChange = (change: number) => {
     const isPositive = change >= 0;
     return (
-      <div className={`flex items-center ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+      <div className={`flex items-center ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
         {isPositive ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-        <span>{Math.abs(change).toFixed(1)}%</span>
+        <span className="font-semibold">{Math.abs(change).toFixed(1)}%</span>
       </div>
     );
   };
 
   // Render summary metrics
   const renderSummary = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div className="bg-white p-4 rounded-lg border">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="card-base p-6 bg-gradient-to-r from-saffron-50 to-amber-50 border-saffron-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Ingresos totales</p>
-            <p className="text-lg font-bold">{formatCurrency(totalRevenue)}</p>
+            <p className="text-sm text-saffron-700 font-semibold mb-1">Ingresos totales</p>
+            <p className="text-2xl font-bold text-saffron-800">{formatCurrency(totalRevenue)}</p>
           </div>
-          <div className="p-2 bg-blue-100 rounded-full">
-            <DollarSign className="h-5 w-5 text-blue-600" />
+          <div className="p-3 bg-saffron-100 rounded-full">
+            <DollarSign className="h-6 w-6 text-saffron-600" />
           </div>
         </div>
       </div>
       
-      <div className="bg-white p-4 rounded-lg border">
+      <div className="card-base p-6 bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Pedidos totales</p>
-            <p className="text-lg font-bold">{totalOrders}</p>
+            <p className="text-sm text-emerald-700 font-semibold mb-1">Pedidos totales</p>
+            <p className="text-2xl font-bold text-emerald-800">{totalOrders}</p>
           </div>
-          <div className="p-2 bg-green-100 rounded-full">
-            <ShoppingCart className="h-5 w-5 text-green-600" />
+          <div className="p-3 bg-emerald-100 rounded-full">
+            <ShoppingCart className="h-6 w-6 text-emerald-600" />
           </div>
         </div>
       </div>
       
-      <div className="bg-white p-4 rounded-lg border">
+      <div className="card-base p-6 bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Valor promedio</p>
-            <p className="text-lg font-bold">{formatCurrency(averageOrderValue)}</p>
+            <p className="text-sm text-purple-700 font-semibold mb-1">Valor promedio</p>
+            <p className="text-2xl font-bold text-purple-800">{formatCurrency(averageOrderValue)}</p>
           </div>
-          <div className="p-2 bg-purple-100 rounded-full">
-            <TrendingUp className="h-5 w-5 text-purple-600" />
+          <div className="p-3 bg-purple-100 rounded-full">
+            <TrendingUp className="h-6 w-6 text-purple-600" />
           </div>
         </div>
       </div>
@@ -239,77 +249,85 @@ const SalesChart: React.FC<SalesChartProps> = ({
   );
 
   return (
-    <BaseCard title={title} className={className}>
-      {data.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="mx-auto h-12 w-12 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-full w-full">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No se encontraron datos de ventas para mostrar en el período seleccionado.
-          </p>
-        </div>
-      ) : (
-        <>
-          {renderSummary()}
-          
-          <div className="space-y-6">
-            {/* Revenue Chart */}
-            <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Ingresos</h3>
-              <div className="space-y-2">
-                {data.map((point, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="w-20 text-sm text-gray-600">
-                      {formatDate(point.date)}
-                    </div>
-                    <div className="flex-1 ml-2">
-                      <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${(point.revenue / maxRevenue) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="w-24 text-right text-sm font-medium">
-                      {formatCurrency(point.revenue)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+    <div className="card-base shadow-brand-lg">
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+        
+        {data.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="h-8 w-8 text-purple-600" />
             </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay datos</h3>
+            <p className="text-gray-500">
+              No se encontraron datos de ventas para mostrar en el período seleccionado.
+            </p>
+          </div>
+        ) : (
+          <>
+            {renderSummary()}
             
-            {/* Orders Chart */}
-            <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Pedidos</h3>
-              <div className="space-y-2">
-                {data.map((point, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="w-20 text-sm text-gray-600">
-                      {formatDate(point.date)}
-                    </div>
-                    <div className="flex-1 ml-2">
-                      <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-green-500 rounded-full"
-                          style={{ width: `${(point.orders / maxOrders) * 100}%` }}
-                        ></div>
+            <div className="space-y-8">
+              {/* Revenue Chart */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-saffron-600" />
+                  Ingresos por día
+                </h4>
+                <div className="space-y-3">
+                  {data.map((point, index) => (
+                    <div key={index} className="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                      <div className="w-20 text-sm text-gray-600 font-medium">
+                        {formatDate(point.date)}
+                      </div>
+                      <div className="flex-1 ml-4">
+                        <div className="h-8 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-saffron-500 to-amber-500 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${(point.revenue / maxRevenue) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="w-28 text-right text-sm font-bold text-saffron-600 ml-4">
+                        {formatCurrency(point.revenue)}
                       </div>
                     </div>
-                    <div className="w-24 text-right text-sm font-medium">
-                      {point.orders}
+                  ))}
+                </div>
+              </div>
+              
+              {/* Orders Chart */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-emerald-600" />
+                  Pedidos por día
+                </h4>
+                <div className="space-y-3">
+                  {data.map((point, index) => (
+                    <div key={index} className="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                      <div className="w-20 text-sm text-gray-600 font-medium">
+                        {formatDate(point.date)}
+                      </div>
+                      <div className="flex-1 ml-4">
+                        <div className="h-8 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${(point.orders / maxOrders) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="w-28 text-right text-sm font-bold text-emerald-600 ml-4">
+                        {point.orders} {point.orders === 1 ? 'pedido' : 'pedidos'}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
-    </BaseCard>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

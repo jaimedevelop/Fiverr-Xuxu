@@ -4,19 +4,30 @@ import React from 'react';
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
   className?: string;
+  color?: 'primary' | 'secondary' | 'white';
 }
 
-const LoadingSpinner = ({ size = 'medium', className = '' }: LoadingSpinnerProps) => {
+const LoadingSpinner = ({ 
+  size = 'medium', 
+  className = '', 
+  color = 'primary' 
+}: LoadingSpinnerProps) => {
   const sizeClasses = {
     small: 'h-4 w-4',
     medium: 'h-8 w-8',
     large: 'h-12 w-12'
   };
 
+  const colorClasses = {
+    primary: 'text-saffron-500',
+    secondary: 'text-gray-500',
+    white: 'text-white'
+  };
+
   return (
     <div className={`flex justify-center items-center ${className}`}>
       <svg 
-        className={`animate-spin text-blue-600 ${sizeClasses[size]}`} 
+        className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]}`} 
         xmlns="http://www.w3.org/2000/svg" 
         fill="none" 
         viewBox="0 0 24 24"

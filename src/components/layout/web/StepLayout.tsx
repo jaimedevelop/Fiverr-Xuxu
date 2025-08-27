@@ -1,7 +1,21 @@
 // src/components/layout/StepLayout.tsx
 import React from 'react';
 import ProgressBar from '../../ui/ProgressBar';
-// ... rest of the imports remain the same
+
+interface StepLayoutProps {
+  children: React.ReactNode;
+  currentStep: number;
+  totalSteps: number;
+  stepTitles: string[];
+  title?: string;
+  description?: string;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  isLastStep?: boolean;
+  isSubmitting?: boolean;
+  nextDisabled?: boolean;
+  previousDisabled?: boolean;
+}
 
 const StepLayout: React.FC<StepLayoutProps> = ({ 
   children, 
@@ -22,63 +36,75 @@ const StepLayout: React.FC<StepLayoutProps> = ({
     id: index + 1,
     name: title
   }));
+
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Center the ProgressBar */}
+    <div className="max-w-2xl mx-auto p-4">
+      {/* Center the ProgressBar with beautiful spacing */}
       <div className="mb-8 flex justify-center">
         <ProgressBar steps={steps} currentStep={currentStep} />
       </div>
       
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200">
+      {/* Main Card Container */}
+      <div className="card-base overflow-hidden">
+        {/* Header Section */}
+        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-saffron-50 to-orange-50">
           {title && (
-            <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 text-gradient-saffron">{title}</h2>
           )}
           {description && (
-            <p className="mt-1 text-sm text-gray-600">{description}</p>
+            <p className="mt-2 text-gray-600">{description}</p>
           )}
         </div>
         
-        <div className="px-6 py-5">
+        {/* Content Section */}
+        <div className="px-8 py-6">
           {children}
         </div>
         
-        <div className="px-6 py-4 bg-gray-50 flex justify-between">
+        {/* Footer Section */}
+        <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-saffron-50 border-t border-gray-100 flex justify-between items-center">
           <button
             onClick={onPrevious}
             disabled={previousDisabled || currentStep === 1}
-            className={`px-4 py-2 rounded-lg font-medium ${
+            className={`btn-outline ${
               previousDisabled || currentStep === 1
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-700 hover:bg-gray-200'
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:scale-105'
             }`}
           >
-            Anterior
+            ← Anterior
           </button>
           
           {isLastStep ? (
             <button
               onClick={onNext}
               disabled={nextDisabled || isSubmitting}
-              className={`px-4 py-2 rounded-lg font-medium text-white ${
+              className={`btn-primary ${
                 nextDisabled || isSubmitting
-                  ? 'bg-blue-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105'
               }`}
             >
-              {isSubmitting ? 'Registrando...' : 'Registrarse'}
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-900 border-t-transparent mr-2"></div>
+                  Registrando...
+                </>
+              ) : (
+                '✨ Registrarse'
+              )}
             </button>
           ) : (
             <button
               onClick={onNext}
               disabled={nextDisabled}
-              className={`px-4 py-2 rounded-lg font-medium text-white ${
+              className={`btn-primary ${
                 nextDisabled
-                  ? 'bg-blue-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105'
               }`}
             >
-              Siguiente
+              Siguiente →
             </button>
           )}
         </div>
@@ -86,4 +112,5 @@ const StepLayout: React.FC<StepLayoutProps> = ({
     </div>
   );
 };
+
 export default StepLayout;

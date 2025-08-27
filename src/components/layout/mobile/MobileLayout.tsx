@@ -15,17 +15,20 @@ const MobileLayout: React.FC = () => {
   // Show loading spinner while checking user context
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-col h-screen bg-gradient-main">
         <main className="flex-1 overflow-y-auto flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 animate-spin rounded-full border-4 border-saffron-200 border-t-saffron-600"></div>
+            <p className="text-saffron-600 font-medium">Cargando Dulces Momentos...</p>
+          </div>
         </main>
       </div>
     );
   }
   
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <main className={`flex-1 overflow-y-auto ${firestoreUser?.role === 'admin' ? 'pb-0' : 'pb-16'}`}>
+    <div className="flex flex-col h-screen bg-gradient-main">
+      <main className={`flex-1 overflow-y-auto ${firestoreUser?.role === 'admin' ? 'pb-0' : 'pb-20'}`}>
         <Outlet />
       </main>
       

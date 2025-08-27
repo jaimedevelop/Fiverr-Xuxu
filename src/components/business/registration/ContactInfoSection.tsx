@@ -1,6 +1,7 @@
 import React from 'react';
-import BusinessRegistrationData from '../../../types/business';
-import FormErrors from '../../../types/form';
+import { ThemeHelper } from '../../../utils/themeHelper';
+import type { BusinessRegistrationData } from '../../../types/business';
+import type { FormErrors } from '../../../types/form';
 import FormInput from '../../common/FormInput';
 import FormError from '../../common/FormError';
 
@@ -48,7 +49,7 @@ const ContactInfoSection = ({
 
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-900 mb-4">
+      <h2 className={`text-lg font-medium text-${ThemeHelper.colors.roles.business} mb-4`}>
         Información de Contacto
       </h2>
       
@@ -62,6 +63,7 @@ const ContactInfoSection = ({
             placeholder="ejemplo@correo.com"
             value={formData.email}
             onChange={handleChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.email && <FormError message={errors.email} />}
@@ -76,6 +78,7 @@ const ContactInfoSection = ({
             placeholder="(55) 1234-5678"
             value={formData.phone}
             onChange={handlePhoneChange}
+            className={`input-base focus:border-${ThemeHelper.colors.roles.business} focus:ring-${ThemeHelper.colors.roles.business}/20`}
             required
           />
           {errors.phone && <FormError message={errors.phone} />}

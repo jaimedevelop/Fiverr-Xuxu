@@ -1,7 +1,7 @@
-// src/components/admin/settings/OrderSettings.tsx
+// src/components/admin/settings/OrderSettings.tsx - Theme Converted
 import React, { useState, useEffect } from 'react';
-import { Clock, Settings, AlertCircle, CheckCircle, Calendar } from 'lucide-react';
-import Button from '../../ui/Button';
+import { Clock, Settings, AlertCircle, CheckCircle, Save, Calendar, Timer, Play } from 'lucide-react';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 import BaseCard from '../../common/BaseCard';
 import Input from '../../common/Input';
 import Select from '../../ui/Select';
@@ -158,11 +158,11 @@ const OrderSettings: React.FC<OrderSettingsProps> = ({
   return (
     <BaseCard title="Configuración de Pedidos">
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <div>
+              <h3 className="text-sm font-semibold text-red-800">Error</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>
@@ -170,12 +170,12 @@ const OrderSettings: React.FC<OrderSettingsProps> = ({
       )}
 
       {saveSuccess && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-          <div className="flex">
-            <CheckCircle className="h-5 w-5 text-green-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">¡Éxito!</h3>
-              <p className="text-sm text-green-700 mt-1">
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <div>
+              <h3 className="text-sm font-semibold text-emerald-800">¡Configuración Guardada!</h3>
+              <p className="text-sm text-emerald-700">
                 La configuración de pedidos se guardó correctamente.
               </p>
             </div>
@@ -183,169 +183,94 @@ const OrderSettings: React.FC<OrderSettingsProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Order Timing Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Clock className="h-5 w-5 mr-2 text-blue-500" />
-            Horarios de Pedido
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label htmlFor="cutoffTime" className="block text-sm font-medium text-gray-700 mb-1">
-                Hora de Corte para Siguiente Día
-              </label>
-              <Select
-                id="cutoffTime"
-                name="cutoffTime"
-                value={settings.cutoffTime}
-                onChange={handleInputChange}
-                options={timeOptions}
-                className="w-full"
-              />
-              {errors.cutoffTime && <FormError message={errors.cutoffTime} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Pedidos después de esta hora van para el siguiente día
-              </p>
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-blue-200">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-sky-100 rounded-lg flex items-center justify-center">
+              <Clock className="h-5 w-5 text-blue-600" />
             </div>
-
             <div>
-              <label htmlFor="morningOrderDeadline" className="block text-sm font-medium text-gray-700 mb-1">
-                Límite de Pedidos Matutinos
-              </label>
-              <Select
-                id="morningOrderDeadline"
-                name="morningOrderDeadline"
-                value={settings.morningOrderDeadline}
-                onChange={handleInputChange}
-                options={timeOptions}
-                className="w-full"
-              />
-              {errors.morningOrderDeadline && <FormError message={errors.morningOrderDeadline} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Pedidos antes de esta hora tienen prioridad
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="sameDayCompletionHour" className="block text-sm font-medium text-gray-700 mb-1">
-                Hora Límite de Completado
-              </label>
-              <Select
-                id="sameDayCompletionHour"
-                name="sameDayCompletionHour"
-                value={settings.sameDayCompletionHour}
-                onChange={handleInputChange}
-                options={timeOptions}
-                className="w-full"
-              />
-              {errors.sameDayCompletionHour && <FormError message={errors.sameDayCompletionHour} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Pedidos prioritarios listos hasta esta hora
+              <h3 className="text-lg font-semibold text-gray-900">
+                Resumen de Lógica de Pedidos
+              </h3>
+              <p className="text-sm text-gray-600">
+                Visualiza cómo funcionan tus configuraciones actuales
               </p>
             </div>
           </div>
-        </div>
 
-        {/* Queue Settings Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Calendar className="h-5 w-5 mr-2 text-green-500" />
-            Configuración de Cola
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center">
-                <input
-                  id="enableOrderQueue"
-                  name="enableOrderQueue"
-                  type="checkbox"
-                  checked={settings.enableOrderQueue}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="enableOrderQueue" className="ml-2 block text-sm text-gray-900">
-                  Habilitar Cola de Pedidos
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Permite pedidos fuera de horario
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="defaultQueueDelay" className="block text-sm font-medium text-gray-700 mb-1">
-                Tiempo de Procesamiento Estándar
-              </label>
-              <Select
-                id="defaultQueueDelay"
-                name="defaultQueueDelay"
-                value={settings.defaultQueueDelay.toString()}
-                onChange={handleInputChange}
-                options={delayOptions}
-                className="w-full"
-              />
-              {errors.defaultQueueDelay && <FormError message={errors.defaultQueueDelay} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Tiempo estimado para completar un pedido
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="minOrderAdvanceTime" className="block text-sm font-medium text-gray-700 mb-1">
-                Tiempo Mínimo de Anticipación
-              </label>
-              <Select
-                id="minOrderAdvanceTime"
-                name="minOrderAdvanceTime"
-                value={settings.minOrderAdvanceTime.toString()}
-                onChange={handleInputChange}
-                options={advanceTimeOptions}
-                className="w-full"
-              />
-              {errors.minOrderAdvanceTime && <FormError message={errors.minOrderAdvanceTime} />}
-              <p className="mt-1 text-xs text-gray-500">
-                Tiempo mínimo requerido para programar pedidos
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Order Logic Summary */}
-        <div className="space-y-4 pt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Settings className="h-5 w-5 mr-2 text-purple-500" />
-            Resumen de Lógica de Pedidos
-          </h3>
-
-          <div className="bg-gray-50 p-4 rounded-md">
-            <ul className="text-sm text-gray-700 space-y-2">
-              <li className="flex items-start">
-                <span className="font-medium mr-2">•</span>
-                Pedidos después de las <strong>{settings.cutoffTime}</strong> se programan para el siguiente día
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 p-6 rounded-xl">
+            <h4 className="font-semibold text-gray-900 mb-4">Reglas Configuradas:</h4>
+            <ul className="space-y-3 text-sm text-gray-700">
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-orange-600">1</span>
+                </div>
+                <div>
+                  <span className="font-medium">Corte diario:</span> Pedidos después de las{' '}
+                  <span className="font-semibold text-orange-600">{settings.cutoffTime}</span>{' '}
+                  se programan para el siguiente día
+                </div>
               </li>
-              <li className="flex items-start">
-                <span className="font-medium mr-2">•</span>
-                Pedidos entre las 9:00 AM y <strong>{settings.morningOrderDeadline}</strong> tienen prioridad y pueden estar listos hasta las  <strong>{settings.sameDayCompletionHour}</strong>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-green-600">2</span>
+                </div>
+                <div>
+                  <span className="font-medium">Pedidos prioritarios:</span> Entre las 9:00 AM y{' '}
+                  <span className="font-semibold text-green-600">{settings.morningOrderDeadline}</span>{' '}
+                  pueden estar listos hasta las{' '}
+                  <span className="font-semibold text-green-600">{settings.sameDayCompletionHour}</span>
+                </div>
               </li>
-              <li className="flex items-start">
-                <span className="font-medium mr-2">•</span>
-                Pedidos fuera de horario {settings.enableOrderQueue ? 'se agregan a la cola' : 'no son permitidos'}
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-indigo-600">3</span>
+                </div>
+                <div>
+                  <span className="font-medium">Cola de pedidos:</span>{' '}
+                  {settings.enableOrderQueue ? (
+                    <span className="text-emerald-600 font-semibold">Habilitada</span>
+                  ) : (
+                    <span className="text-red-600 font-semibold">Deshabilitada</span>
+                  )}{' '}
+                  para pedidos fuera de horario
+                </div>
               </li>
-              <li className="flex items-start">
-                <span className="font-medium mr-2">•</span>
-                Tiempo estándar de procesamiento:  <strong> {settings.defaultQueueDelay} minutos</strong>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-purple-600">4</span>
+                </div>
+                <div>
+                  <span className="font-medium">Tiempo de procesamiento:</span>{' '}
+                  <span className="font-semibold text-purple-600">{settings.defaultQueueDelay} minutos</span>{' '}
+                  estándar por pedido
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-pink-600">5</span>
+                </div>
+                <div>
+                  <span className="font-medium">Anticipación mínima:</span>{' '}
+                  <span className="font-semibold text-pink-600">{settings.minOrderAdvanceTime} minutos</span>{' '}
+                  requeridos para programar
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={loading}>
+        <div className="flex justify-end pt-6 border-t border-gray-200">
+          <button
+            type="submit"
+            disabled={loading}
+            className={getButtonClass('admin')}
+          >
+            <Save className="h-4 w-4 mr-2" />
             {loading ? 'Guardando...' : 'Guardar Configuración'}
-          </Button>
+          </button>
         </div>
       </form>
     </BaseCard>

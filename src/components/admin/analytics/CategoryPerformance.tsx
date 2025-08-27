@@ -1,12 +1,13 @@
 // src/components/admin/analytics/CategoryPerformance.tsx
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, DollarSign, RefreshCw, AlertCircle, Info } from 'lucide-react';
+import { TrendingUp, DollarSign, RefreshCw, AlertCircle, Info, Package } from 'lucide-react';
 import { CategoryPerformance } from '../../../types/analytics';
 import BaseCard from '../../../components/common/BaseCard';
 import { getCategoryPerformanceData } from '../../../services/analytics/categoryPerformanceService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { useUser } from '../../../contexts/UserContext';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface CategoryPerformanceProps {
   title: string;
@@ -14,7 +15,7 @@ interface CategoryPerformanceProps {
   className?: string;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = ['#8b5cf6', '#F5CB5C', '#10b981', '#ef4444', '#3b82f6', '#ec4899'];
 
 const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({ 
   title, 
@@ -42,11 +43,14 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
   if (!timeRange || !timeRange.start || !timeRange.end) {
     console.log('CategoryPerformance - timeRange is undefined or incomplete');
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex justify-center py-8">
-          <p className="text-gray-500">Seleccionando rango de fechas...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">Seleccionando rango de fechas...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -123,12 +127,15 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
 
   if (loading) {
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Cargando datos de categorías...</p>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 font-medium">Cargando datos de categorías...</p>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -137,38 +144,41 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
     const isMissingBusinessError = error.includes('No se encontró el ID del negocio');
     
     return (
-      <BaseCard title={title} className={className}>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="flex items-center text-red-500 mb-4">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <p>{error}</p>
-          </div>
-          
-          {isMissingBusinessError && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 max-w-md">
-              <div className="flex">
-                <Info className="h-5 w-5 text-blue-400 mr-2 flex-shrink-0" />
-                <div className="text-sm text-blue-700">
-                  <p className="font-medium mb-1">Información importante</p>
-                  <p>Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
-                  <ol className="list-decimal pl-5 mt-2 space-y-1">
-                    <li>Iniciar sesión con una cuenta de negocio</li>
-                    <li>O asociar esta cuenta a un negocio existente</li>
-                  </ol>
+      <div className="card-base shadow-brand-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex items-center text-red-500 mb-6">
+              <AlertCircle className="h-6 w-6 mr-3" />
+              <p className="font-semibold">{error}</p>
+            </div>
+            
+            {isMissingBusinessError && (
+              <div className="bg-sky-50 border-2 border-sky-200 rounded-xl p-6 mb-6 max-w-md">
+                <div className="flex">
+                  <Info className="h-5 w-5 text-sky-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-sky-800">
+                    <p className="font-bold mb-2">Información importante</p>
+                    <p className="mb-3">Esta cuenta de usuario no está asociada a un negocio. Para ver las analíticas, necesitas:</p>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>Iniciar sesión con una cuenta de negocio</li>
+                      <li>O asociar esta cuenta a un negocio existente</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          
-          <button 
-            onClick={handleRetry}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reintentar
-          </button>
+            )}
+            
+            <button 
+              onClick={handleRetry}
+              className={`${getButtonClass('admin')} flex items-center gap-2`}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reintentar
+            </button>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
@@ -179,92 +189,94 @@ const CategoryPerformanceComponent: React.FC<CategoryPerformanceProps> = ({
   const sortedData = [...data].sort((a, b) => b.revenue - a.revenue);
 
   return (
-    <BaseCard title={title} className={className}>
-      {data.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="mx-auto h-12 w-12 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-full w-full">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+    <div className="card-base shadow-brand-lg">
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
+        
+        {data.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package className="h-8 w-8 text-purple-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay datos</h3>
+            <p className="text-gray-500">
+              No se encontraron categorías para mostrar en el período seleccionado.
+            </p>
           </div>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No se encontraron categorías para mostrar en el período seleccionado.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded-lg border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Ingresos totales</p>
-                  <p className="text-lg font-bold">{formatCurrency(totalRevenue)}</p>
+        ) : (
+          <div className="space-y-8">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="card-base p-6 bg-gradient-to-r from-saffron-50 to-amber-50 border-saffron-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-saffron-700 font-semibold mb-1">Ingresos totales</p>
+                    <p className="text-2xl font-bold text-saffron-800">{formatCurrency(totalRevenue)}</p>
+                  </div>
+                  <div className="p-3 bg-saffron-100 rounded-full">
+                    <DollarSign className="h-6 w-6 text-saffron-600" />
+                  </div>
                 </div>
-                <div className="p-2 bg-blue-100 rounded-full">
-                  <DollarSign className="h-5 w-5 text-blue-600" />
+              </div>
+              
+              <div className="card-base p-6 bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-emerald-700 font-semibold mb-1">Categorías activas</p>
+                    <p className="text-2xl font-bold text-emerald-800">{data.length}</p>
+                  </div>
+                  <div className="p-3 bg-emerald-100 rounded-full">
+                    <TrendingUp className="h-6 w-6 text-emerald-600" />
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Categorías</p>
-                  <p className="text-lg font-bold">{data.length}</p>
-                </div>
-                <div className="p-2 bg-green-100 rounded-full">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                </div>
+            {/* Category List */}
+            <div>
+              <h4 className="text-lg font-bold text-gray-900 mb-4">Rendimiento por categoría</h4>
+              <div className="space-y-4">
+                {sortedData.map((category, index) => (
+                  <div key={category.categoryId} className="card-base p-5 hover:shadow-brand-lg transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <div 
+                          className="w-4 h-4 rounded-full mr-4 shadow-sm" 
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        ></div>
+                        <h4 className="text-base font-bold text-gray-900">{category.categoryName}</h4>
+                      </div>
+                      <div className="text-lg font-bold text-saffron-600">
+                        {formatCurrency(category.revenue)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-full bg-gray-200 rounded-full h-3 mr-4">
+                        <div 
+                          className="h-3 rounded-full transition-all duration-500 ease-out" 
+                          style={{ 
+                            width: `${category.percentageOfTotal}%`,
+                            backgroundColor: COLORS[index % COLORS.length]
+                          }}
+                        ></div>
+                      </div>
+                      <div className="text-sm font-bold text-purple-600 min-w-16 text-right">
+                        {category.percentageOfTotal.toFixed(1)}%
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 font-medium">
+                      {category.ordersCount} {category.ordersCount === 1 ? 'pedido' : 'pedidos'}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-          
-          {/* Category List */}
-          <div>
-            <h3 className="text-md font-medium text-gray-900 mb-3">Rendimiento por categoría</h3>
-            <div className="space-y-4">
-              {sortedData.map((category, index) => (
-                <div key={category.categoryId} className="p-3 bg-white rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2" 
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                      ></div>
-                      <h4 className="text-sm font-medium text-gray-900">{category.categoryName}</h4>
-                    </div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {formatCurrency(category.revenue)}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
-                      <div 
-                        className="h-2 rounded-full" 
-                        style={{ 
-                          width: `${category.percentageOfTotal}%`,
-                          backgroundColor: COLORS[index % COLORS.length]
-                        }}
-                      ></div>
-                    </div>
-                    <div className="text-xs font-medium text-gray-500">
-                      {category.percentageOfTotal.toFixed(1)}%
-                    </div>
-                  </div>
-                  
-                  <div className="mt-2 text-xs text-gray-500">
-                    {category.ordersCount} pedidos
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </BaseCard>
+        )}
+      </div>
+    </div>
   );
 };
 

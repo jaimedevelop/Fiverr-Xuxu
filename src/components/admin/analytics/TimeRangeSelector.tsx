@@ -4,6 +4,7 @@ import { Calendar, ChevronDown } from 'lucide-react';
 import { TimeRange } from '../../../types/analytics';
 import Button from '../../../components/ui/Button';
 import Select from '../../../components/ui/Select';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface TimeRangeSelectorProps {
   selectedRange: TimeRange & { label?: string };
@@ -152,27 +153,31 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   };
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-4 ${className}`}>
       <div className="relative">
-        <Select
+        <select
           value={internalValue}
           onChange={handleSelectChange}
-          options={timeRangeOptions}
-          className="w-48 pr-10 appearance-none"
-        />
-        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          className="input-base w-56 pr-10 appearance-none font-medium"
+        >
+          {timeRangeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <ChevronDown className="h-4 w-4 text-purple-400" />
         </div>
       </div>
       
-      <Button
-        variant="outline"
+      <button
         onClick={handleCustomRange}
-        className="flex items-center"
+        className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
       >
-        <Calendar className="h-4 w-4 mr-2" />
+        <Calendar className="h-4 w-4" />
         Personalizado
-      </Button>
+      </button>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { OrderStatus } from '../../../types/order';
 import Button from '../../../components/ui/Button';
 import Select from '../../../components/ui/Select';
 import FormInput from '../../../components/common/FormInput';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface OrdersFilterProps {
   onFilter: (filters: {
@@ -53,92 +54,98 @@ const OrdersFilter: React.FC<OrdersFilterProps> = ({ onFilter, onClear, classNam
   };
 
   return (
-    <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <h3 className="text-lg font-medium text-gray-900 flex items-center">
-          <Filter className="h-5 w-5 mr-2" />
-          Filtros
-        </h3>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-        >
-          {isExpanded ? 'Ocultar filtros' : 'Mostrar filtros'}
-        </button>
-      </div>
-
-      {isExpanded && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <Select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as OrderStatus | '')}
-                options={statusOptions}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Desde
-              </label>
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hasta
-              </label>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar
-              </label>
-              <input
-                type="text"
-                placeholder="ID o nombre del cliente"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-2 border-t">
-            <Button
-              variant="outline"
-              onClick={handleClearFilter}
-              className="flex items-center"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Limpiar
-            </Button>
-            <Button
-              onClick={handleApplyFilter}
-              className="flex items-center"
-            >
-              <Filter className="h-4 w-4 mr-1" />
-              Aplicar
-            </Button>
-          </div>
+    <div className={`card-base shadow-brand-lg ${className}`}>
+      <div className="p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+            <Filter className="h-5 w-5 mr-2 text-purple-600" />
+            Filtros
+          </h3>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center transition-colors duration-200"
+          >
+            {isExpanded ? 'Ocultar filtros' : 'Mostrar filtros'}
+          </button>
         </div>
-      )}
+
+        {isExpanded && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Estado
+                </label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as OrderStatus | '')}
+                  className="input-base"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Desde
+                </label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="input-base"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hasta
+                </label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="input-base"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Buscar
+                </label>
+                <input
+                  type="text"
+                  placeholder="ID o nombre del cliente"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="input-base placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button
+                className={`${getButtonClass('outline')} flex items-center`}
+                onClick={handleClearFilter}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Limpiar
+              </button>
+              <button
+                className={`${getButtonClass('admin')} flex items-center`}
+                onClick={handleApplyFilter}
+              >
+                <Filter className="h-4 w-4 mr-1" />
+                Aplicar
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

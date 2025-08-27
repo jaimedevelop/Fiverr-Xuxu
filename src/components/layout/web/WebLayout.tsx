@@ -11,7 +11,7 @@ const WebLayout: React.FC = () => {
   console.log("  - Firestore user role:", firestoreUser?.role);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-main">
       {/* Render sidebar based on FIRESTORE user role */}
       {firestoreUser?.role === 'admin' ? (
         <>
@@ -25,8 +25,11 @@ const WebLayout: React.FC = () => {
         </>
       )}
       
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto bg-white/30 backdrop-blur-sm">
+        <div className="h-full">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

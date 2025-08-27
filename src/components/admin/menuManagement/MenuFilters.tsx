@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange }) => {
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -33,17 +34,17 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
   const hasActiveFilters = searchTerm || selectedCategory;
 
   return (
-    <div className="bg-white rounded-lg border p-4 mb-6">
+    <div className="card-base shadow-brand-lg p-6 mb-6">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
           <input
             type="text"
             placeholder="Buscar postres por nombre, etiquetas o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="input-base pl-12 pr-4"
           />
         </div>
         
@@ -51,7 +52,7 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="input-base min-w-48"
         >
           <option value="">Todas las Categorías</option>
           {categories.map(category => (
@@ -64,7 +65,7 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
         {/* Advanced Filters Toggle */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
         >
           <Filter size={18} />
           Ordenar
@@ -74,7 +75,7 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+            className="px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl flex items-center gap-2 transition-all duration-200 font-medium"
           >
             <X size={18} />
             Limpiar
@@ -84,17 +85,17 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
       
       {/* Advanced Filters - Sort Options */}
       {showAdvanced && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Sort Options */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Ordenar Por
               </label>
               <select 
                 value={sort}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-base"
               >
                 <option value="newest">Más Recientes Primero</option>
                 <option value="oldest">Más Antiguos Primero</option>
@@ -107,18 +108,18 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
             
             {/* Placeholder for future filters */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Disponibilidad
               </label>
               <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-base opacity-60"
                 disabled
               >
                 <option>Todos los Artículos</option>
                 <option>Disponible</option>
                 <option>No Disponible</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">Próximamente</p>
+              <p className="text-xs text-purple-500 mt-2 font-medium">Próximamente</p>
             </div>
           </div>
         </div>
@@ -126,16 +127,16 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
       
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm text-gray-600">Filtros activos:</span>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-semibold text-gray-600">Filtros activos:</span>
             {searchTerm && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              <span className="badge-base bg-sky-100 text-sky-700 font-medium">
                 Búsqueda: "{searchTerm}"
               </span>
             )}
             {selectedCategory && (
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+              <span className="badge-base bg-emerald-100 text-emerald-700 font-medium">
                 Categoría: {categories.find(c => c.id === selectedCategory)?.name}
               </span>
             )}

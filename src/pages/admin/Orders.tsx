@@ -9,6 +9,7 @@ import { Order, OrderStatus } from '../../types/order';
 import { formatCurrency, formatDate } from '../../utils/formatting';
 import userService from '../../services/userService';
 import { ClipboardList, Clock, Package, CheckCircle, RefreshCw, AlertTriangle, Users, Truck, UserCheck } from 'lucide-react';
+import { getButtonClass, colors } from '../../utils/themeHelper';
 
 const AdminOrders: React.FC = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -53,18 +54,18 @@ const AdminOrders: React.FC = () => {
 
   const getStatusBadge = (status: OrderStatus) => {
     const statusMap = {
-      'pending': { label: 'Pendiente', class: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      'confirmed': { label: 'Confirmado', class: 'bg-blue-100 text-blue-800 border-blue-200' },
-      'preparing': { label: 'Preparando', class: 'bg-purple-100 text-purple-800 border-purple-200' },
-      'ready': { label: 'Listo', class: 'bg-green-100 text-green-800 border-green-200' },
-      'delivered': { label: 'Entregado', class: 'bg-gray-100 text-gray-800 border-gray-200' },
-      'cancelled': { label: 'Cancelado', class: 'bg-red-100 text-red-800 border-red-200' },
+      'pending': { label: 'Pendiente', class: 'badge-warning' },
+      'confirmed': { label: 'Confirmado', class: 'badge-info' },
+      'preparing': { label: 'Preparando', class: 'bg-purple-100 text-purple-800' },
+      'ready': { label: 'Listo', class: 'badge-success' },
+      'delivered': { label: 'Entregado', class: 'bg-gray-100 text-gray-800' },
+      'cancelled': { label: 'Cancelado', class: 'badge-error' },
     };
 
-    const statusInfo = statusMap[status] || { label: status || 'Desconocido', class: 'bg-gray-100 text-gray-800 border-gray-200' };
+    const statusInfo = statusMap[status] || { label: status || 'Desconocido', class: 'bg-gray-100 text-gray-800' };
     
     return (
-      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${statusInfo.class}`}>
+      <span className={`badge-base ${statusInfo.class}`}>
         {statusInfo.label}
       </span>
     );
@@ -124,7 +125,7 @@ const AdminOrders: React.FC = () => {
       key: 'id' as keyof Order,
       title: 'ID de Pedido',
       render: (value: any, row: Order) => (
-        <span className="text-sm font-mono text-gray-900">
+        <span className="text-sm font-mono text-gray-700">
           #{row.id ? row.id.slice(-8) : 'N/A'}
         </span>
       )
@@ -134,7 +135,7 @@ const AdminOrders: React.FC = () => {
       title: 'Fecha y Hora',
       render: (value: any, row: Order) => (
         <div className="text-sm">
-          <div className="font-medium text-gray-900">
+          <div className="font-medium text-gray-700">
             {row.createdAt ? new Date(row.createdAt).toLocaleDateString('es-MX') : 'N/A'}
           </div>
           <div className="text-gray-500">
@@ -155,7 +156,7 @@ const AdminOrders: React.FC = () => {
       key: 'total' as keyof Order,
       title: 'Total',
       render: (value: any, row: Order) => (
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-medium text-gray-700">
           {row.total ? formatCurrency(row.total) : '$0.00'}
         </span>
       )
@@ -176,13 +177,13 @@ const AdminOrders: React.FC = () => {
         <div className="flex items-center gap-1">
           {row.fulfillmentType === 'delivery' ? (
             <>
-              <Truck size={14} className="text-blue-600" />
-              <span className="text-sm text-blue-600 font-medium">Entrega</span>
+              <Truck size={14} className="text-purple-600" />
+              <span className="text-sm text-purple-600 font-medium">Entrega</span>
             </>
           ) : (
             <>
-              <UserCheck size={14} className="text-green-600" />
-              <span className="text-sm text-green-600 font-medium">Recogida</span>
+              <UserCheck size={14} className="text-emerald-600" />
+              <span className="text-sm text-emerald-600 font-medium">Recogida</span>
             </>
           )}
         </div>
@@ -192,7 +193,7 @@ const AdminOrders: React.FC = () => {
       key: 'userId' as keyof Order,
       title: 'Cliente',
       render: (value: any, row: Order) => (
-        <span className="text-sm text-gray-900">
+        <span className="text-sm text-gray-700">
           {clientNames[row.userId] || `Cliente ${row.userId?.slice(-6) || 'N/A'}`}
         </span>
       )
@@ -204,7 +205,7 @@ const AdminOrders: React.FC = () => {
         <div className="flex flex-col gap-1">
           <button
             onClick={() => row.id && handleViewOrder(row.id)}
-            className="text-blue-600 hover:text-blue-900 text-xs font-medium transition-colors duration-200 text-left"
+            className="text-purple-600 hover:text-purple-800 text-xs font-medium transition-colors duration-200 text-left"
             disabled={!row.id}
           >
             Ver Detalles
@@ -213,7 +214,7 @@ const AdminOrders: React.FC = () => {
             <select
               onChange={(e) => handleStatusUpdate(row.id, e.target.value as OrderStatus)}
               value={row.status || 'pending'}
-              className="text-xs border border-gray-300 rounded-md px-2 py-1 hover:border-gray-400 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200 min-w-0"
+              className="input-base text-xs py-1 min-w-0"
             >
               <option value="pending">Ordenado</option>
               <option value="preparing">Preparando</option>
@@ -231,9 +232,9 @@ const AdminOrders: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
           <p className="text-gray-600 font-medium">Cargando pedidos...</p>
         </div>
       </div>
@@ -242,16 +243,16 @@ const AdminOrders: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-main p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-8 shadow-sm">
+          <div className="card-base p-8 border border-red-200 bg-red-50">
             <div className="text-center">
               <AlertTriangle className="mx-auto h-16 w-16 text-red-500 mb-6" />
               <h3 className="text-xl font-semibold text-red-800 mb-3">Error al cargar pedidos</h3>
               <p className="text-red-600 mb-6">{error}</p>
               <button
                 onClick={handleManualRefresh}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2 mx-auto"
+                className={`${getButtonClass('admin')} mx-auto flex items-center gap-2`}
               >
                 <RefreshCw size={18} />
                 Reintentar
@@ -265,9 +266,9 @@ const AdminOrders: React.FC = () => {
 
   if (!user?.businessId) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-main p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 shadow-sm">
+          <div className="card-base p-8 border border-yellow-200 bg-yellow-50">
             <div className="text-center">
               <Users className="mx-auto h-16 w-16 text-yellow-500 mb-6" />
               <h3 className="text-xl font-semibold text-yellow-800 mb-3">Sin acceso a pedidos</h3>
@@ -285,15 +286,15 @@ const AdminOrders: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-main">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
           {/* Header Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <div className="card-base p-6 sm:p-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 mb-3">
                   Gestión de Pedidos
                 </h1>
                 <p className="text-lg text-gray-600">
@@ -303,7 +304,7 @@ const AdminOrders: React.FC = () => {
               <div className="hidden sm:block">
                 <button
                   onClick={handleManualRefresh}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-3"
+                  className={`${getButtonClass('admin')} flex items-center gap-3`}
                 >
                   <RefreshCw size={18} />
                   Actualizar
@@ -314,10 +315,10 @@ const AdminOrders: React.FC = () => {
 
           {/* Orders Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{orders.length}</p>
+                  <p className="text-3xl font-bold text-gray-700 mb-1">{orders.length}</p>
                   <p className="text-sm font-medium text-gray-600">Total de Pedidos</p>
                 </div>
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -326,53 +327,53 @@ const AdminOrders: React.FC = () => {
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-yellow-600 mb-1">
+                  <p className="text-3xl font-bold text-saffron-600 mb-1">
                     {orders.filter(order => order.status === 'pending').length}
                   </p>
                   <p className="text-sm font-medium text-gray-600">Pendientes</p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-gradient-saffron rounded-lg flex items-center justify-center shadow-saffron">
+                  <Clock className="w-6 h-6 text-orange-800" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-blue-600 mb-1">
+                  <p className="text-3xl font-bold text-purple-600 mb-1">
                     {orders.filter(order => ['confirmed', 'preparing'].includes(order.status)).length}
                   </p>
                   <p className="text-sm font-medium text-gray-600">En Proceso</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-gradient-purple rounded-lg flex items-center justify-center shadow-purple">
+                  <Package className="w-6 h-6 text-white" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="card-interactive p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-green-600 mb-1">
+                  <p className="text-3xl font-bold text-emerald-600 mb-1">
                     {orders.filter(order => order.status === 'delivered').length}
                   </p>
                   <p className="text-sm font-medium text-gray-600">Completados</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-gradient-mint rounded-lg flex items-center justify-center shadow-mint">
+                  <CheckCircle className="w-6 h-6 text-emerald-800" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Orders Table Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-base p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
                 Lista de Pedidos
               </h2>
               <p className="text-gray-600">
@@ -388,7 +389,7 @@ const AdminOrders: React.FC = () => {
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <ClipboardList className="w-10 h-10 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">No hay pedidos</h3>
+                <h3 className="text-xl font-semibold text-gray-700 mb-3">No hay pedidos</h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   Aún no has recibido ningún pedido para tu negocio. Los pedidos aparecerán aquí cuando los clientes realicen compras.
                 </p>
@@ -397,14 +398,14 @@ const AdminOrders: React.FC = () => {
                 </div>
                 <button
                   onClick={handleManualRefresh}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2 mx-auto"
+                  className={`${getButtonClass('admin')} mx-auto flex items-center gap-2`}
                 >
                   <RefreshCw size={18} />
                   Actualizar Pedidos
                 </button>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-lg border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200">
                 <DataTable
                   columns={columns}
                   data={orders}

@@ -3,6 +3,7 @@ import { Eye, MoreVertical, Clock, CheckCircle, XCircle, Truck } from 'lucide-re
 import { Order, OrderStatus } from '../../../types/order';
 import Button from '../../../components/ui/Button';
 import DataTable from '../../../components/common/DataTable';
+import { getButtonClass } from '../../../utils/themeHelper';
 
 interface OrdersListProps {
   orders: Order[];
@@ -20,14 +21,14 @@ const OrdersList: React.FC<OrdersListProps> = ({
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
       case 'pending':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <Clock className="h-4 w-4 text-amber-500" />;
       case 'confirmed':
       case 'preparing':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-4 w-4 text-sky-500" />;
       case 'ready':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-emerald-500" />;
       case 'delivered':
-        return <Truck className="h-4 w-4 text-green-600" />;
+        return <Truck className="h-4 w-4 text-emerald-600" />;
       case 'cancelled':
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
@@ -54,22 +55,22 @@ const OrdersList: React.FC<OrdersListProps> = ({
     }
   };
 
-  const getStatusColor = (status: OrderStatus) => {
+  const getStatusBadgeClass = (status: OrderStatus) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'badge-warning';
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
+        return 'badge-info';
       case 'preparing':
-        return 'bg-blue-100 text-blue-800';
+        return 'badge-info';
       case 'ready':
-        return 'bg-green-100 text-green-800';
+        return 'badge-success';
       case 'delivered':
-        return 'bg-green-100 text-green-800';
+        return 'badge-success';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'badge-error';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-base bg-gray-100 text-gray-800';
     }
   };
 
@@ -101,18 +102,18 @@ const OrdersList: React.FC<OrdersListProps> = ({
     {
       key: 'id',
       title: 'ID',
-      render: (value: string) => <span className="font-mono text-sm">#{value.slice(-6)}</span>,
+      render: (value: string) => <span className="font-mono text-sm text-gray-700">#{value.slice(-6)}</span>,
     },
     {
       key: 'createdAt',
       title: 'Fecha',
-      render: (value: Date) => <span className="text-sm">{formatDate(value)}</span>,
+      render: (value: Date) => <span className="text-sm text-gray-700">{formatDate(value)}</span>,
     },
     {
       key: 'items',
       title: 'Items',
       render: (value: any[]) => (
-        <span className="text-sm">
+        <span className="text-sm text-gray-700">
           {value.length} {value.length === 1 ? 'item' : 'items'}
         </span>
       ),
@@ -121,7 +122,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
       key: 'total',
       title: 'Total',
       render: (value: number) => (
-        <span className="font-medium text-sm">{formatCurrency(value)}</span>
+        <span className="font-semibold text-sm text-saffron-600">{formatCurrency(value)}</span>
       ),
     },
     {
@@ -130,7 +131,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
       render: (value: OrderStatus) => (
         <div className="flex items-center">
           {getStatusIcon(value)}
-          <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(value)}`}>
+          <span className={`ml-2 ${getStatusBadgeClass(value)}`}>
             {getStatusText(value)}
           </span>
         </div>
@@ -141,14 +142,14 @@ const OrdersList: React.FC<OrdersListProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
       </div>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="card-base text-center py-12">
         <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
           <Truck className="h-full w-full" />
         </div>
@@ -161,26 +162,26 @@ const OrdersList: React.FC<OrdersListProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div className="card-base shadow-brand-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gradient-main">
             <tr>
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
                 >
                   {column.title}
                 </th>
               ))}
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white/90 divide-y divide-gray-200">
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + 1} className="px-6 py-4 text-center text-sm text-gray-500">
@@ -189,7 +190,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
+                <tr key={order.id} className="hover:bg-gray-50/50 transition-colors duration-200">
                   {columns.map((column) => (
                     <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap text-sm">
                       {column.render(order[column.key])}
@@ -197,28 +198,28 @@ const OrdersList: React.FC<OrdersListProps> = ({
                   ))}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
-                      <Button
-                        variant="outline"
+                      <button
+                        className={`${getButtonClass('outline', 'sm')} h-8 w-8 p-0`}
                         onClick={() => onViewDetails(order)}
-                        className="h-8 w-8 p-0"
+                        title="Ver detalles"
                       >
                         <Eye className="h-4 w-4" />
-                      </Button>
+                      </button>
                       
                       {/* Status update dropdown */}
                       <div className="relative group">
-                        <Button
-                          variant="outline"
-                          className="h-8 w-8 p-0"
+                        <button
+                          className={`${getButtonClass('outline', 'sm')} h-8 w-8 p-0`}
+                          title="Más opciones"
                         >
                           <MoreVertical className="h-4 w-4" />
-                        </Button>
+                        </button>
                         
-                        <div className="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        <div className="absolute right-0 z-10 mt-2 w-48 bg-white/95 backdrop-blur-sm rounded-xl shadow-brand-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-white/50">
                           {order.status === 'pending' && (
                             <button
                               onClick={() => onUpdateStatus(order.id, 'confirmed')}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200"
                             >
                               Confirmar pedido
                             </button>
@@ -226,7 +227,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
                           {order.status === 'confirmed' && (
                             <button
                               onClick={() => onUpdateStatus(order.id, 'preparing')}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-700 transition-colors duration-200"
                             >
                               Comenzar preparación
                             </button>
@@ -234,7 +235,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
                           {order.status === 'preparing' && (
                             <button
                               onClick={() => onUpdateStatus(order.id, 'ready')}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200"
                             >
                               Marcar como listo
                             </button>
@@ -242,17 +243,17 @@ const OrdersList: React.FC<OrdersListProps> = ({
                           {order.status === 'ready' && (
                             <button
                               onClick={() => onUpdateStatus(order.id, 'delivered')}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200"
                             >
                               Marcar como entregado
                             </button>
                           )}
                           {order.status !== 'cancelled' && order.status !== 'delivered' && (
                             <>
-                              <div className="border-t my-1"></div>
+                              <div className="border-t border-gray-200 my-1"></div>
                               <button
                                 onClick={() => onUpdateStatus(order.id, 'cancelled')}
-                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
                               >
                                 Cancelar pedido
                               </button>
@@ -271,5 +272,3 @@ const OrdersList: React.FC<OrdersListProps> = ({
     </div>
   );
 };
-
-export default OrdersList;
