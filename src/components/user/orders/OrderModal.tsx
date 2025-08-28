@@ -39,7 +39,7 @@ interface PaymentMethod {
   icon: React.ReactNode;
 }
 
-type OrderStep = 'review' | 'fulfillment' | 'pickup-payment' | 'delivery-info' | 'payment-processing' | 'guest-info' | 'confirmation';
+type OrderStep = 'review' | 'fulfillment' | 'pickup-payment' | 'delivery-info' | 'guest-info' | 'confirmation';
 
 const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplete }) => {
   const { items, total, clearCart, getBusinessIds, getItemsByBusiness } = useCart();
@@ -53,7 +53,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
   
   // Form state
   const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>('delivery');
-  const [paymentLocation, setPaymentLocation] = useState<'store' | 'online'>('online');
   const [selectedPickupTime, setSelectedPickupTime] = useState<PickupTimeSlot | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     street: '',
@@ -76,21 +75,11 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
   // Refs for scrolling
   const modalContentRef = useRef<HTMLDivElement>(null);
 
-  // Payment methods
+  // Payment methods (cash only)
   const paymentMethods: PaymentMethod[] = [
     {
       id: 'cash',
       name: 'Efectivo',
-      icon: <CreditCard className="h-5 w-5" />
-    },
-    {
-      id: 'card',
-      name: 'Tarjeta',
-      icon: <CreditCard className="h-5 w-5" />
-    },
-    {
-      id: 'transfer',
-      name: 'Transferencia',
       icon: <CreditCard className="h-5 w-5" />
     }
   ];
@@ -99,9 +88,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
   const stepConfig = {
     review: { title: 'Revisar Pedido', progress: 20 },
     fulfillment: { title: 'Tipo de Entrega', progress: 40 },
-    'pickup-payment': { title: 'Forma de Pago', progress: 60 },
+    'pickup-payment': { title: 'Hora de Recogida', progress: 60 },
     'delivery-info': { title: 'Información de Entrega', progress: 60 },
-    'payment-processing': { title: 'Procesar Pago', progress: 80 },
     'guest-info': { title: 'Información de Contacto', progress: 85 },
     confirmation: { title: 'Confirmación', progress: 100 }
   };
@@ -142,9 +130,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
       if (fulfillmentType === 'pickup') {
         if (!selectedPickupTime) {
           newErrors.pickupTime = 'Selecciona una hora de recogida';
-        }
-        if (!paymentLocation) {
-          newErrors.paymentLocation = 'Selecciona cómo prefieres pagar';
         }
       }
       break;
@@ -196,21 +181,14 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
         }
         break;
       case 'pickup-payment':
-        if (paymentLocation === 'online') {
-          setCurrentStep('payment-processing');
+        // For cash payments, go to guest info or order creation
+        if (!user) {
+          setCurrentStep('guest-info');
         } else {
-          // For in-store payment, skip to guest info or order creation
-          if (!user) {
-            setCurrentStep('guest-info');
-          } else {
-            handleOrderSubmit();
-          }
+          handleOrderSubmit();
         }
         break;
       case 'delivery-info':
-        setCurrentStep('payment-processing');
-        break;
-      case 'payment-processing':
         if (!user) {
           setCurrentStep('guest-info');
         } else {
@@ -234,15 +212,12 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
       case 'delivery-info':
         setCurrentStep('fulfillment');
         break;
-      case 'payment-processing':
+      case 'guest-info':
         if (fulfillmentType === 'pickup') {
           setCurrentStep('pickup-payment');
         } else {
           setCurrentStep('delivery-info');
         }
-        break;
-      case 'guest-info':
-        setCurrentStep('payment-processing');
         break;
     }
   };
@@ -256,18 +231,15 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
         return !!fulfillmentType;
       case 'pickup-payment':
         const hasPickupTime = !!selectedPickupTime;
-        const hasPaymentLocation = !!paymentLocation;
         const isPickupOrder = fulfillmentType === 'pickup';
         
-        return !isPickupOrder || (hasPickupTime && hasPaymentLocation);
+        return !isPickupOrder || hasPickupTime;
       case 'delivery-info':
         return fulfillmentType !== 'delivery' || (
           deliveryAddress.street && deliveryAddress.number && 
           deliveryAddress.neighborhood && deliveryAddress.city && 
           deliveryAddress.state && deliveryAddress.zipCode
         );
-      case 'payment-processing':
-        return true;
       case 'guest-info':
         return user || (guestInfo.name && guestInfo.email && guestInfo.phone);
       default:
@@ -348,7 +320,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
         } else if (fulfillmentType === 'pickup' && selectedPickupTime) {
           orderData.pickupTime = selectedPickupTime;
           orderData.estimatedDeliveryTime = selectedPickupTime.datetime;
-          orderData.paymentLocation = paymentLocation;
         }
         
         const result = await createOrder(orderData);
@@ -368,13 +339,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
         onClose();
         onOrderComplete();
         resetModal();
-        alert(`¡Pedido realizado exitosamente!`);
+        alert(`¡Pedido realizado exitosamente! Pagarás en efectivo al recibir.`);
       }, 2000);
       
     } catch (error) {
       console.error('Error creating order:', error);
       setErrors({ form: 'Error al crear el pedido. Inténtalo de nuevo.' });
-      setCurrentStep('payment-processing');
+      setCurrentStep('guest-info'); // Go back to previous step
     } finally {
       setIsSubmitting(false);
     }
@@ -469,6 +440,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                     Se crearán {getBusinessIds().length} pedidos separados (uno por negocio)
                   </div>
                 )}
+                
+                <div className="text-sm text-emerald-700 bg-emerald-100 px-3 py-2 rounded-lg mt-4">
+                  💵 Pago en efectivo al recibir tu pedido
+                </div>
               </div>
             </div>
               
@@ -504,7 +479,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                   <div>
                     <span className="font-semibold block text-gray-700 mb-1">Recoger en tienda</span>
                     <span className="text-sm text-gray-600 block mb-2">Recoge tu pedido directamente</span>
-                    <span className="text-sm text-emerald-600 block font-medium">Sin costo de envío</span>
+                    <span className="text-sm text-emerald-600 block font-medium">Sin costo de envío • Pago en efectivo</span>
                   </div>
                 </div>
               </div>
@@ -524,7 +499,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                   <div>
                     <span className="font-semibold block text-gray-700 mb-1">Envío a domicilio</span>
                     <span className="text-sm text-gray-600 block mb-2">Entrega en tu dirección</span>
-                    <span className="text-sm text-gray-600 block">+$30 por negocio</span>
+                    <span className="text-sm text-gray-600 block">+$30 por negocio • Pago en efectivo al recibir</span>
                   </div>
                 </div>
               </div>
@@ -537,157 +512,111 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
         );
 
       case 'pickup-payment':
-  return (
-    <div className="space-y-6">
-      <div className="card-base p-6">
-        <div className="flex items-center mb-6">
-          <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center mr-3 shadow-mint">
-            <Clock className="w-5 h-5 text-emerald-800" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-700">Hora de Recogida</h3>
-        </div>
-
-        {business?.operatingHours ? (
-          <PickupTimeSelector
-            operatingHours={business.operatingHours}
-            selectedPickupTime={selectedPickupTime}
-            onPickupTimeSelect={(time) => {
-              setSelectedPickupTime(time);
-            }}
-            error={errors.pickupTime}
-          />
-        ) : (
+        return (
           <div className="space-y-6">
-            <div className="card-base p-4 bg-gradient-to-r from-saffron-50 to-mint-50 border border-saffron-200">
-              <div className="flex items-start">
-                <Clock className="w-5 h-5 text-saffron-600 mt-0.5 mr-3 flex-shrink-0" />
-                <div className="text-sm text-saffron-800">
-                  <p className="font-medium mb-1">Selecciona tu horario de recogida</p>
-                  <p className="text-saffron-700">
-                    Preparamos tu pedido con 30 minutos de anticipación mínimo
-                  </p>
+            <div className="card-base p-6">
+              <div className="flex items-center mb-6">
+                <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center mr-3 shadow-mint">
+                  <Clock className="w-5 h-5 text-emerald-800" />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-700">Hora de Recogida</h3>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { time: '10:00', label: '10:00 AM' },
-                { time: '11:00', label: '11:00 AM' },
-                { time: '12:00', label: '12:00 PM' },
-                { time: '13:00', label: '1:00 PM' },
-                { time: '14:00', label: '2:00 PM' },
-                { time: '15:00', label: '3:00 PM' },
-                { time: '16:00', label: '4:00 PM' },
-                { time: '17:00', label: '5:00 PM' }
-              ].map((slot, index) => {
-                const datetime = new Date();
-                datetime.setHours(parseInt(slot.time.split(':')[0]), 0, 0, 0);
-                
-                const isSelected = selectedPickupTime?.datetime.getTime() === datetime.getTime();
-                
-                const pickupTimeSlot = {
-                  datetime: datetime,
-                  displayTime: `Hoy a las ${slot.label}`,
-                  isToday: true,
-                  estimatedPreparationTime: 30
-                };
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedPickupTime(pickupTimeSlot)}
-                    className={`p-4 text-sm rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
-                      isSelected
-                        ? 'bg-gradient-saffron text-orange-900 border-saffron-400 shadow-saffron'
-                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gradient-to-r hover:from-saffron-50 hover:to-persian-pink-50 hover:border-saffron-300'
-                    }`}
-                  >
-                    <div className="text-center">
-                      <div className="font-semibold">{slot.label}</div>
-                      <div className={`text-xs mt-1 ${
-                        isSelected ? 'text-orange-700' : 'text-gray-500'
-                      }`}>
-                        Hoy
+              {business?.operatingHours ? (
+                <PickupTimeSelector
+                  operatingHours={business.operatingHours}
+                  selectedPickupTime={selectedPickupTime}
+                  onPickupTimeSelect={(time) => {
+                    setSelectedPickupTime(time);
+                  }}
+                  error={errors.pickupTime}
+                />
+              ) : (
+                <div className="space-y-6">
+                  <div className="card-base p-4 bg-gradient-to-r from-saffron-50 to-mint-50 border border-saffron-200">
+                    <div className="flex items-start">
+                      <Clock className="w-5 h-5 text-saffron-600 mt-0.5 mr-3 flex-shrink-0" />
+                      <div className="text-sm text-saffron-800">
+                        <p className="font-medium mb-1">Selecciona tu horario de recogida</p>
+                        <p className="text-saffron-700">
+                          Preparamos tu pedido con 30 minutos de anticipación mínimo
+                        </p>
+                        <p className="text-emerald-700 font-medium mt-2">
+                          💵 Pagarás en efectivo al recoger
+                        </p>
                       </div>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedPickupTime && (
-              <div className="card-base p-4 bg-gradient-to-r from-emerald-50 to-mint-50 border border-emerald-200">
-                <div className="flex items-center">
-                  <Calendar className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-emerald-800">Horario seleccionado</p>
-                    <p className="text-sm text-emerald-700">{selectedPickupTime.displayTime}</p>
                   </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { time: '10:00', label: '10:00 AM' },
+                      { time: '11:00', label: '11:00 AM' },
+                      { time: '12:00', label: '12:00 PM' },
+                      { time: '13:00', label: '1:00 PM' },
+                      { time: '14:00', label: '2:00 PM' },
+                      { time: '15:00', label: '3:00 PM' },
+                      { time: '16:00', label: '4:00 PM' },
+                      { time: '17:00', label: '5:00 PM' }
+                    ].map((slot, index) => {
+                      const datetime = new Date();
+                      datetime.setHours(parseInt(slot.time.split(':')[0]), 0, 0, 0);
+                      
+                      const isSelected = selectedPickupTime?.datetime.getTime() === datetime.getTime();
+                      
+                      const pickupTimeSlot = {
+                        datetime: datetime,
+                        displayTime: `Hoy a las ${slot.label}`,
+                        isToday: true,
+                        estimatedPreparationTime: 30
+                      };
+
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedPickupTime(pickupTimeSlot)}
+                          className={`p-4 text-sm rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                            isSelected
+                              ? 'bg-gradient-saffron text-orange-900 border-saffron-400 shadow-saffron'
+                              : 'bg-white text-gray-700 border-gray-200 hover:bg-gradient-to-r hover:from-saffron-50 hover:to-persian-pink-50 hover:border-saffron-300'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="font-semibold">{slot.label}</div>
+                            <div className={`text-xs mt-1 ${
+                              isSelected ? 'text-orange-700' : 'text-gray-500'
+                            }`}>
+                              Hoy
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedPickupTime && (
+                    <div className="card-base p-4 bg-gradient-to-r from-emerald-50 to-mint-50 border border-emerald-200">
+                      <div className="flex items-center">
+                        <Calendar className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium text-emerald-800">Horario seleccionado</p>
+                          <p className="text-sm text-emerald-700">{selectedPickupTime.displayTime}</p>
+                          <p className="text-xs text-emerald-600 mt-1">Pago en efectivo al recoger</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {errors.pickupTime && (
+                    <div className="card-base p-3 bg-red-50 border border-red-200">
+                      <p className="text-sm text-red-700">{errors.pickupTime}</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-
-            {errors.pickupTime && (
-              <div className="card-base p-3 bg-red-50 border border-red-200">
-                <p className="text-sm text-red-700">{errors.pickupTime}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <div className="card-base p-6">
-        <div className="flex items-center mb-6">
-          <div className="w-8 h-8 bg-gradient-persian-pink rounded-lg flex items-center justify-center mr-3 shadow-pink">
-            <CreditCard className="w-5 h-5 text-pink-800" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-700">¿Cómo prefieres pagar?</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div
-            onClick={() => setPaymentLocation('store')}
-            className={`card-interactive p-6 cursor-pointer transition-all duration-300 ${
-              paymentLocation === 'store'
-                ? 'border-emerald-400 bg-gradient-to-r from-emerald-50 to-mint-50 shadow-mint transform scale-105'
-                : 'hover:border-emerald-300 hover:shadow-brand-lg'
-            }`}
-          >
-            <div className="text-center">
-              <span className="font-semibold block text-gray-700 mb-1">Pagar en tienda</span>
-              <span className="text-sm text-gray-600">Al recoger tu pedido</span>
+              )}
             </div>
           </div>
-          
-          <div
-            onClick={() => setPaymentLocation('online')}
-            className={`card-interactive p-6 cursor-pointer transition-all duration-300 ${
-              paymentLocation === 'online'
-                ? 'border-saffron-400 bg-gradient-to-r from-saffron-50 to-persian-pink-50 shadow-saffron transform scale-105'
-                : 'hover:border-saffron-300 hover:shadow-brand-lg'
-            }`}
-          >
-            <div className="text-center">
-              <span className="font-semibold block text-gray-700 mb-1">Pagar en línea</span>
-              <span className="text-sm text-gray-600">Procesar pago ahora</span>
-            </div>
-          </div>
-        </div>
-
-        {(errors.pickupTime || errors.paymentLocation) && (
-          <div className="mt-4 space-y-2">
-            {errors.pickupTime && (
-              <div className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{errors.pickupTime}</div>
-            )}
-            {errors.paymentLocation && (
-              <div className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{errors.paymentLocation}</div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        );
 
       case 'delivery-info':
         return (
@@ -782,6 +711,19 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                   placeholder="Referencias para encontrar la dirección"
                 />
               </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Instrucciones Especiales (opcional)
+                </label>
+                <textarea
+                  value={specialInstructions}
+                  onChange={(e) => setSpecialInstructions(e.target.value)}
+                  className="input-base resize-none"
+                  placeholder="Instrucciones especiales para tu pedido..."
+                  rows={3}
+                />
+              </div>
             </div>
             
             <div className="card-base p-4 bg-gradient-to-r from-saffron-50 to-persian-pink-50 border border-saffron-200">
@@ -789,48 +731,76 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                 <Info className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span>Tiempo estimado de entrega: 45-60 minutos</span>
               </div>
-              <div className="text-sm text-saffron-600">
+              <div className="text-sm text-saffron-600 mb-2">
                 <strong>Costo de envío: {formatCurrency(deliveryFee)}</strong>
                 {getBusinessIds().length > 1 && <span> ({getBusinessIds().length} negocios × $30)</span>}
+              </div>
+              <div className="text-sm text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg">
+                💵 Pago en efectivo al recibir
               </div>
             </div>
           </div>
         );
 
-      case 'payment-processing':
+      case 'guest-info':
         return (
           <div className="space-y-6">
             <div className="card-base p-6">
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-gradient-purple rounded-lg flex items-center justify-center mr-3 shadow-purple">
-                  <CreditCard className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center mr-3 shadow-mint">
+                  <User className="w-5 h-5 text-emerald-800" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-700">Método de Pago</h3>
+                <h3 className="text-xl font-semibold text-gray-700">Información de Contacto</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {paymentMethods.map(method => (
-                  <div
-                    key={method.id}
-                    onClick={() => setSelectedPaymentMethod(method.id)}
-                    className={`card-interactive p-6 cursor-pointer transition-all duration-300 ${
-                      selectedPaymentMethod === method.id
-                        ? 'border-saffron-400 bg-gradient-to-r from-saffron-50 to-persian-pink-50 shadow-saffron transform scale-105'
-                        : 'hover:border-saffron-300 hover:shadow-brand-lg'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className={`mr-3 ${selectedPaymentMethod === method.id ? 'text-saffron-600' : 'text-gray-500'}`}>
-                        {method.icon}
-                      </div>
-                      <span className="font-semibold text-gray-700">{method.name}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-sm text-gray-600 mb-6 bg-gradient-to-r from-saffron-50 to-persian-pink-50 p-4 rounded-xl border border-saffron-200">
+                Para procesar tu pedido, necesitamos tu información de contacto:
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                  <input
+                    type="text"
+                    value={guestInfo.name}
+                    onChange={(e) => handleGuestInfoChange('name', e.target.value)}
+                    className="input-base"
+                    placeholder="Tu nombre completo"
+                  />
+                  {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                  <input
+                    type="email"
+                    value={guestInfo.email}
+                    onChange={(e) => handleGuestInfoChange('email', e.target.value)}
+                    className="input-base"
+                    placeholder="tu@email.com"
+                  />
+                  {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                  <input
+                    type="tel"
+                    value={guestInfo.phone}
+                    onChange={(e) => handleGuestInfoChange('phone', e.target.value)}
+                    className="input-base"
+                    placeholder="55 1234 5678"
+                  />
+                  {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
+                </div>
+                
+                <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                  * Usaremos esta información únicamente para contactarte sobre tu pedido
+                </div>
               </div>
             </div>
-
-            <div className="card-base p-6">
+            
+            <div className="card-base p-6 bg-gradient-to-r from-emerald-50 to-mint-50 border border-emerald-200">
               <h3 className="text-xl font-semibold text-gray-700 mb-6">Resumen Final</h3>
               
               <div className="space-y-3 mb-6">
@@ -851,81 +821,14 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                   <span>{formatCurrency(tax)}</span>
                 </div>
                 
-                <div className="flex justify-between font-bold text-xl pt-3 border-t border-saffron-200 text-gray-700">
+                <div className="flex justify-between font-bold text-xl pt-3 border-t border-emerald-200 text-gray-700">
                   <span>Total</span>
                   <span className="text-gradient-saffron">{formatCurrency(finalTotal)}</span>
                 </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instrucciones Especiales (opcional)
-                </label>
-                <textarea
-                  value={specialInstructions}
-                  onChange={(e) => setSpecialInstructions(e.target.value)}
-                  className="input-base resize-none"
-                  placeholder="Instrucciones especiales para tu pedido..."
-                  rows={3}
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'guest-info':
-        return (
-          <div className="card-base p-6">
-            <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-gradient-mint rounded-lg flex items-center justify-center mr-3 shadow-mint">
-                <User className="w-5 h-5 text-emerald-800" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-700">Información de Contacto</h3>
-            </div>
-
-            <div className="text-sm text-gray-600 mb-6 bg-gradient-to-r from-saffron-50 to-persian-pink-50 p-4 rounded-xl border border-saffron-200">
-              Para procesar tu pedido, necesitamos tu información de contacto:
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
-                <input
-                  type="text"
-                  value={guestInfo.name}
-                  onChange={(e) => handleGuestInfoChange('name', e.target.value)}
-                  className="input-base"
-                  placeholder="Tu nombre completo"
-                />
-                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={guestInfo.email}
-                  onChange={(e) => handleGuestInfoChange('email', e.target.value)}
-                  className="input-base"
-                  placeholder="tu@email.com"
-                />
-                {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
-                <input
-                  type="tel"
-                  value={guestInfo.phone}
-                  onChange={(e) => handleGuestInfoChange('phone', e.target.value)}
-                  className="input-base"
-                  placeholder="55 1234 5678"
-                />
-                {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
-              </div>
-              
-              <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                * Usaremos esta información únicamente para contactarte sobre tu pedido
+                
+                <div className="text-sm text-emerald-700 bg-emerald-100 px-3 py-2 rounded-lg mt-4">
+                  💵 Método de pago: Efectivo {fulfillmentType === 'pickup' ? 'al recoger' : 'al recibir'}
+                </div>
               </div>
             </div>
           </div>
@@ -938,7 +841,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-800"></div>
             </div>
             <h3 className="text-2xl font-semibold mb-3 text-gray-700">Procesando tu pedido...</h3>
-            <p className="text-gray-600">Por favor espera mientras confirmamos tu orden...</p>
+            <p className="text-gray-600 mb-2">Por favor espera mientras confirmamos tu orden...</p>
+            <p className="text-emerald-600 font-medium">💵 Recuerda tener efectivo listo para el pago</p>
             
             {errors.form && (
               <div className="mt-6 card-base p-4 border border-red-200 bg-red-50">
@@ -1027,8 +931,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                   disabled={!canGoNext() || isSubmitting}
                   className={`${getButtonClass('primary')} flex items-center min-w-[150px]`}
                 >
-                  {currentStep === 'guest-info' || 
-                   (currentStep === 'pickup-payment' && paymentLocation === 'store') ? (
+                  {currentStep === 'guest-info' || currentStep === 'pickup-payment' || currentStep === 'delivery-info' ? (
                     isSubmitting ? 'Procesando...' : 'Realizar Pedido'
                   ) : (
                     <>
@@ -1039,24 +942,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, onOrderComplet
                 </button>
               </div>
             </div>
-            
-            {/* Show user login option for guest users */}
-            {!user && ['payment-processing', 'guest-info'].includes(currentStep) && (
-              <div className="mt-6 pt-4 border-t border-saffron-200">
-                <div className="text-center text-sm text-gray-600">
-                  ¿Ya tienes cuenta?{' '}
-                  <button 
-                    onClick={() => {
-                      alert('Funcionalidad de inicio de sesión aquí');
-                    }}
-                    className="text-saffron-600 hover:text-saffron-800 font-medium transition-colors duration-200"
-                  >
-                    Inicia sesión
-                  </button>
-                  {' '}para una experiencia más rápida
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

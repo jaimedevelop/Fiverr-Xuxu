@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface PaymentMethod {
   id: string;
-  type: 'cash' | 'card' | 'digital';
+  type: 'cash';
   name: string;
   description: string;
   icon?: string;
@@ -20,20 +20,6 @@ const paymentMethods: PaymentMethod[] = [
     name: 'Efectivo',
     description: 'Pago en efectivo al recibir tu pedido',
     icon: '💵'
-  },
-  {
-    id: 'card',
-    type: 'card',
-    name: 'Tarjeta de crédito/débito',
-    description: 'Pago con tarjeta al recibir tu pedido',
-    icon: '💳'
-  },
-  {
-    id: 'digital',
-    type: 'digital',
-    name: 'Transferencia digital',
-    description: 'Pago por transferencia bancaria o app',
-    icon: '📱'
   }
 ];
 
