@@ -49,122 +49,6 @@ const Analytics: React.FC = () => {
     { date: new Date(), orders: 16, revenue: 3540 },
   ];
 
-  const mockTopItems = [
-    {
-      pastryId: '1',
-      name: 'Croissant de Chocolate',
-      categoryId: '1',
-      categoryName: 'Panadería',
-      ordersCount: 45,
-      totalQuantity: 68,
-      revenue: 1125,
-      popularityScore: 95
-    },
-    {
-      pastryId: '2',
-      name: 'Concha',
-      categoryId: '1',
-      categoryName: 'Panadería',
-      ordersCount: 38,
-      totalQuantity: 57,
-      revenue: 855,
-      popularityScore: 88
-    },
-    {
-      pastryId: '3',
-      name: 'Pastel de Chocolate',
-      categoryId: '2',
-      categoryName: 'Repostería',
-      ordersCount: 22,
-      totalQuantity: 24,
-      revenue: 1540,
-      popularityScore: 76
-    },
-    {
-      pastryId: '4',
-      name: 'Donut',
-      categoryId: '1',
-      categoryName: 'Panadería',
-      ordersCount: 31,
-      totalQuantity: 62,
-      revenue: 775,
-      popularityScore: 82
-    },
-    {
-      pastryId: '5',
-      name: 'Pastel de Fresa',
-      categoryId: '3',
-      categoryName: 'Dulces',
-      ordersCount: 27,
-      totalQuantity: 54,
-      revenue: 1350,
-      popularityScore: 79
-    }
-  ];
-
-  const mockCustomerAnalytics = {
-    totalCustomers: 128,
-    newCustomers: 24,
-    returningCustomers: 104,
-    averageOrdersPerCustomer: 2.7,
-    topCustomers: [
-      {
-        userId: '1',
-        name: 'Juan Pérez',
-        ordersCount: 8,
-        totalSpent: 2150
-      },
-      {
-        userId: '2',
-        name: 'María García',
-        ordersCount: 6,
-        totalSpent: 1870
-      },
-      {
-        userId: '3',
-        name: 'Carlos López',
-        ordersCount: 5,
-        totalSpent: 1620
-      },
-      {
-        userId: '4',
-        name: 'Ana Martínez',
-        ordersCount: 7,
-        totalSpent: 1540
-      },
-      {
-        userId: '5',
-        name: 'Roberto Sánchez',
-        ordersCount: 4,
-        totalSpent: 1320
-      }
-    ]
-  };
-
-  const mockCategoryPerformance = [
-    {
-      categoryId: '1',
-      categoryName: 'Panadería',
-      ordersCount: 142,
-      revenue: 4250,
-      percentageOfTotal: 48.3
-    },
-    {
-      categoryId: '2',
-      categoryName: 'Repostería',
-      ordersCount: 87,
-      revenue: 3120,
-      percentageOfTotal: 35.5
-    },
-    {
-      categoryId: '3',
-      categoryName: 'Salados',
-      ordersCount: 56,
-      revenue: 1420,
-      percentageOfTotal: 16.2
-    }
-  ];
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-main flex items-center justify-center">
@@ -176,10 +60,10 @@ const Analytics: React.FC = () => {
     );
   }
 
-const timeRangeForTopItems = {
-  start: selectedTimeRange?.start || new Date(),
-  end: selectedTimeRange?.end || new Date()
-};
+  const timeRangeForTopItems = {
+    start: selectedTimeRange?.start || new Date(),
+    end: selectedTimeRange?.end || new Date()
+  };
 
   return (
     <div className="min-h-screen bg-gradient-main">
@@ -188,15 +72,13 @@ const timeRangeForTopItems = {
           
           {/* Header Section */}
           <div className="card-base p-6 sm:p-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="mb-6 lg:mb-0">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 mb-3">
-                  Analíticas
-                </h1>
-                <p className="text-lg text-gray-600">
-                  Mide y analiza el rendimiento de tu negocio con datos en tiempo real
-                </p>
-              </div>
+            <div className="mb-6">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 mb-3">
+                Analíticas
+              </h1>
+              <p className="text-lg text-gray-600 mb-6">
+                Mide y analiza el rendimiento de tu negocio con datos en tiempo real
+              </p>
               
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -218,61 +100,6 @@ const timeRangeForTopItems = {
             </div>
           )}
 
-          {/* Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="card-interactive p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Ingresos Totales</p>
-                  <p className="text-3xl font-bold text-gray-700">$21,950</p>
-                  <p className="text-xs text-emerald-600 mt-1">+12.5% vs período anterior</p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-purple rounded-lg flex items-center justify-center shadow-purple">
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="card-interactive p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Total de Pedidos</p>
-                  <p className="text-3xl font-bold text-gray-700">123</p>
-                  <p className="text-xs text-emerald-600 mt-1">+8.3% vs período anterior</p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-mint rounded-lg flex items-center justify-center shadow-mint">
-                  <TrendingUp className="w-6 h-6 text-emerald-800" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="card-interactive p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Total de Clientes</p>
-                  <p className="text-3xl font-bold text-gray-700">128</p>
-                  <p className="text-xs text-persian-pink-600 mt-1">24 clientes nuevos</p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-pink rounded-lg flex items-center justify-center shadow-pink">
-                  <Users className="w-6 h-6 text-pink-800" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="card-interactive p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Valor Promedio</p>
-                  <p className="text-3xl font-bold text-gray-700">$178.45</p>
-                  <p className="text-xs text-saffron-600 mt-1">+5.2% vs período anterior</p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-saffron rounded-lg flex items-center justify-center shadow-saffron">
-                  <Package className="w-6 h-6 text-orange-800" />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Sales Chart Section */}
           <div className="card-base p-6">
             <div className="mb-6">
@@ -290,41 +117,21 @@ const timeRangeForTopItems = {
             />
           </div>
 
-          {/* Analytics Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Top Items */}
-            <div className="card-base p-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                  Productos Más Vendidos
-                </h2>
-                <p className="text-gray-600">
-                  Los productos con mejor rendimiento en el período seleccionado
-                </p>
-              </div>
-              
+          {/* Top Items Section - Now full width */}
+          <div className="card-base p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                Productos Más Vendidos
+              </h2>
+              <p className="text-gray-600">
+                Los productos con mejor rendimiento en el período seleccionado
+              </p>
+            </div>
+            
             <TopItems
               title="Productos más vendidos"
               timeRange={timeRangeForTopItems}
             />
-            </div>
-
-            {/* Customer Analytics */}
-            <div className="card-base p-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                  Analítica de Clientes
-                </h2>
-                <p className="text-gray-600">
-                  Insights sobre el comportamiento y preferencias de tus clientes
-                </p>
-              </div>
-              
-              <CustomerAnalyticsComponent
-                title="Analítica de clientes"
-                data={customerAnalytics || mockCustomerAnalytics}
-              />
-            </div>
           </div>
 
           {/* Category Performance Section */}

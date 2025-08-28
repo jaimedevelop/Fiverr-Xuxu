@@ -1,9 +1,8 @@
-// src/components/user/explore/BusinessCard.tsx - Clean Production Version
+// src/components/user/explore/BusinessCard.tsx - No Ratings Version
 import React, { useCallback, useMemo, memo } from 'react';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { Business } from '../../../types/business';
 import { Pastry } from '../../../types/pastry';
-import RatingDisplay from '../../ui/RatingDisplay';
 import BusinessStatus from '../../ui/BusinessStatus';
 import FeaturedPastries from './FeaturedPastries';
 import Button from '../../ui/Button';
@@ -44,27 +43,27 @@ const BusinessCard: React.FC<BusinessCardProps> = memo(({
   }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <div className="card-base bg-white/95 backdrop-blur-sm border-2 border-white/50 overflow-hidden shadow-md hover:shadow-xl hover:border-saffron-200 transition-all duration-300">
       {/* Business Header */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-saffron-50/30 to-orange-50/30">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {/* Business Logo or Initial */}
             <div className="flex-shrink-0">
               {business.logoUrl ? (
                 <img
                   src={business.logoUrl}
                   alt={`${business.storeName} logo`}
-                  className="h-12 w-12 rounded-full object-cover"
+                  className="h-14 w-14 rounded-full object-cover border-2 border-white shadow-md"
                   onError={handleLogoError}
                 />
               ) : null}
               <div 
-                className={`h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center ${
+                className={`h-14 w-14 rounded-full bg-gradient-to-br from-saffron-100 to-orange-100 flex items-center justify-center shadow-md ${
                   business.logoUrl ? 'hidden' : ''
                 }`}
               >
-                <span className="text-lg font-bold text-blue-600">
+                <span className="text-xl font-bold text-orange-800">
                   {businessInitial}
                 </span>
               </div>
@@ -72,22 +71,14 @@ const BusinessCard: React.FC<BusinessCardProps> = memo(({
 
             {/* Business Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
+              <h3 className="text-xl font-bold text-gray-800 truncate mb-1">
                 {business.storeName}
               </h3>
               
-              {/* Rating */}
-              <RatingDisplay 
-                rating={business.averageRating}
-                totalReviews={business.totalReviews}
-                size="sm"
-                disabled={true}
-              />
-              
               {/* Location */}
-              <div className="flex items-center text-sm text-gray-500 mt-1">
-                <MapPin className="h-3 w-3 mr-1" />
-                <span className="truncate">{locationText}</span>
+              <div className="flex items-center text-sm text-gray-600 mt-2">
+                <MapPin className="h-4 w-4 mr-1 text-saffron-600" />
+                <span className="truncate font-medium">{locationText}</span>
               </div>
             </div>
           </div>
@@ -104,12 +95,12 @@ const BusinessCard: React.FC<BusinessCardProps> = memo(({
       </div>
 
       {/* Featured Pastries */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-gray-900">
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-base font-semibold text-gray-800">
             Productos destacados
           </h4>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium">
             {featuredPastries.length} producto{featuredPastries.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -122,14 +113,13 @@ const BusinessCard: React.FC<BusinessCardProps> = memo(({
       </div>
 
       {/* View Menu Button */}
-      <div className="p-4 border-t border-gray-100 bg-gray-50">
+      <div className="p-5 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-slate-50">
         <Button
-          variant="outline"
           onClick={handleViewMenuClick}
-          className="w-full group flex items-center justify-center"
+          className="btn-primary w-full group flex items-center justify-center hover:scale-105 transition-all duration-300"
         >
-          <span>Ver menú completo</span>
-          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+          <span className="font-semibold">Ver menú completo</span>
+          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
         </Button>
       </div>
     </div>

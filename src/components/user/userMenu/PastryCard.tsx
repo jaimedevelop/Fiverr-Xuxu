@@ -1,11 +1,11 @@
+// src/components/user/userMenu/PastryCard.tsx
 import React from 'react';
-import { Heart, Eye, ShoppingCart, Plus, Check } from 'lucide-react';
+import { Eye, ShoppingCart, Plus, Check } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
-import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '../../../contexts/CartContext'; // ENABLED
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
 import ImageDisplay from './ImageDisplay';
-import FavoriteButton from './FavoriteButton';
 
 interface PastryCardProps {
   pastry: Pastry;
@@ -13,6 +13,7 @@ interface PastryCardProps {
 }
 
 const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
+  // ENABLED - Cart functionality
   const { addItem, items } = useCart();
   
   // Check if this pastry is already in cart
@@ -25,6 +26,7 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
     
     if (!pastry.available) return;
     
+    // ENABLED - Cart functionality restored
     addItem({
       pastryId: pastry.id,
       businessId: pastry.businessId,
@@ -35,7 +37,7 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <div className="card-interactive">
       <div className="relative">
         {/* Image */}
         <div className="aspect-square w-full overflow-hidden bg-gray-100">
@@ -54,20 +56,19 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
         {/* View Details Button */}
         <button
           onClick={onClick}
-          className="absolute bottom-2 right-2 bg-white bg-opacity-90 rounded-full p-2 shadow-md hover:bg-opacity-100 transition-all"
+          className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-brand-lg hover:bg-white hover:scale-110 transition-all duration-300"
           aria-label="Ver detalles"
         >
-          <Eye className="h-4 w-4 text-gray-700" />
+          <Eye className="h-4 w-4 text-charcoal" />
         </button>
       </div>
       
       <div className="p-4">
         <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold text-gray-900">{pastry.name}</h3>
-          <FavoriteButton pastryId={pastry.id} />
+          <h3 className="text-lg font-semibold text-charcoal">{pastry.name}</h3>
         </div>
         
-        <p className="mt-1 text-gray-600 text-sm line-clamp-2">
+        <p className="mt-1 text-slate text-sm line-clamp-2">
           {pastry.description}
         </p>
         
@@ -75,7 +76,7 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
           <PriceDisplay price={pastry.price} />
           <button
             onClick={onClick}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+            className="text-sm font-medium text-saffron-600 hover:text-saffron-700 transition-colors duration-200"
           >
             Ver detalles
           </button>
@@ -85,12 +86,12 @@ const PastryCard = ({ pastry, onClick }: PastryCardProps) => {
           <button
             onClick={handleAddToCart}
             disabled={!pastry.available}
-            className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`w-full flex items-center justify-center px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${
               pastry.available
                 ? isInCart 
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'btn-primary'
+                : 'bg-gray-200 text-slate cursor-not-allowed opacity-60'
             }`}
           >
             {!pastry.available ? (

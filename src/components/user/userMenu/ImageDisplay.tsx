@@ -1,3 +1,4 @@
+// src/components/user/common/ImageDisplay.tsx
 import React, { useState, useEffect } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 
@@ -35,7 +36,6 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }: ImageDisplayPro
   const needsBlurBackground = () => {
     if (!imageLoaded || !imageDimensions.width || !imageDimensions.height) return false;
     
-    // Check if image is significantly smaller than container or has unusual aspect ratio
     const aspectRatio = imageDimensions.width / imageDimensions.height;
     const isVeryTall = aspectRatio < 0.5;
     const isVeryWide = aspectRatio > 2;
@@ -49,9 +49,11 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }: ImageDisplayPro
   if (!mainImage || imageError) {
     return (
       <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
-        <div className="text-center text-gray-400">
-          <ImageIcon size={32} className="mx-auto mb-2" />
-          <span className="text-xs">Sin Imagen</span>
+        <div className="text-center text-slate">
+          <div className="bg-gray-200 rounded-full p-3 mx-auto mb-2 w-fit">
+            <ImageIcon size={32} />
+          </div>
+          <span className="text-xs font-medium">Sin Imagen</span>
         </div>
       </div>
     );
@@ -59,9 +61,9 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }: ImageDisplayPro
 
   if (!imageLoaded) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
+      <div className={`bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${className}`}>
         <div className="animate-pulse">
-          <div className="bg-gray-300 rounded w-8 h-8"></div>
+          <div className="bg-saffron-200 rounded-lg w-8 h-8"></div>
         </div>
       </div>
     );
@@ -86,7 +88,7 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }: ImageDisplayPro
           <img
             src={mainImage}
             alt={alt}
-            className="max-w-full max-h-full object-contain rounded-sm shadow-lg"
+            className="max-w-full max-h-full object-contain rounded-lg shadow-brand-lg ring-1 ring-white/20"
             onError={() => setImageError(true)}
           />
         </div>
@@ -103,7 +105,7 @@ const ImageDisplay = ({ images = [], alt = '', className = '' }: ImageDisplayPro
       <img
         src={mainImage}
         alt={alt}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         onError={() => setImageError(true)}
       />
     </div>

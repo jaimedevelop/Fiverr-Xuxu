@@ -1,23 +1,18 @@
-// src/components/user/businessMenu/BusinessHeader.tsx
+// src/components/user/businessMenu/BusinessHeader.tsx - No Ratings Version
 import React from 'react';
-import { ArrowLeft, MapPin, Phone, Heart, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, ExternalLink } from 'lucide-react';
 import { Business } from '../../../types/business';
-import RatingDisplay from '../../ui/RatingDisplay';
 import BusinessStatus from '../../ui/BusinessStatus';
 import Button from '../../ui/Button';
 
 interface BusinessHeaderProps {
   business: Business;
   onBack: () => void;
-  onToggleFavorite?: () => void;
-  isFavorite?: boolean;
 }
 
 const BusinessHeader: React.FC<BusinessHeaderProps> = ({
   business,
-  onBack,
-  onToggleFavorite,
-  isFavorite = false
+  onBack
 }) => {
   const getBusinessInitial = (storeName: string) => {
     return storeName.charAt(0).toUpperCase();
@@ -42,32 +37,32 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({
   };
 
   return (
-    <div className="bg-white shadow-sm border-b border-gray-200">
+    <div className="card-base bg-white/95 backdrop-blur-sm shadow-lg border-b border-saffron-100">
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <button
           onClick={onBack}
-          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-4"
+          className="flex items-center text-gray-600 hover:text-saffron-600 transition-colors duration-200 mb-6 group"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Volver a Explorar</span>
+          <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+          <span className="font-medium">Volver a Explorar</span>
         </button>
 
         {/* Business Info */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-6 lg:space-y-0">
           {/* Left Side - Business Details */}
-          <div className="flex items-start space-x-4">
+          <div className="flex items-start space-x-6">
             {/* Business Logo */}
             <div className="flex-shrink-0">
               {business.logoUrl ? (
                 <img
                   src={business.logoUrl}
                   alt={`${business.storeName} logo`}
-                  className="h-20 w-20 rounded-full object-cover"
+                  className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
-                <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-blue-600">
+                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-saffron-100 to-orange-100 flex items-center justify-center shadow-lg border-4 border-white">
+                  <span className="text-3xl font-bold text-orange-800">
                     {getBusinessInitial(business.storeName)}
                   </span>
                 </div>
@@ -76,22 +71,12 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({
 
             {/* Business Info */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-800 mb-3">
                 {business.storeName}
               </h1>
 
-              {/* Rating */}
-              <div className="mb-2">
-                <RatingDisplay 
-                  rating={business.averageRating}
-                  totalReviews={business.totalReviews}
-                  size="md"
-                  disabled={true}
-                />
-              </div>
-
               {/* Business Status */}
-              <div className="mb-3">
+              <div className="mb-4">
                 <BusinessStatus 
                   operatingHours={business.operatingHours}
                   size="md"
@@ -100,17 +85,17 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({
               </div>
 
               {/* Contact Info */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {business.phone && (
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Phone className="h-4 w-4 mr-2" />
-                    <span>{business.phone}</span>
+                  <div className="flex items-center text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                    <Phone className="h-4 w-4 mr-3 text-saffron-600" />
+                    <span className="font-medium">{business.phone}</span>
                   </div>
                 )}
 
-                <div className="flex items-start text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="break-words">{getFullAddress()}</span>
+                <div className="flex items-start text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                  <MapPin className="h-4 w-4 mr-3 mt-0.5 flex-shrink-0 text-saffron-600" />
+                  <span className="break-words font-medium">{getFullAddress()}</span>
                 </div>
               </div>
             </div>
@@ -118,44 +103,24 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-row lg:flex-col space-x-3 lg:space-x-0 lg:space-y-3">
-            {/* Favorite Button */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                // Temporarily show alert since favorites are disabled
-                alert('Funcionalidad de favoritos temporalmente deshabilitada');
-                // onToggleFavorite?.();
-              }}
-              className="flex items-center"
-            >
-              <Heart 
-                className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} 
-              />
-              <span className="hidden sm:inline">
-                {isFavorite ? 'Favorito' : 'Favorito'}
-              </span>
-            </Button>
-
             {/* Call Button */}
             {business.phone && (
               <Button
-                variant="outline"
                 onClick={handleCall}
-                className="flex items-center"
+                className="btn-outline flex items-center hover:bg-green-50 hover:border-green-300 transition-all duration-200"
               >
-                <Phone className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Llamar</span>
+                <Phone className="h-4 w-4 mr-2 text-gray-600" />
+                <span className="hidden sm:inline font-semibold">Llamar</span>
               </Button>
             )}
 
             {/* View Map Button */}
             <Button
-              variant="outline"
               onClick={handleViewMap}
-              className="flex items-center"
+              className="btn-outline flex items-center hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Ver mapa</span>
+              <ExternalLink className="h-4 w-4 mr-2 text-gray-600" />
+              <span className="hidden sm:inline font-semibold">Ver mapa</span>
             </Button>
           </div>
         </div>

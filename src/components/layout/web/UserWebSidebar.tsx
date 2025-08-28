@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUser } from '../../../contexts/UserContext';
@@ -8,18 +8,18 @@ import {
   Heart,
   LogOut
 } from 'lucide-react';
-// Temporarily disabled cart functionality
-// import CartIcon from '../../../components/user/cart/CartIcon';
-// import CartSidebar from '../../../components/user/cart/CartSidebar';
+// Re-enabled cart functionality
+import CartIcon from '../../../components/user/cart/CartIcon';
+import Cart from '../../../components/user/cart/Cart';
 
 const UserWebSidebar: React.FC = () => {
   const { logout } = useAuth();
   const { user: firestoreUser } = useUser();
+  const [showCart, setShowCart] = useState(false);
   
   const userNavItems = [
     { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: ShoppingBag },
-    { path: '/usuario/favoritos', label: 'Favoritos', icon: Heart },
   ];
   
   return (
@@ -63,15 +63,16 @@ const UserWebSidebar: React.FC = () => {
               </li>
             ))}
             
-            {/* Temporarily disabled cart functionality */}
-            {/* 
+            {/* Re-enabled cart functionality - styled consistently with other nav items */}
             <li>
-              <div className="flex items-center px-4 py-3 text-gray-700 hover:bg-saffron-50 hover:text-saffron-700 rounded-xl transition-all duration-300 cursor-pointer hover:scale-105">
+              <button 
+                className="flex items-center px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer hover:scale-105 text-gray-700 hover:bg-saffron-50 hover:text-saffron-700 w-full text-left"
+                onClick={() => setShowCart(true)}
+              >
                 <CartIcon />
                 <span className="ml-3 font-medium">Carrito</span>
-              </div>
+              </button>
             </li>
-            */}
           </ul>
         </nav>
         
@@ -87,8 +88,11 @@ const UserWebSidebar: React.FC = () => {
         </div>
       </aside>
       
-      {/* Temporarily disabled cart sidebar */}
-      {/* <CartSidebar /> */}
+      {/* Re-enabled cart component - same as FloatingCartButton */}
+      <Cart
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+      />
     </>
   );
 };

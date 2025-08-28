@@ -7,10 +7,8 @@ import {
   ShoppingBag, 
   BarChart3, 
   Settings, 
-  Package, 
   TrendingUp,
   Building2,
-  Megaphone,
   X,
   LogOut
 } from 'lucide-react';
@@ -24,16 +22,14 @@ const AdminMobileNavigation: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Navigation items with corrected paths
+  // UPDATED: Navigation items with new order and dashboard removed
   const adminNavItems = [
-    { path: '/admin/dashboard', label: 'Panel de Control', icon: BarChart3 },
-    { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu },
-    { path: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag },
-    { path: '/admin/analitica', label: 'Análisis', icon: TrendingUp },
-    { path: '/admin/inventario', label: 'Inventario', icon: Package },
-    { path: '/admin/perfil-negocio', label: 'Perfil del Negocio', icon: Building2 },
-    { path: '/admin/promociones', label: 'Promociones', icon: Megaphone },
-    { path: '/admin/configuracion', label: 'Configuración', icon: Settings },
+    { path: '/admin/pedidos', label: 'Pedidos', icon: ShoppingBag }, // MOVED: First position
+    { path: '/admin/menu-management', label: 'Gestión de Menú', icon: Menu }, // SECOND
+    { path: '/admin/analitica', label: 'Análisis', icon: TrendingUp }, // THIRD
+    { path: '/admin/perfil-negocio', label: 'Perfil del Negocio', icon: Building2 }, // FOURTH
+    { path: '/admin/configuracion', label: 'Ajustes', icon: Settings }, // FIFTH (renamed from Configuración)
+    // REMOVED: Dashboard item completely
   ];
 
   const toggleMenu = () => {

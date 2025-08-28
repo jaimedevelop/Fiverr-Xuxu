@@ -103,28 +103,28 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Selecciona una fecha</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Selecciona una fecha</h4>
         
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card-base p-6">
+          <div className="flex items-center justify-between mb-6">
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-saffron-100 rounded-lg transition-all duration-200 text-saffron-600 hover:text-saffron-800"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
-            <h5 className="text-sm font-medium">
+            <h5 className="text-lg font-semibold text-gray-700">
               {currentMonth.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
             </h5>
             
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-saffron-100 rounded-lg transition-all duration-200 text-saffron-600 hover:text-saffron-800"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -132,9 +132,9 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             </button>
           </div>
           
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-2">
             {weekDays.map(day => (
-              <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+              <div key={day} className="text-center text-xs font-semibold text-gray-600 py-3 bg-gradient-to-r from-saffron-50 to-persian-pink-50 rounded-lg">
                 {day}
               </div>
             ))}
@@ -146,9 +146,13 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
                     type="button"
                     onClick={() => !day.isDisabled && onDateChange(day.date)}
                     disabled={day.isDisabled}
-                    className={`w-full h-full text-sm rounded hover:bg-gray-100 ${
-                      day.isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : ''
-                    } ${day.isDisabled ? 'text-gray-300 cursor-not-allowed' : 'text-gray-900'}`}
+                    className={`w-full h-full text-sm rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
+                      day.isSelected 
+                        ? 'bg-gradient-saffron text-orange-900 shadow-saffron font-semibold' 
+                        : day.isDisabled 
+                        ? 'text-gray-300 cursor-not-allowed' 
+                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-saffron-100 hover:to-persian-pink-100 hover:text-saffron-700'
+                    }`}
                   >
                     {day.day}
                   </button>
@@ -163,23 +167,25 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
       {selectedDate && (
         <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Selecciona una hora</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Selecciona una hora</h4>
           
-          <div className="grid grid-cols-3 gap-2">
-            {timeSlots.map((time) => (
-              <button
-                key={time}
-                type="button"
-                onClick={() => onTimeChange(time)}
-                className={`px-3 py-2 text-sm rounded-md border ${
-                  selectedTime === time
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 hover:border-gray-400 text-gray-700'
-                }`}
-              >
-                {time}
-              </button>
-            ))}
+          <div className="card-base p-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+              {timeSlots.map((time) => (
+                <button
+                  key={time}
+                  type="button"
+                  onClick={() => onTimeChange(time)}
+                  className={`px-4 py-3 text-sm font-medium rounded-xl border transition-all duration-300 transform hover:scale-105 ${
+                    selectedTime === time
+                      ? 'border-saffron-400 bg-gradient-saffron text-orange-900 shadow-saffron'
+                      : 'border-gray-300 hover:border-saffron-300 text-gray-700 hover:bg-gradient-to-r hover:from-saffron-50 hover:to-persian-pink-50 hover:text-saffron-700'
+                  }`}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -31,7 +31,9 @@ export class ThemeHelper {
       preparing: theme.colors.secondary.amber,
       delivered: theme.colors.secondary.emerald,
       
-      // Text colors
+      // Text colors (semantic naming)
+      charcoal: theme.colors.neutral.charcoal,
+      slate: theme.colors.neutral.slate,
       textPrimary: theme.colors.neutral.charcoal,
       textSecondary: theme.colors.neutral.slate,
       textMuted: theme.colors.extended.gray[400],
@@ -83,73 +85,36 @@ export class ThemeHelper {
     return `${baseClasses} ${variantClasses}`;
   }
   
-  // ===== TAILWIND CLASS BUILDERS =====
-  static tailwind = {
-    // Background classes
-    bg: {
-      primary: 'bg-white',
-      secondary: 'bg-gray-50',
-      gradient: 'bg-gradient-main',
-      saffron: 'bg-gradient-saffron',
-      mint: 'bg-gradient-mint',
-      pink: 'bg-gradient-pink',
-      purple: 'bg-gradient-purple',
-      card: 'bg-white/90 backdrop-blur-sm',
-    },
-    
-    // Text classes
-    text: {
-      primary: 'text-gray-700',
-      secondary: 'text-gray-600',
-      muted: 'text-gray-400',
-      inverse: 'text-white',
-      saffron: 'text-saffron-600',
-      mint: 'text-emerald-600',
-      pink: 'text-persian-pink-600',
-      purple: 'text-purple-600',
-      gradient: {
-        saffron: 'text-gradient-saffron',
-        pink: 'text-gradient-pink',
-        purple: 'text-gradient-purple',
-      },
-    },
-    
-    // Border classes
-    border: {
-      default: 'border-gray-200',
-      saffron: 'border-saffron-200',
-      mint: 'border-emerald-200',
-      pink: 'border-persian-pink-200',
-      purple: 'border-purple-200',
-    },
-    
-    // Shadow classes
-    shadow: {
-      sm: 'shadow-brand-sm',
-      md: 'shadow-brand-md',
-      lg: 'shadow-brand-lg',
-      xl: 'shadow-brand-xl',
-      saffron: 'shadow-saffron',
-      mint: 'shadow-mint',
-      pink: 'shadow-pink',
-      purple: 'shadow-purple',
-    },
-    
-    // Animation classes
-    animate: {
-      fadeIn: 'animate-fade-in',
-      slideIn: 'animate-slide-in',
-      bounce: 'animate-bounce-gentle',
-      pulse: 'animate-pulse-gentle',
-    },
-  };
-  
   // ===== STATUS HELPERS =====
   static getBusinessStatusStyle(isOpen: boolean) {
     return {
       className: this.badge(isOpen ? 'open' : 'closed'),
       text: isOpen ? 'Abierto' : 'Cerrado',
       color: isOpen ? this.colors.open : this.colors.closed,
+    };
+  }
+  
+  static getAvailabilityStyle(available: boolean, inventory: number) {
+    if (!available) {
+      return {
+        className: this.badge('error'),
+        text: 'No disponible',
+        color: this.colors.error,
+      };
+    }
+    
+    if (inventory > 0 && inventory <= 5) {
+      return {
+        className: this.badge('warning'),
+        text: inventory === 1 ? '¡Queda 1!' : `¡Quedan ${inventory}!`,
+        color: this.colors.warning,
+      };
+    }
+    
+    return {
+      className: this.badge('success'),
+      text: 'Disponible',
+      color: this.colors.success,
     };
   }
   
@@ -175,16 +140,18 @@ export class ThemeHelper {
       return {
         primary: this.colors.admin,
         gradient: this.gradients.purple,
-        textClass: this.tailwind.text.purple,
-        bgClass: this.tailwind.bg.purple,
+        buttonClass: this.button('admin'),
+        textClass: 'text-purple-600',
+        bgClass: 'bg-gradient-purple',
       };
     }
     
     return {
       primary: this.colors.user,
       gradient: this.gradients.saffron,
-      textClass: this.tailwind.text.saffron,
-      bgClass: this.tailwind.bg.saffron,
+      buttonClass: this.button('primary'),
+      textClass: 'text-saffron-600',
+      bgClass: 'bg-gradient-saffron',
     };
   }
   
@@ -218,7 +185,7 @@ export class ThemeHelper {
 }
 
 // ===== CONVENIENCE EXPORTS =====
-export const { colors, gradients, tailwind } = ThemeHelper;
+export const { colors, gradients } = ThemeHelper;
 
 // Quick access functions
 export const getButtonClass = ThemeHelper.button;
@@ -228,6 +195,7 @@ export const getBadgeClass = ThemeHelper.badge;
 
 // Status helpers
 export const getBusinessStatus = ThemeHelper.getBusinessStatusStyle;
+export const getAvailabilityStyle = ThemeHelper.getAvailabilityStyle;
 export const getOrderStatus = ThemeHelper.getOrderStatusStyle;
 export const getRoleStyle = ThemeHelper.getRoleStyle;
 

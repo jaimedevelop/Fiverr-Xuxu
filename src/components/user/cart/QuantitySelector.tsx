@@ -36,14 +36,14 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center border border-gray-300 rounded-md">
+    <div className="flex items-center bg-white/90 backdrop-blur-sm border border-saffron-200 rounded-xl shadow-sm overflow-hidden">
       <button
         onClick={handleDecrement}
         disabled={quantity <= min || disabled}
-        className={`p-2 rounded-l-md ${
+        className={`p-2.5 transition-all duration-200 ${
           quantity <= min || disabled
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-700 hover:bg-gray-100'
+            ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+            : 'text-saffron-600 hover:text-saffron-800 hover:bg-saffron-100 active:bg-saffron-200'
         }`}
         aria-label="Disminuir cantidad"
       >
@@ -57,17 +57,17 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         value={quantity}
         onChange={handleChange}
         disabled={disabled}
-        className="w-12 text-center border-0 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="w-12 text-center bg-transparent border-0 focus:ring-0 focus:outline-none font-semibold text-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         aria-label="Cantidad"
       />
       
       <button
         onClick={handleIncrement}
         disabled={quantity >= max || disabled}
-        className={`p-2 rounded-r-md ${
+        className={`p-2.5 transition-all duration-200 ${
           quantity >= max || disabled
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-700 hover:bg-gray-100'
+            ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+            : 'text-saffron-600 hover:text-saffron-800 hover:bg-saffron-100 active:bg-saffron-200'
         }`}
         aria-label="Aumentar cantidad"
       >

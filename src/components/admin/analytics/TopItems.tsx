@@ -39,7 +39,6 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
     return (
       <div className="card-base shadow-brand-lg">
         <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
           <div className="flex justify-center py-8">
             <p className="text-gray-500">Seleccionando rango de fechas...</p>
           </div>
@@ -123,7 +122,6 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
     return (
       <div className="card-base shadow-brand-lg">
         <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
           <div className="flex flex-col items-center justify-center py-12">
             <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-gray-600 font-medium">Cargando datos...</p>
@@ -140,7 +138,6 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
     return (
       <div className="card-base shadow-brand-lg">
         <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
           <div className="flex flex-col items-center justify-center py-8">
             <div className="flex items-center text-red-500 mb-6">
               <AlertCircle className="h-6 w-6 mr-3" />
@@ -179,8 +176,6 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
   return (
     <div className="card-base shadow-brand-lg">
       <div className="p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
-        
         {items.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -194,7 +189,7 @@ const TopItems: React.FC<TopItemsProps> = ({ title, timeRange, className = '' })
         ) : (
           <div className="space-y-4">
             {items.slice(0, 10).map((item, index) => (
-              <div key={item.pastryId} className="card-interactive p-5">
+              <div key={item.pastryId} className="bg-white border border-gray-200 rounded-lg p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-white shadow-lg ${

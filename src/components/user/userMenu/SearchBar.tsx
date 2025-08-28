@@ -1,3 +1,4 @@
+// src/components/user/userMenu/SearchBar.tsx
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
@@ -19,12 +20,12 @@ const SearchBar = ({ onSearch, initialValue }: SearchBarProps) => {
 
   return (
     <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-gray-400" />
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <Search className="h-5 w-5 text-slate" />
       </div>
       <input
         type="text"
-        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="input-base pl-12"
         placeholder="Buscar pasteles..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

@@ -1,4 +1,4 @@
-// src/pages/user/UserExplore.tsx - Clean Production Version
+// src/pages/user/UserExplore.tsx - Themed Version
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MapPin } from 'lucide-react';
@@ -96,10 +96,11 @@ const UserExplore = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Cargando negocios...</p>
+          <div className="w-16 h-16 border-4 border-saffron-200 border-t-saffron-600 rounded-full animate-spin mb-6"></div>
+          <p className="text-gray-600 font-semibold text-lg">Cargando pastelerías...</p>
+          <p className="text-gray-500 text-sm mt-2">Descubriendo los mejores sabores para ti</p>
         </div>
       </div>
     );
@@ -107,12 +108,17 @@ const UserExplore = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 font-medium">{error}</p>
+          <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-coral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-red-600 font-semibold text-lg mb-4">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="btn-primary"
           >
             Intentar de nuevo
           </button>
@@ -122,7 +128,7 @@ const UserExplore = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-main">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -136,12 +142,12 @@ const UserExplore = () => {
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar pastelerías o productos..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-base w-full pl-12 pr-4 py-4 text-lg shadow-lg"
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -149,13 +155,13 @@ const UserExplore = () => {
         </div>
 
         {/* Filters */}
-        <div className="mb-8 flex flex-wrap gap-4 items-center">
+        <div className="mb-8 flex flex-wrap gap-4 items-center justify-center">
           <div className="flex items-center space-x-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">Filtros:</span>
+            <Filter className="h-5 w-5 text-saffron-600" />
+            <span className="text-sm font-semibold text-gray-700">Filtros:</span>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3 justify-center">
             {[
               { key: 'all', label: 'Todos' },
               { key: 'open', label: 'Abierto ahora' },
@@ -164,10 +170,10 @@ const UserExplore = () => {
               <button
                 key={filter.key}
                 onClick={() => handleFilterChange(filter.key)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
                   selectedFilter === filter.key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gradient-saffron text-orange-900 shadow-saffron'
+                    : 'bg-white/90 text-gray-700 border-2 border-gray-200 hover:bg-saffron-50 hover:border-saffron-300 shadow-md'
                 }`}
               >
                 {filter.label}
@@ -176,26 +182,33 @@ const UserExplore = () => {
           </div>
 
           {/* Area filter info */}
-          <div className="flex items-center text-sm text-gray-500 ml-auto">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span>{filteredBusinesses.length} negocio{filteredBusinesses.length !== 1 ? 's' : ''} encontrado{filteredBusinesses.length !== 1 ? 's' : ''}</span>
+          <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-md border border-gray-200 ml-auto">
+            <MapPin className="h-4 w-4 mr-2 text-saffron-600" />
+            <span className="text-sm font-semibold text-gray-700">
+              {filteredBusinesses.length} negocio{filteredBusinesses.length !== 1 ? 's' : ''} encontrado{filteredBusinesses.length !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
 
         {/* Business Cards */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {filteredBusinesses.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-500">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div className="text-gray-600">
                 {searchTerm ? (
                   <>
-                    <p className="text-lg font-medium mb-2">No se encontraron resultados</p>
-                    <p>Intenta con diferentes términos de búsqueda</p>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800">No se encontraron resultados</h3>
+                    <p className="text-lg">Intenta con diferentes términos de búsqueda</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-lg font-medium mb-2">No hay pastelerías disponibles</p>
-                    <p>Vuelve pronto para ver nuevos negocios</p>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800">No hay pastelerías disponibles</h3>
+                    <p className="text-lg">Vuelve pronto para ver nuevos negocios</p>
                   </>
                 )}
               </div>

@@ -1,10 +1,10 @@
-// src/components/user/userMenu/EmptyState.tsx - Updated to support business-specific messaging
+// src/components/user/userMenu/EmptyState.tsx
 import React from 'react';
 import { Search, Package } from 'lucide-react';
 
 interface EmptyStateProps {
   hasSearch?: boolean;
-  businessName?: string; // NEW: For business-specific messaging
+  businessName?: string;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({ 
@@ -13,7 +13,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div className="text-center py-12">
-      <div className="mx-auto h-24 w-24 text-gray-400 mb-4">
+      <div className="mx-auto h-24 w-24 text-slate mb-4">
         {hasSearch ? (
           <Search className="h-full w-full" />
         ) : (
@@ -21,15 +21,15 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         )}
       </div>
       
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-charcoal mb-2">
         {hasSearch ? 'No se encontraron productos' : 'No hay productos disponibles'}
       </h3>
       
-      <p className="text-gray-500 max-w-md mx-auto">
+      <p className="text-slate max-w-md mx-auto leading-relaxed">
         {hasSearch ? (
           businessName ? (
             <>
-              No encontramos productos en <strong>{businessName}</strong> que coincidan con tu búsqueda. 
+              No encontramos productos en <span className="font-medium text-saffron-600">{businessName}</span> que coincidan con tu búsqueda. 
               Intenta con diferentes términos o explora otras categorías.
             </>
           ) : (
@@ -38,7 +38,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         ) : (
           businessName ? (
             <>
-              <strong>{businessName}</strong> aún no ha agregado productos a su menú. 
+              <span className="font-medium text-saffron-600">{businessName}</span> aún no ha agregado productos a su menú. 
               Vuelve pronto para ver las novedades.
             </>
           ) : (
@@ -51,7 +51,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <div className="mt-6">
           <button
             onClick={() => window.location.reload()}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-saffron-600 hover:text-saffron-700 font-medium transition-colors duration-200"
           >
             Limpiar filtros y ver todos los productos
           </button>

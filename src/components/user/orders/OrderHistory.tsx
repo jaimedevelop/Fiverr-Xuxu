@@ -8,6 +8,7 @@ import Select from '../../../components/ui/Select';
 import { useAuth } from '../../../contexts/AuthContext';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
+import { getButtonClass, colors } from '../../../utils/themeHelper';
 
 interface Order {
   id: string;
@@ -181,19 +182,19 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>;
+        return <span className="badge-warning">Pendiente</span>;
       case 'confirmed':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Confirmado</span>;
+        return <span className="badge-info">Confirmado</span>;
       case 'preparing':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Preparando</span>;
+        return <span className="badge-base bg-purple-100 text-purple-800">Preparando</span>;
       case 'ready':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Listo para Recoger</span>;
+        return <span className="badge-success">Listo para Recoger</span>;
       case 'delivered':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Entregado</span>;
+        return <span className="badge-base bg-gray-100 text-gray-800">Entregado</span>;
       case 'cancelled':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Cancelado</span>;
+        return <span className="badge-error">Cancelado</span>;
       default:
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{status}</span>;
+        return <span className="badge-base bg-gray-100 text-gray-800">{status}</span>;
     }
   };
 
@@ -216,12 +217,12 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({
     {
       key: 'id' as keyof Order,
       title: 'ID de Orden',
-      render: (row: Order) => <span className="text-sm font-medium text-gray-900">{row.id}</span>
+      render: (row: Order) => <span className="text-sm font-medium text-gray-700">#{row.id.slice(-8)}</span>
     },
     {
       key: 'createdAt' as keyof Order,
       title: 'Fecha',
-      render: (row: Order) => <span className="text-sm text-gray-500">{formatDate(row.createdAt)}</span>
+      render: (row: Order) => <span className="text-sm text-gray-600">{formatDate(row.createdAt)}</span>
     },
     {
       key: 'status' as keyof Order,
@@ -231,26 +232,30 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({
     {
       key: 'total' as keyof Order,
       title: 'Total',
-      render: (row: Order) => <span className="text-sm font-medium text-gray-900">{formatCurrency(row.total)}</span>
+      render: (row: Order) => <span className="text-sm font-semibold text-gray-700">{formatCurrency(row.total)}</span>
     },
     {
       key: 'items' as keyof Order,
       title: 'Artículos',
-      render: (row: Order) => <span className="text-sm text-gray-900">{row.items.length}</span>
+      render: (row: Order) => (
+        <span className="text-sm text-gray-700 bg-saffron-100 px-2 py-1 rounded-full">
+          {row.items.length} item{row.items.length !== 1 ? 's' : ''}
+        </span>
+      )
     },
     {
       key: 'paymentMethod' as keyof Order,
       title: 'Método de Pago',
-      render: (row: Order) => <span className="text-sm text-gray-900">{row.paymentMethod}</span>
+      render: (row: Order) => <span className="text-sm text-gray-700">{row.paymentMethod}</span>
     },
     {
       key: 'paymentStatus' as keyof Order,
       title: 'Estado de Pago',
       render: (row: Order) => (
-        <span className={`text-sm font-medium ${
-          row.paymentStatus === 'paid' ? 'text-green-600' : 
-          row.paymentStatus === 'pending' ? 'text-yellow-600' : 
-          row.paymentStatus === 'failed' ? 'text-red-600' : 'text-gray-600'
+        <span className={`text-sm font-medium badge-base ${
+          row.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 
+          row.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+          row.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
         }`}>
           {row.paymentStatus === 'paid' ? 'Pagado' : 
            row.paymentStatus === 'pending' ? 'Pendiente' : 
@@ -263,23 +268,21 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({
       title: 'Acciones',
       render: (row: Order) => (
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
+          <button
             onClick={() => handleViewDetails(row)}
-            className="h-8 w-8 p-0"
+            className="p-2 text-saffron-600 hover:text-saffron-800 hover:bg-saffron-100 rounded-lg transition-all duration-200"
             title="Ver detalles"
           >
             <Eye className="h-4 w-4" />
-          </Button>
+          </button>
           {row.status === 'delivered' && (
-            <Button
-              variant="outline"
+            <button
               onClick={() => handleDownloadReceipt(row)}
-              className="h-8 w-8 p-0"
+              className="p-2 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 rounded-lg transition-all duration-200"
               title="Descargar recibo"
             >
               <Download className="h-4 w-4" />
-            </Button>
+            </button>
           )}
         </div>
       )
@@ -293,95 +296,151 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({
   const pendingOrders = orders.filter(order => order.status === 'pending' || order.status === 'confirmed').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <BaseCard>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="card-interactive p-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
-            <p className="text-sm text-gray-500">Total de Pedidos</p>
+            <p className="text-3xl font-bold text-gray-700 mb-1">{totalOrders}</p>
+            <p className="text-sm font-medium text-gray-600">Total de Pedidos</p>
           </div>
-        </BaseCard>
+        </div>
         
-        <BaseCard>
+        <div className="card-interactive p-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalSpent)}</p>
-            <p className="text-sm text-gray-500">Total Gastado</p>
+            <p className="text-3xl font-bold text-saffron-600 mb-1">{formatCurrency(totalSpent)}</p>
+            <p className="text-sm font-medium text-gray-600">Total Gastado</p>
           </div>
-        </BaseCard>
+        </div>
         
-        <BaseCard>
+        <div className="card-interactive p-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{deliveredOrders}</p>
-            <p className="text-sm text-gray-500">Pedidos Entregados</p>
+            <p className="text-3xl font-bold text-emerald-600 mb-1">{deliveredOrders}</p>
+            <p className="text-sm font-medium text-gray-600">Pedidos Entregados</p>
           </div>
-        </BaseCard>
+        </div>
         
-        <BaseCard>
+        <div className="card-interactive p-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{pendingOrders}</p>
-            <p className="text-sm text-gray-500">Pedidos Pendientes</p>
+            <p className="text-3xl font-bold text-persian-pink-600 mb-1">{pendingOrders}</p>
+            <p className="text-sm font-medium text-gray-600">Pedidos Pendientes</p>
           </div>
-        </BaseCard>
+        </div>
       </div>
       
       {/* Order History Table */}
-      <BaseCard title="Historial de Pedidos">
-        {error && <div className="mb-6 text-red-600">{error}</div>}
+      <div className="card-base p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">Historial de Pedidos</h2>
+          <p className="text-gray-600">Revisa todos tus pedidos anteriores y su estado actual</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 card-base p-4 border border-red-200 bg-red-50">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-saffron-400" />
               </div>
-              <Input
+              <input
                 type="text"
                 placeholder="Buscar pedidos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full"
+                className="input-base pl-10 w-full"
               />
             </div>
           </div>
           
           <div className="flex space-x-3">
-            <Select
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              options={statusOptions}
-              className="w-48"
-            />
+              className="input-base w-48"
+            >
+              {statusOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             
-            <Select
+            <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              options={dateOptions}
-              className="w-48"
-            />
-            
-            <Button
-              variant="outline"
-              onClick={handleExportHistory}
+              className="input-base w-48"
             >
-              <Download className="h-4 w-4 mr-2" />
+              {dateOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            
+            <button
+              onClick={handleExportHistory}
+              className={`${getButtonClass('outline')} flex items-center gap-2`}
+            >
+              <Download className="h-4 w-4" />
               Exportar
-            </Button>
+            </button>
           </div>
         </div>
 
+        {/* Results info */}
+        {filteredOrders.length !== orders.length && orders.length > 0 && (
+          <div className="mb-4 card-base p-3 bg-gradient-to-r from-saffron-50 to-persian-pink-50 border border-saffron-200">
+            <p className="text-sm text-saffron-700">
+              Mostrando {filteredOrders.length} de {orders.length} pedidos
+            </p>
+          </div>
+        )}
+
         {isLoading || loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="flex justify-center items-center py-16">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-saffron-600"></div>
+              <p className="text-gray-600 font-medium">Cargando historial de pedidos...</p>
+            </div>
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Calendar className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">
+              {orders.length === 0 ? 'No tienes pedidos aún' : 'No se encontraron pedidos'}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {orders.length === 0 
+                ? 'Cuando realices tu primer pedido, aparecerá aquí.'
+                : 'Intenta cambiar los filtros para ver más pedidos.'
+              }
+            </p>
+            {orders.length === 0 && (
+              <button
+                onClick={() => window.location.href = '/explorar'}
+                className={getButtonClass('primary')}
+              >
+                Explorar Postres
+              </button>
+            )}
           </div>
         ) : (
-          <DataTable
-            columns={columns}
-            data={filteredOrders}
-            emptyMessage="No se encontraron pedidos en tu historial"
-          />
+          <div className="overflow-hidden rounded-xl border border-saffron-200">
+            <DataTable
+              columns={columns}
+              data={filteredOrders}
+              emptyMessage="No se encontraron pedidos en tu historial"
+            />
+          </div>
         )}
-      </BaseCard>
+      </div>
     </div>
   );
 };

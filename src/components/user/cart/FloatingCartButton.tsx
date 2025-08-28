@@ -21,7 +21,7 @@ const FloatingCartButton: React.FC = () => {
       {/* Floating Cart Button */}
       <button
         onClick={() => setShowCart(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 z-40"
+        className="fixed bottom-6 right-6 bg-gradient-saffron text-orange-900 rounded-full p-4 shadow-brand-xl hover:shadow-saffron transition-all duration-300 transform hover:scale-105 z-40 backdrop-blur-sm border border-saffron-300"
         aria-label="Ver carrito"
       >
         <div className="flex items-center">
@@ -30,7 +30,7 @@ const FloatingCartButton: React.FC = () => {
             
             {/* Item Count Badge */}
             {itemCount > 0 && (
-              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-persian-pink-500 to-persian-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-pink animate-bounce">
                 {itemCount > 99 ? '99+' : itemCount}
               </div>
             )}
@@ -38,7 +38,7 @@ const FloatingCartButton: React.FC = () => {
           
           {/* Total Amount (visible on larger screens) */}
           <div className="ml-3 hidden sm:block">
-            <div className="text-sm font-medium">
+            <div className="text-sm font-semibold text-orange-800">
               {formatCurrency(total)}
             </div>
           </div>

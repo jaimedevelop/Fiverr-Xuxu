@@ -36,7 +36,7 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
   return (
     <div className="card-base shadow-brand-lg p-6 mb-6">
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Search */}
+        {/* Search - Now with balanced width */}
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
           <input
@@ -44,28 +44,30 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
             placeholder="Buscar postres por nombre, etiquetas o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-base pl-12 pr-4"
+            className="input-base pl-12 pr-4 w-full"
           />
         </div>
         
-        {/* Category Filter */}
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="input-base min-w-48"
-        >
-          <option value="">Todas las Categorías</option>
-          {categories.map(category => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+        {/* Category Filter - Now with balanced width */}
+        <div className="flex-1">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="input-base w-full"
+          >
+            <option value="">Todas las Categorías</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
         
         {/* Advanced Filters Toggle */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
+          className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600 shrink-0`}
         >
           <Filter size={18} />
           Ordenar
@@ -75,7 +77,7 @@ const MenuFilters = ({ categories, filters, sort, onFiltersChange, onSortChange 
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl flex items-center gap-2 transition-all duration-200 font-medium"
+            className="px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl flex items-center gap-2 transition-all duration-200 font-medium shrink-0"
           >
             <X size={18} />
             Limpiar

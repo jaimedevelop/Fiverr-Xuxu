@@ -1,6 +1,6 @@
 // src/components/operatingHours/OperatingHoursInput.tsx
 import React from 'react';
-import { useOperatingHours } from '../../hooks/useOperatingHours';
+import { useOperatingHours } from '../../../hooks/useOperatingHours';
 import DayHoursSelector from './DayHoursSelector';
 import ClosedDayToggle from './ClosedDayToggle';
 

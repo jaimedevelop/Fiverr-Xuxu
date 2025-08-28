@@ -1,9 +1,7 @@
 // src/components/admin/analytics/TimeRangeSelector.tsx
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { TimeRange } from '../../../types/analytics';
-import Button from '../../../components/ui/Button';
-import Select from '../../../components/ui/Select';
 import { getButtonClass } from '../../../utils/themeHelper';
 
 interface TimeRangeSelectorProps {
@@ -42,21 +40,6 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     { value: 'thisYear', label: 'Este año' },
     { value: 'lastYear', label: 'Año pasado' },
   ];
-
-  const handleCustomRange = () => {
-    // In a real implementation, this would open a date picker modal
-    // For now, we'll just set a default custom range
-    const today = new Date();
-    const lastWeek = new Date(today);
-    lastWeek.setDate(today.getDate() - 7);
-    
-    onChange({
-      start: lastWeek,
-      end: today,
-      label: 'Personalizado'
-    });
-    setInternalValue('custom'); // Set a special value for custom ranges
-  };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -153,7 +136,7 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   };
 
   return (
-    <div className={`flex items-center space-x-4 ${className}`}>
+    <div className={`flex items-center ${className}`}>
       <div className="relative">
         <select
           value={internalValue}
@@ -170,14 +153,6 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
           <ChevronDown className="h-4 w-4 text-purple-400" />
         </div>
       </div>
-      
-      <button
-        onClick={handleCustomRange}
-        className={`${getButtonClass('outline')} flex items-center gap-2 hover:border-purple-300 hover:text-purple-600`}
-      >
-        <Calendar className="h-4 w-4" />
-        Personalizado
-      </button>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DayHours } from '../../types/business';
+import { DayHours } from '../../../types/business';
 
 interface DayHoursSelectorProps {
   dayHours: DayHours;

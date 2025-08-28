@@ -15,19 +15,19 @@ const CartIcon: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+      className="relative p-2 text-gray-600 hover:text-saffron-600 focus:outline-none transition-all duration-300 hover:scale-105"
       aria-label="Carrito de compras"
     >
       <ShoppingCart className="h-6 w-6" />
       
       {itemCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-          {itemCount}
+        <span className="absolute -top-1 -right-1 bg-gradient-saffron text-orange-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-saffron animate-pulse">
+          {itemCount > 99 ? '99+' : itemCount}
         </span>
       )}
       
-      {itemCount > 0 && (
-        <span className="absolute -bottom-1 -right-1 bg-gray-800 text-white text-xs font-medium rounded px-1 py-0.5">
+      {itemCount > 0 && total > 0 && (
+        <span className="absolute -bottom-1 -right-1 bg-gradient-to-r from-persian-pink-500 to-persian-pink-600 text-white text-xs font-medium rounded-full px-2 py-0.5 shadow-pink min-w-max">
           {formatCurrency(total)}
         </span>
       )}

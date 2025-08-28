@@ -24,9 +24,9 @@ const ResponsiveLayout: React.FC = () => {
         </WebLayout>
       </div>
 
-      {/* Floating Cart Button - Only show for regular users, not admins */}
+      {/* Floating Cart Button - Show for regular users on ALL devices (mobile AND desktop) */}
       {user?.role === 'user' && (
-        <div className="md:hidden">
+        <div>
           <FloatingCartButton />
         </div>
       )}

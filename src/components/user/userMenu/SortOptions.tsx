@@ -1,3 +1,4 @@
+// src/components/user/userMenu/SortOptions.tsx
 import React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const SortOptions = ({ currentSort, onSortChange }: SortOptionsProps) => {
       <select
         value={currentSort}
         onChange={(e) => onSortChange(e.target.value)}
-        className="appearance-none w-full bg-white border border-gray-300 rounded-lg py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="appearance-none w-full bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl py-3 pl-4 pr-10 text-sm font-medium text-charcoal focus:border-saffron-500 focus:ring-2 focus:ring-saffron-500/20 transition-colors duration-200"
       >
         {sortOptions.map((option) => (
           <option key={option.id} value={option.id}>
@@ -29,7 +30,7 @@ const SortOptions = ({ currentSort, onSortChange }: SortOptionsProps) => {
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate">
         <ArrowUpDown className="h-4 w-4" />
       </div>
     </div>

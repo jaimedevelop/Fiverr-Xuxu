@@ -3,11 +3,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { OrderProvider } from './contexts/OrderContext';
-import { InventoryProvider } from './contexts/InventoryContext';
 import { AnalyticsProvider } from './contexts/AnalyticsContext';
 import { BusinessProvider } from './contexts/BusinessContext';
-import { FavoritesProvider } from './contexts/FavoritesContext';
-import { CartProvider } from './contexts/CartContext';
+import { CartProvider } from './contexts/CartContext'; //Component is named CartContext NOT CartProvider, unlike the rest
 import { UserProvider } from './contexts/UserContext';
 import ResponsiveLayout from './components/layout/ResponsiveLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -19,20 +17,16 @@ import BusinessRegistration from './pages/business/BusinessRegistration';
 import EmailVerification from './pages/business/EmailVerification';
 import { useUser } from './contexts/UserContext';
 // User pages
-import UserExplore from './pages/user/UserExplore'; // NEW: Import UserExplore
-import UserMenu from './pages/user/UserMenu'; // UPDATED: Now business-specific
+import UserExplore from './pages/user/UserExplore';
+import UserMenu from './pages/user/UserMenu';
 import Orders from './pages/user/Orders';
 import Profile from './pages/user/Profile';
-import Favorites from './pages/user/Favorites';
 import OrderHistory from './pages/user/OrderHistory';
-// Admin pages
-import Dashboard from './pages/admin/Dashboard';
+// Admin pages - REMOVED: Dashboard import
 import MenuManagement from './pages/admin/MenuManagement';
 import AdminOrders from './pages/admin/Orders';
 import Analytics from './pages/admin/Analytics';
-import Inventory from './pages/admin/Inventory';
 import BusinessProfile from './pages/admin/BusinessProfile';
-import Promotions from './pages/admin/Promotions';
 import Settings from './pages/admin/Settings';
 
 // Define AppRoutes inside the App component to have access to AuthProvider
@@ -92,15 +86,15 @@ function App() {
       );
     }
     
- // Default route based on user role - USE FIRESTORE USER ROLE
+ // Default route based on user role - UPDATED: Admin goes to orders instead of dashboard
   const getDefaultRoute = () => {
     console.log("🎯 Getting default route for role:", firestoreUser?.role);
     if (firestoreUser?.role === 'admin') {
-      console.log("  → Directing to admin dashboard");
-      return '/admin/dashboard';
+      console.log("  → Directing to admin orders"); // UPDATED: Changed from dashboard to orders
+      return '/admin/pedidos'; // UPDATED: Changed from '/admin/dashboard' to '/admin/pedidos'
     }
-    console.log("  → Directing to user explore"); // UPDATED: Changed from menu to explore
-    return '/usuario/explorar'; // UPDATED: Changed from /usuario/menu to /usuario/explorar
+    console.log("  → Directing to user explore");
+    return '/usuario/explorar';
   };
     
     // If user is authenticated, show protected routes
@@ -115,28 +109,20 @@ function App() {
         <Route path="/" element={<ResponsiveLayout />}>
           {/* User routes */}
           <Route path="usuario">
-            {/* NEW: Explore page (marketplace view) */}
             <Route path="explorar" element={
               <ProtectedRoute requiredRole="user">
                 <UserExplore />
               </ProtectedRoute>
             } />
-            {/* UPDATED: Menu is now business-specific with businessId parameter */}
             <Route path="menu/:businessId" element={
               <ProtectedRoute requiredRole="user">
                 <UserMenu />
               </ProtectedRoute>
             } />
-            {/* REDIRECT: Old menu route to new explore route */}
             <Route path="menu" element={<Navigate to="/usuario/explorar" replace />} />
             <Route path="pedidos" element={
               <ProtectedRoute requiredRole="user">
                 <Orders />
-              </ProtectedRoute>
-            } />
-            <Route path="favoritos" element={
-              <ProtectedRoute requiredRole="user">
-                <Favorites />
               </ProtectedRoute>
             } />
             <Route path="perfil" element={
@@ -146,11 +132,12 @@ function App() {
             } />
           </Route>
           
-          {/* Admin routes */}
+          {/* Admin routes - REMOVED: Dashboard route completely */}
           <Route path="admin">
-            <Route path="dashboard" element={
+            {/* UPDATED: Orders is now the main admin page */}
+            <Route path="pedidos" element={
               <ProtectedRoute requiredRole="admin">
-                <Dashboard />
+                <AdminOrders />
               </ProtectedRoute>
             } />
             <Route path="menu-management" element={
@@ -158,19 +145,9 @@ function App() {
                 <MenuManagement />
               </ProtectedRoute>
             } />
-            <Route path="pedidos" element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminOrders />
-              </ProtectedRoute>
-            } />
             <Route path="analitica" element={
               <ProtectedRoute requiredRole="admin">
                 <Analytics />
-              </ProtectedRoute>
-            } />
-            <Route path="inventario" element={
-              <ProtectedRoute requiredRole="admin">
-                <Inventory />
               </ProtectedRoute>
             } />
             <Route path="perfil-negocio" element={
@@ -178,16 +155,13 @@ function App() {
                 <BusinessProfile />
               </ProtectedRoute>
             } />
-            <Route path="promociones" element={
-              <ProtectedRoute requiredRole="admin">
-                <Promotions />
-              </ProtectedRoute>
-            } />
             <Route path="configuracion" element={
               <ProtectedRoute requiredRole="admin">
                 <Settings />
               </ProtectedRoute>
             } />
+            {/* ADDED: Redirect /admin to orders page */}
+            <Route path="" element={<Navigate to="/admin/pedidos" replace />} />
           </Route>
           
           {/* Default redirects based on role */}
@@ -204,16 +178,12 @@ function App() {
         <UserProvider>
           <BusinessProvider>
             <OrderProvider>
-            <InventoryProvider>
               <AnalyticsProvider>
-                  <FavoritesProvider>
-                    <CartProvider>
-                      <AppRoutes />
-                    </CartProvider>
-                  </FavoritesProvider>
+                <CartProvider>
+                  <AppRoutes />
+                </CartProvider>
               </AnalyticsProvider>
-            </InventoryProvider>
-          </OrderProvider>
+            </OrderProvider>
           </BusinessProvider>
         </UserProvider>
       </AuthProvider>

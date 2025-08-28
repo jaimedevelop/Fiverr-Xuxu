@@ -4,7 +4,7 @@ import { Upload, Clock, Settings, Info } from 'lucide-react';
 import Input from '../../common/Input';
 import Select from '../../ui/Select';
 import Button from '../../ui/Button';
-import OperatingHoursInput from '../../operatingHours/OperatingHoursInput';
+import OperatingHoursInput from '../../admin/operatingHours/OperatingHoursInput';
 import type { BusinessRegistrationData } from '../../../types/business';
 import { OrderSettings, DEFAULT_ORDER_SETTINGS } from '../../../utils/orderScheduler';
 

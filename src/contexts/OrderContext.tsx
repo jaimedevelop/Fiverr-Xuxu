@@ -1,16 +1,9 @@
-// src/contexts/OrderContext.tsx - Enhanced with scheduling logic
+// src/contexts/OrderContext.tsx - Simplified without pre-order scheduling
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import orderService from '../services/orderService';
 import { Order, OrderFilters, OrderStats, FulfillmentType } from '../types/order';
 import { useAuth } from './AuthContext';
 import { useUser } from './UserContext';
-import { 
-  calculateOrderSchedule, 
-  OrderSettings, 
-  BusinessHours,
-  OrderScheduleResult,
-  DEFAULT_ORDER_SETTINGS 
-} from '../utils/orderScheduler';
 
 interface OrderContextType {
   orders: Order[];
@@ -20,7 +13,6 @@ interface OrderContextType {
   stats: OrderStats | null;
   fetchOrders: (filters?: OrderFilters) => Promise<void>;
   createOrder: (orderData: any) => Promise<string>;
-  createScheduledOrder: (orderData: any, scheduledTime: Date, scheduleInfo: OrderScheduleResult) => Promise<string>;
   updateOrder: (orderId: string, updates: Partial<Order>) => Promise<void>;
   updateOrderStatus: (orderId: string, status: string) => Promise<void>;
   deleteOrder: (orderId: string) => Promise<void>;
@@ -29,7 +21,6 @@ interface OrderContextType {
   refreshStats: () => Promise<void>;
   getOrdersByFulfillmentType: (fulfillmentType: FulfillmentType) => Order[];
   getPickupOrdersForDate: (date: string) => Order[];
-  calculateOrderTiming: (businessHours: BusinessHours, orderSettings: OrderSettings, orderTime?: Date) => OrderScheduleResult;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -54,15 +45,6 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   const [stats, setStats] = useState<OrderStats | null>(null);
   const { authState } = useAuth();
   const { user } = useUser();
-
-  // Calculate order timing based on business rules
-  const calculateOrderTiming = useCallback((
-    businessHours: BusinessHours,
-    orderSettings: OrderSettings = DEFAULT_ORDER_SETTINGS,
-    orderTime: Date = new Date()
-  ): OrderScheduleResult => {
-    return calculateOrderSchedule(orderTime, businessHours, orderSettings);
-  }, []);
 
   // Fetch orders for the current business - MEMOIZED to prevent infinite loop
   const fetchOrders = useCallback(async (filters?: OrderFilters) => {
@@ -99,7 +81,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     }
   }, [user?.businessId]);
 
-  // Create a new order with basic timing
+  // Create a new order
   const createOrder = useCallback(async (orderData: any): Promise<string> => {
     console.log('🆕 Creating new order with data:', orderData);
     setLoading(true);
@@ -110,7 +92,8 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         ...orderData,
         fulfillmentType: orderData.fulfillmentType || 'delivery',
         createdAt: new Date(),
-        orderPlacedAt: new Date() // Track when order was actually placed
+        orderPlacedAt: new Date(),
+        status: 'pending'
       };
 
       const orderId = await orderService.createOrder(completeOrderData);
@@ -121,61 +104,6 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     } catch (err: any) {
       console.error('❌ Error creating order:', err);
       setError(err.message || 'Error al crear el pedido');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchOrders]);
-
-  // Create a scheduled order with timing logic
-  const createScheduledOrder = useCallback(async (
-    orderData: any, 
-    scheduledTime: Date, 
-    scheduleInfo: OrderScheduleResult
-  ): Promise<string> => {
-    console.log('📅 Creating scheduled order:', {
-      orderData,
-      scheduledTime,
-      scheduleInfo
-    });
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const completeOrderData = {
-        ...orderData,
-        fulfillmentType: orderData.fulfillmentType || 'delivery',
-        createdAt: new Date(),
-        orderPlacedAt: new Date(),
-        
-        // Scheduling information
-        scheduledCompletionTime: scheduledTime,
-        estimatedDeliveryTime: scheduledTime,
-        
-        // Schedule metadata
-        isScheduledForNextDay: scheduleInfo.isScheduledForNextDay,
-        isMorningPriority: scheduleInfo.isMorningPriority,
-        isQueuedOrder: scheduleInfo.isQueuedOrder,
-        scheduleMessage: scheduleInfo.message,
-        
-        // Additional status for scheduled orders
-        status: scheduleInfo.isScheduledForNextDay ? 'scheduled' : 'pending',
-        
-        // Priority flag for faster processing
-        priority: scheduleInfo.isMorningPriority ? 'high' : 'normal'
-      };
-
-      console.log('📅 Complete scheduled order data:', completeOrderData);
-
-      const orderId = await orderService.createOrder(completeOrderData);
-      console.log('✅ Scheduled order created with ID:', orderId);
-      
-      await fetchOrders(); // Refresh the orders list
-      return orderId;
-    } catch (err: any) {
-      console.error('❌ Error creating scheduled order:', err);
-      setError(err.message || 'Error al crear el pedido programado');
       throw err;
     } finally {
       setLoading(false);
@@ -208,7 +136,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     }
   }, [fetchOrders, currentOrder]);
 
-  // Update order status with scheduling logic
+  // Update order status
   const updateOrderStatus = useCallback(async (orderId: string, status: string) => {
     console.log('🔄 Updating order status:', orderId, 'to:', status);
     setLoading(true);
@@ -327,18 +255,14 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     try {
       const statsData = await orderService.getOrderStats(user.businessId);
       
-      // Calculate additional stats including scheduling info
+      // Calculate additional stats
       const deliveryOrders = orders.filter(order => order.fulfillmentType === 'delivery').length;
       const pickupOrders = orders.filter(order => order.fulfillmentType === 'pickup').length;
-      const scheduledOrders = orders.filter(order => order.status === 'scheduled').length;
-      const priorityOrders = orders.filter(order => order.priority === 'high').length;
       
       const enhancedStats = {
         ...statsData,
         deliveryOrders,
-        pickupOrders,
-        scheduledOrders,
-        priorityOrders
+        pickupOrders
       };
       
       console.log('📊 Enhanced stats calculated:', enhancedStats);
@@ -377,7 +301,6 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     stats,
     fetchOrders,
     createOrder,
-    createScheduledOrder,
     updateOrder,
     updateOrderStatus,
     deleteOrder,
@@ -386,7 +309,6 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     refreshStats,
     getOrdersByFulfillmentType,
     getPickupOrdersForDate,
-    calculateOrderTiming,
   };
 
   return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;

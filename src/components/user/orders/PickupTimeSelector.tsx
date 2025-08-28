@@ -119,21 +119,20 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
     
     return slots;
   };
-  
 
   const handleTimeSelect = (timeSlot: TimeSlot) => {
-  if (!timeSlot.available) return;
-  
-  const pickupTimeSlot = {
-    datetime: timeSlot.time,
-    displayTime: `${timeSlot.displayDate} a las ${timeSlot.label}`,
-    isToday: timeSlot.displayDate === 'Hoy',
-    estimatedPreparationTime: 30
+    if (!timeSlot.available) return;
+    
+    const pickupTimeSlot = {
+      datetime: timeSlot.time,
+      displayTime: `${timeSlot.displayDate} a las ${timeSlot.label}`,
+      isToday: timeSlot.displayDate === 'Hoy',
+      estimatedPreparationTime: 30
+    };
+    
+    console.log('PickupTimeSelector: handleTimeSelect called with:', pickupTimeSlot);
+    onPickupTimeSelect(pickupTimeSlot);
   };
-  
-  console.log('PickupTimeSelector: handleTimeSelect called with:', pickupTimeSlot);
-  onPickupTimeSelect(pickupTimeSlot);
-};
 
   const visibleSlots = showAllSlots ? timeSlots : timeSlots.slice(0, 8);
   const hasMoreSlots = timeSlots.length > 8;
@@ -141,12 +140,12 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
   return (
     <div className="space-y-4">
       {/* Information banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="bg-gradient-to-r from-saffron-50 to-orange-50 border border-saffron-200 rounded-xl p-4">
         <div className="flex items-start">
-          <Clock className="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium">Selecciona tu horario de recogida</p>
-            <p className="text-blue-700 mt-1">
+          <Clock className="w-5 h-5 text-saffron-600 mt-0.5 mr-3 flex-shrink-0" />
+          <div className="text-sm text-orange-800">
+            <p className="font-semibold">Selecciona tu horario de recogida</p>
+            <p className="text-orange-700 mt-1">
               Preparamos tu pedido con 30 minutos de anticipación mínimo
             </p>
           </div>
@@ -156,7 +155,7 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
       {/* Time slots grid */}
       {timeSlots.length > 0 ? (
         <div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {visibleSlots.map((slot, index) => {
               const isSelected = selectedPickupTime?.datetime.getTime() === slot.time.getTime();
               
@@ -165,25 +164,25 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
                   key={index}
                   onClick={() => handleTimeSelect(slot)}
                   disabled={!slot.available}
-                  className={`p-3 text-sm rounded-lg border transition-all duration-200 relative ${
+                  className={`p-3 text-sm rounded-xl border-2 transition-all duration-300 relative transform hover:scale-105 ${
                     isSelected
-                      ? 'bg-blue-500 text-white border-blue-500 shadow-md'
+                      ? 'bg-gradient-saffron text-orange-900 border-saffron-500 shadow-saffron'
                       : slot.available
-                      ? 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm'
-                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      ? 'bg-white/90 text-gray-700 border-gray-200 hover:bg-gradient-to-r hover:from-saffron-50 hover:to-orange-50 hover:border-saffron-300 shadow-md hover:shadow-lg'
+                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50'
                   }`}
                 >
                   <div className="text-center">
-                    <div className="font-medium">{slot.label}</div>
+                    <div className="font-semibold">{slot.label}</div>
                     <div className={`text-xs mt-1 ${
-                      isSelected ? 'text-blue-100' : 'text-gray-500'
+                      isSelected ? 'text-orange-700' : 'text-gray-500'
                     }`}>
                       {slot.displayDate}
                     </div>
                   </div>
                   
                   {slot.isRecommended && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full border-2 border-white shadow-md"></div>
                   )}
                 </button>
               );
@@ -194,7 +193,7 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
             <div className="text-center">
               <button
                 onClick={() => setShowAllSlots(!showAllSlots)}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium underline"
+                className="text-sm text-saffron-600 hover:text-saffron-800 font-medium transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-saffron-50"
               >
                 {showAllSlots 
                   ? 'Ver menos horarios' 
@@ -206,11 +205,13 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-          <p className="text-sm text-gray-600 font-medium">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-amber-600" />
+          </div>
+          <p className="text-sm text-gray-600 font-semibold mb-2">
             No hay horarios disponibles
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500">
             El negocio está cerrado o fuera del horario de servicio
           </p>
         </div>
@@ -218,14 +219,16 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
 
       {/* Selected time confirmation */}
       {selectedPickupTime && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+        <div className="bg-gradient-to-r from-emerald-50 to-mint-50 border border-emerald-200 rounded-xl p-4">
           <div className="flex items-center">
-            <Calendar className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+            <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center mr-3">
+              <Calendar className="w-4 h-4 text-white" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-green-800">
+              <p className="text-sm font-semibold text-emerald-800">
                 Horario seleccionado
               </p>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-emerald-700">
                 {selectedPickupTime.displayTime}
               </p>
             </div>
@@ -235,13 +238,13 @@ const PickupTimeSelector: React.FC<PickupTimeSelectorProps> = ({
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="bg-gradient-to-r from-red-50 to-coral-50 border border-red-200 rounded-xl p-4">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
         </div>
       )}
 
       {/* Help text */}
-      <div className="text-xs text-gray-500 space-y-1">
+      <div className="text-xs text-gray-500 space-y-1 bg-gray-50 rounded-lg p-3">
         <p>• Los horarios mostrados son estimados</p>
         <p>• Te notificaremos si hay algún retraso</p>
         <p>• Puedes llamar al negocio si necesitas cambiar el horario</p>

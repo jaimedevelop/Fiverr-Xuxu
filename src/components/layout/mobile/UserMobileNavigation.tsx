@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search,
   Package,
-  Settings,
-  Heart
+  Settings
 } from 'lucide-react';
-// Temporarily disabled cart functionality
-// import CartIcon from '../../../components/user/cart/CartIcon';
-// import CartSidebar from '../../../components/user/cart/CartSidebar';
+// Re-enabled cart functionality
+import CartIcon from '../../../components/user/cart/CartIcon';
+import Cart from '../../../components/user/cart/Cart';
 
 const UserMobileNavigation: React.FC = () => {
+  const [showCart, setShowCart] = useState(false);
+  
   const userNavItems = [
     { path: '/usuario/explorar', label: 'Explorar', icon: Search },
     { path: '/usuario/pedidos', label: 'Pedidos', icon: Package },
-    { path: '/usuario/favoritos', label: 'Favoritos', icon: Heart },
     { path: '/usuario/perfil', label: 'Perfil', icon: Settings },
   ];
 
@@ -37,23 +37,13 @@ const UserMobileNavigation: React.FC = () => {
               </Link>
             ))}
             
-            {/* Temporarily disabled cart functionality */}
-            {/* 
-            <div className="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-saffron-700 hover:bg-saffron-50 active:bg-saffron-100 hover:scale-110 group cursor-pointer">
-              <div className="p-1">
-                <CartIcon />
-              </div>
-              <span className="text-xs mt-1 font-medium">Carrito</span>
-            </div>
-            */}
-            
-            {/* Temporary cart placeholder */}
+            {/* Re-enabled cart functionality */}
             <div 
-              className="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 text-gray-400 cursor-not-allowed opacity-60"
-              onClick={() => alert('Funcionalidad de carrito temporalmente deshabilitada')}
+              className="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-saffron-700 hover:bg-saffron-50 active:bg-saffron-100 hover:scale-110 group cursor-pointer"
+              onClick={() => setShowCart(true)}
             >
               <div className="p-1">
-                <Package size={20} />
+                <CartIcon />
               </div>
               <span className="text-xs mt-1 font-medium">Carrito</span>
             </div>
@@ -64,8 +54,11 @@ const UserMobileNavigation: React.FC = () => {
         <div className="h-1 bg-gradient-saffron"></div>
       </nav>
       
-      {/* Temporarily disabled cart sidebar */}
-      {/* <CartSidebar /> */}
+      {/* Re-enabled cart component - same as FloatingCartButton */}
+      <Cart
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+      />
     </>
   );
 };

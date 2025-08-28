@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { X, Heart, ShoppingCart, Clock, Plus, Minus } from 'lucide-react';
+// src/components/user/userMenu/PastryDetailModal.tsx
+import React, { useState, useEffect } from 'react';
+import { X, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Pastry } from '../../../types/pastry';
-import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '../../../contexts/CartContext'; // ENABLED
 import PriceDisplay from './PriceDisplay';
 import AvailabilityBadge from './AvailabilityBadge';
-import FavoriteButton from './FavoriteButton';
 import ImageDisplay from './ImageDisplay';
-import PreOrderModal from '../orders/PreOrderModal';
 
 interface PastryDetailModalProps {
   pastry: Pastry | null;
@@ -14,10 +13,36 @@ interface PastryDetailModalProps {
 }
 
 const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
+  // ENABLED - Cart functionality
   const { addItem, items, updateQuantity, removeItem } = useCart();
-  const [showPreOrderModal, setShowPreOrderModal] = useState(false);
+  
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (pastry) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Prevent scrolling on body
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scrolling
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [pastry]);
 
   if (!pastry) return null;
 
@@ -30,6 +55,7 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
   const handleAddToCart = () => {
     if (!pastry.available) return;
     
+    // ENABLED - Cart functionality restored
     addItem({
       pastryId: pastry.id,
       businessId: pastry.businessId,
@@ -45,7 +71,6 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
     
     // Show success feedback
     alert(`${quantity} ${pastry.name} añadido${quantity > 1 ? 's' : ''} al carrito!`);
-
   };
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -55,6 +80,7 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
   };
 
   const handleUpdateCartQuantity = (newQuantity: number) => {
+    // ENABLED - Cart update functionality restored
     if (!cartItem) return;
     
     if (newQuantity <= 0) {
@@ -62,14 +88,6 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
     } else {
       updateQuantity(cartItem.id, newQuantity);
     }
-  };
-
-  const handlePreOrder = () => {
-    setShowPreOrderModal(true);
-  };
-
-  const handlePreOrderComplete = () => {
-    console.log('Pre-order completed successfully');
   };
 
   const formatCurrency = (amount: number) => {
@@ -80,203 +98,181 @@ const PastryDetailModal = ({ pastry, onClose }: PastryDetailModalProps) => {
   };
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] overflow-hidden">
-          {/* Header */}
-          <div className="flex justify-between items-center p-6 border-b">
-            <h2 className="text-2xl font-bold text-gray-900">{pastry.name}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          <div className="overflow-y-auto max-h-[calc(95vh-200px)]">
-            <div className="md:flex">
-              {/* Images */}
-              <div className="md:w-1/2 p-6">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                  <ImageDisplay
-                    images={pastry.images}
-                    alt={pastry.name}
-                    className="w-full h-full"
-                  />
-                </div>
-                
-                {pastry.images.length > 1 && (
-                  <div className="mt-4 grid grid-cols-4 gap-2">
-                    {pastry.images.slice(1, 5).map((image, index) => (
-                      <div key={index} className="aspect-square rounded-md overflow-hidden bg-gray-100">
-                        <ImageDisplay
-                          images={[image]}
-                          alt={`${pastry.name} ${index + 2}`}
-                          className="w-full h-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-base max-w-4xl w-full max-h-[95vh] overflow-hidden animate-fadeIn">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200/50">
+          <h2 className="text-2xl font-bold text-charcoal">{pastry.name}</h2>
+          <button
+            onClick={onClose}
+            className="text-slate hover:text-charcoal transition-colors duration-200 p-2 rounded-xl hover:bg-gray-100"
+          >
+            <X size={24} />
+          </button>
+        </div>
+        
+        <div className="overflow-y-auto max-h-[calc(95vh-200px)]">
+          <div className="md:flex">
+            {/* Images */}
+            <div className="md:w-1/2 p-6">
+              <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                <ImageDisplay
+                  images={pastry.images}
+                  alt={pastry.name}
+                  className="w-full h-full"
+                />
               </div>
               
-              {/* Details */}
-              <div className="md:w-1/2 p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <AvailabilityBadge
-                        available={pastry.available}
-                        inventory={pastry.inventory}
+              {pastry.images.length > 1 && (
+                <div className="mt-4 grid grid-cols-4 gap-2">
+                  {pastry.images.slice(1, 5).map((image, index) => (
+                    <div key={index} className="aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                      <ImageDisplay
+                        images={[image]}
+                        alt={`${pastry.name} ${index + 2}`}
+                        className="w-full h-full"
                       />
                     </div>
-                    <PriceDisplay price={pastry.price} />
-                  </div>
-                  <FavoriteButton pastryId={pastry.id} />
+                  ))}
                 </div>
-                
+              )}
+            </div>
+            
+            {/* Details */}
+            <div className="md:w-1/2 p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <AvailabilityBadge
+                      available={pastry.available}
+                      inventory={pastry.inventory}
+                    />
+                  </div>
+                  <PriceDisplay price={pastry.price} />
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-charcoal mb-2">Descripción</h3>
+                <p className="text-slate leading-relaxed">{pastry.description}</p>
+              </div>
+              
+              {pastry.tags.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
-                  <p className="text-gray-600">{pastry.description}</p>
+                  <h3 className="text-lg font-semibold text-charcoal mb-2">Etiquetas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {pastry.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-gradient-to-r from-saffron-100 to-saffron-200 text-saffron-700 rounded-full text-sm font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                
-                {pastry.tags.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Etiquetas</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {pastry.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+              )}
+
+              {/* Cart Section */}
+              {pastry.available && (
+                <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-charcoal mb-4">Añadir al Carrito</h3>
+                  
+                  {/* Quantity Selector */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <label className="text-sm font-medium text-slate">Cantidad:</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleQuantityChange(quantity - 1)}
+                        className="p-2 text-slate hover:text-charcoal border border-gray-200 rounded-xl hover:bg-white transition-colors duration-200"
+                        disabled={quantity <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="w-12 text-center font-semibold text-charcoal">{quantity}</span>
+                      <button
+                        onClick={() => handleQuantityChange(quantity + 1)}
+                        className="p-2 text-slate hover:text-charcoal border border-gray-200 rounded-xl hover:bg-white transition-colors duration-200"
+                        disabled={quantity >= 99}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="text-sm text-slate font-medium">
+                      Total: {formatCurrency(pastry.price * quantity)}
                     </div>
                   </div>
-                )}
 
-                {/* Cart Section */}
-                {pastry.available && (
-                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Añadir al Carrito</h3>
-                    
-                    {/* Quantity Selector */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <label className="text-sm font-medium text-gray-700">Cantidad:</label>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleQuantityChange(quantity - 1)}
-                          className="p-1 text-gray-500 hover:text-gray-700 border rounded"
-                          disabled={quantity <= 1}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="w-12 text-center font-medium">{quantity}</span>
-                        <button
-                          onClick={() => handleQuantityChange(quantity + 1)}
-                          className="p-1 text-gray-500 hover:text-gray-700 border rounded"
-                          disabled={quantity >= 99}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Total: {formatCurrency(pastry.price * quantity)}
-                      </div>
+                  {/* Notes */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate mb-1">
+                      Notas especiales (opcional):
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="input-base"
+                      placeholder="Ej: Sin azúcar, decoración especial..."
+                      rows={2}
+                      maxLength={200}
+                    />
+                    <div className="text-xs text-slate mt-1">
+                      {notes.length}/200 caracteres
                     </div>
+                  </div>
 
-                    {/* Notes */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Notas especiales (opcional):
-                      </label>
-                      <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Sin azúcar, decoración especial..."
-                        rows={2}
-                        maxLength={200}
-                      />
-                      <div className="text-xs text-gray-400 mt-1">
-                        {notes.length}/200 caracteres
-                      </div>
-                    </div>
-
-                    {/* Current Cart Status */}
-                    {currentCartQuantity > 0 && (
-                      <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-blue-700">
-                            Ya tienes {currentCartQuantity} en el carrito
+                  {/* Current Cart Status */}
+                  {currentCartQuantity > 0 && (
+                    <div className="mb-4 p-3 bg-gradient-to-r from-saffron-50 to-saffron-100 rounded-xl border border-saffron-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-saffron-700 font-medium">
+                          Ya tienes {currentCartQuantity} en el carrito
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleUpdateCartQuantity(currentCartQuantity - 1)}
+                            className="p-1 text-saffron-600 hover:text-saffron-800 transition-colors duration-200"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="text-sm font-semibold text-saffron-700">
+                            {currentCartQuantity}
                           </span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleUpdateCartQuantity(currentCartQuantity - 1)}
-                              className="p-1 text-blue-600 hover:text-blue-800"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </button>
-                            <span className="text-sm font-medium text-blue-700">
-                              {currentCartQuantity}
-                            </span>
-                            <button
-                              onClick={() => handleUpdateCartQuantity(currentCartQuantity + 1)}
-                              className="p-1 text-blue-600 hover:text-blue-800"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleUpdateCartQuantity(currentCartQuantity + 1)}
+                            className="p-1 text-saffron-600 hover:text-saffron-800 transition-colors duration-200"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
-                
-                <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={!pastry.available}
-                    className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                      pastry.available
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    <ShoppingCart size={18} />
-                    {pastry.available ? 
-                      `Añadir ${quantity > 1 ? `${quantity} ` : ''}al Carrito` : 
-                      'No Disponible'
-                    }
-                  </button>
-                  
-                  {pastry.available && (
-                    <button
-                      onClick={handlePreOrder}
-                      className="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Clock size={18} />
-                      Pre-ordenar
-                    </button>
+                    </div>
                   )}
                 </div>
+              )}
+              
+              <div className="mt-8">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!pastry.available}
+                  className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                    pastry.available
+                      ? 'btn-primary'
+                      : 'bg-gray-200 text-slate cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  <ShoppingCart size={18} />
+                  {pastry.available ? 
+                    `Añadir ${quantity > 1 ? `${quantity} ` : ''}al Carrito` : 
+                    'No Disponible'
+                  }
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <PreOrderModal
-        isOpen={showPreOrderModal}
-        onClose={() => setShowPreOrderModal(false)}
-        pastryId={pastry.id}
-        pastryName={pastry.name}
-        pastryPrice={pastry.price}
-        onPreOrderComplete={handlePreOrderComplete}
-      />
-    </>
+    </div>
   );
 };
 

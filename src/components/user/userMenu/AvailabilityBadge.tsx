@@ -1,5 +1,7 @@
+// src/components/user/common/AvailabilityBadge.tsx
 import React from 'react';
 import { Check, X } from 'lucide-react';
+import { ThemeHelper } from '../../../utils/themeHelper';
 
 interface AvailabilityBadgeProps {
   available: boolean;
@@ -7,35 +9,29 @@ interface AvailabilityBadgeProps {
 }
 
 const AvailabilityBadge = ({ available, inventory }: AvailabilityBadgeProps) => {
+  const availabilityStyle = ThemeHelper.getAvailabilityStyle(available, inventory);
+  
   if (!available) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        <X className="mr-1 h-3 w-3" />
-        No disponible
+      <span className={`${availabilityStyle.className} inline-flex items-center whitespace-nowrap`}>
+        <X className="h-3 w-3 mr-1 flex-shrink-0" />
+        <span className="truncate">{availabilityStyle.text}</span>
       </span>
     );
   }
   
   if (inventory > 0 && inventory <= 5) {
-    if (inventory === 1) {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-          ¡Queda 1!
-        </span>
-      );
-    }
-    
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-        ¡Quedan {inventory}!
+      <span className={`${availabilityStyle.className} inline-flex items-center whitespace-nowrap`}>
+        <span className="truncate">{availabilityStyle.text}</span>
       </span>
     );
   }
   
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-      <Check className="mr-1 h-3 w-3" />
-      Disponible
+    <span className={`${availabilityStyle.className} inline-flex items-center whitespace-nowrap`}>
+      <Check className="h-3 w-3 mr-1 flex-shrink-0" />
+      <span className="truncate">{availabilityStyle.text}</span>
     </span>
   );
 };
